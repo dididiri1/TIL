@@ -359,7 +359,7 @@ Hibernate:
     select m.* from Member m where m.m.id = ?
 ```
 
-
+ 
 ### 엔티티 직접 사용 - 외래 키 값
 
 * 아래 JPQL에서 파라미터로 넘긴 team은 Team의  PK이고,
