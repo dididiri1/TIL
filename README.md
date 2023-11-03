@@ -16,8 +16,6 @@
 
 ### JPA
 
-#### [자바 ORM 표준 JPA 프로그래밍](https://www.inflearn.com/course/ORM-JPA-Basic)
-
 * [섹션 1. JPA 소개](https://github.com/dididiri1/jpabook/blob/main/study/01_jpa_introduction.md)
 
 
@@ -53,8 +51,6 @@
 
 ### Spring Boot
 
-#### [실전! 스프링 부트와 JPA 활용1 - 웹 애플리케이션 개발](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JPA-%ED%99%9C%EC%9A%A9-1/dashboard)
-
 * [섹션 1. 프로젝트 환경설정](https://github.com/dididiri1/jpashop/blob/main/study/01_spring_boot_and_jpa.md)
 
 
@@ -76,8 +72,6 @@
 * [섹션 7. 웹 계층 개발](https://github.com/dididiri1/jpashop/blob/main/study/01_spring_boot_and_jpa.md)
 
 
-#### [실전! 스프링 부트와 JPA 활용2 - API 개발과 성능 최적화](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JPA-API%EA%B0%9C%EB%B0%9C-%EC%84%B1%EB%8A%A5%EC%B5%9C%EC%A0%81%ED%99%94/dashboard)
-
 * [섹션 1. API 개발 기본](https://github.com/dididiri1/jpashop/blob/main/study/02_spring_boot_and_jpa.md)
 
 
@@ -93,9 +87,7 @@
 * [섹션 5. API 개발 고급 - 실무 필수 최적화](https://github.com/dididiri1/jpashop/blob/main/study/02_spring_boot_and_jpa.md)
 
 
-### QueryDsl
-
-#### [자바 ORM 표준 JPA 프로그래밍](https://www.inflearn.com/course/querydsl-%EC%8B%A4%EC%A0%84/dashboard)
+### QueryDSL
 
 * [섹션 1. 프로젝트 환경설정](https://github.com/dididiri1/querydsl/blob/main/study/01_project_setting.md)
 
@@ -120,8 +112,6 @@
 
 ### Spring Data JPA
 
-#### [실전! 스프링 데이터 JPA](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%EB%8D%B0%EC%9D%B4%ED%84%B0-JPA-%EC%8B%A4%EC%A0%84/dashboard)
-
 * [섹션 1. 프로젝트 환경설정](https://github.com/dididiri1/data-jpa/tree/main/study/01_spring_data_jpa.md)
 
 
@@ -144,9 +134,6 @@
 
 
 ### TDD
-
-#### [Practical Testing: 실용적인 테스트 가이드](https://www.inflearn.com/course/practical-testing-%EC%8B%A4%EC%9A%A9%EC%A0%81%EC%9D%B8-%ED%85%8C%EC%8A%A4%ED%8A%B8-%EA%B0%80%EC%9D%B4%EB%93%9C/dashboard)
-
 
 * [섹션 1. 테스트는 왜 필요할까?](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
 
@@ -176,9 +163,7 @@
 
 
 
-### JAVA Algorithm
-
-#### [자바(Java) 알고리즘 문제풀이 입문: 코딩테스트 대비](https://www.inflearn.com/course/%EC%9E%90%EB%B0%94-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98-%EB%AC%B8%EC%A0%9C%ED%92%80%EC%9D%B4-%EC%BD%94%ED%85%8C%EB%8C%80%EB%B9%84/dashboard)
+### Algorithm
 
 * [섹션 1. String(문자열)](https://github.com/dididiri1/java-algorithm/blob/main/study/01_spring.md)
 
@@ -213,3 +198,8 @@
 ### Docker 
 
 * [도커 명령어](https://github.com/dididiri1/TIL/blob/main/Docker/README.md)
+
+### Tools
+
+* [IntelliJ IDEA 단축키](https://github.com/dididiri1/TIL/blob/main/Tools/intellj_shortcut_keys.md)
+
