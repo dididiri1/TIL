@@ -8,10 +8,10 @@
 
 ### JAVA
 
+* [스트림](https://github.com/dididiri1/javajungsuk_basic/blob/main/study/01_stream.md)
+
+
 * [람다식](https://github.com/dididiri1/javajungsuk_basic/blob/main/study/02_lambda.md)
-
-
-* [스트림](https://github.com/dididiri1/javajungsuk_basic/blob/main/study/02_lambda.md)
 
 
 ### JPA
@@ -148,31 +148,66 @@
 #### [Practical Testing: 실용적인 테스트 가이드](https://www.inflearn.com/course/practical-testing-%EC%8B%A4%EC%9A%A9%EC%A0%81%EC%9D%B8-%ED%85%8C%EC%8A%A4%ED%8A%B8-%EA%B0%80%EC%9D%B4%EB%93%9C/dashboard)
 
 
-* [섹션 1. 테스트는 왜 필요할까?](https://github.com/dididiri1/cafekiosk/tree/main/study/01_ttd.md)
+* [섹션 1. 테스트는 왜 필요할까?](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
 
 
-* [섹션 2. 단위 테스트](https://github.com/dididiri1/cafekiosk/tree/main/study/01_ttd.md)
+* [섹션 2. 단위 테스트](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
 
 
-* [섹션 3. TDD: Test Driven Development](https://github.com/dididiri1/cafekiosk/tree/main/study/01_ttd.md)
+* [섹션 3. TDD: Test Driven Development](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
 
 
-* [섹션 4. 테스트는 [ ]다.](https://github.com/dididiri1/cafekiosk/tree/main/study/01_ttd.md)
+* [섹션 4. 테스트는 [ ]다.](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
 
 
-* [섹션 5. Spring & JPA 기반 테스트](https://github.com/dididiri1/cafekiosk/tree/main/study/01_ttd.md)
+* [섹션 5. Spring & JPA 기반 테스트](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
 
 
-* [섹션 6. Mock을 마주하는 자세](https://github.com/dididiri1/cafekiosk/tree/main/study/01_ttd.md)
+* [섹션 6. Mock을 마주하는 자세](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
 
 
-* [섹션 7. 더 나은 테스트를 작성하기 위한 구체적 조언](https://github.com/dididiri1/cafekiosk/tree/main/study/01_ttd.md)
+* [섹션 7. 더 나은 테스트를 작성하기 위한 구체적 조언](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
 
 
-* [섹션 8. Appendix](https://github.com/dididiri1/cafekiosk/tree/main/study/01_ttd.md)
+* [섹션 8. Appendix](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
 
 
-* [섹션 9. Outro](https://github.com/dididiri1/cafekiosk/tree/main/study/01_ttd.md)
+* [섹션 9. Outro](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
+
+
+
+### JAVA Algorithm
+
+#### [자바(Java) 알고리즘 문제풀이 입문: 코딩테스트 대비](https://www.inflearn.com/course/%EC%9E%90%EB%B0%94-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98-%EB%AC%B8%EC%A0%9C%ED%92%80%EC%9D%B4-%EC%BD%94%ED%85%8C%EB%8C%80%EB%B9%84/dashboard)
+
+* [섹션 1. String(문자열)](https://github.com/dididiri1/java-algorithm/blob/main/study/01_spring.md)
+
+
+* [섹션 2. Array(1, 2차원 배열)](https://github.com/dididiri1/java-algorithm/blob/main/study/02_array.md)
+
+
+* [섹션 3. Two pointers, Sliding window](https://github.com/dididiri1/java-algorithm/blob/main/study/03_two_pointers.md)
+
+
+* [섹션 4. HashMap, TreeSet](https://github.com/dididiri1/java-algorithm/blob/main/study/04_hashMap_and_treeSet.md)
+
+
+* [섹션 5. Stack, Queue](https://github.com/dididiri1/java-algorithm/blob/main/study/05_stack_and_queue.md)
+
+
+* [섹션 6. Sorting and Searching](https://github.com/dididiri1/java-algorithm/blob/main/study/06_sorting_and_searching.md)
+
+
+* [섹션 7. Recursive, Tree, Graph](https://github.com/dididiri1/java-algorithm/blob/main/study/07_dfs_bfs.md)
+
+
+* [섹션 8. DFS, BFS 활용](https://github.com/dididiri1/java-algorithm/blob/main/study/08_dfs_bfs.md)
+
+
+* [섹션 9. Greedy Algorithm](https://github.com/dididiri1/java-algorithm/blob/main/study/09_greedy.md)
+
+
+* [섹션 10. dynamic programming](https://github.com/dididiri1/java-algorithm/blob/main/study/10_dynamic.md)
 
 
 ### Docker 
