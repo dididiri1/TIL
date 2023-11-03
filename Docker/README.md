@@ -1,5 +1,3 @@
-# 도커 입문 
-
 ## Docker 명령어
 
 ### 이미지 Pull 받기
@@ -64,6 +62,8 @@
   - While process (https, nginx)
     - exec 사용
 
+### Reference
 
+- [메타코딩 | 도커 입문](https://www.youtube.com/watch?v=BivQIVzsiTM&list=PL93mKxaRDidGMzIllhYKx1d6aMg6_5wW3)
 
 
