@@ -6,9 +6,17 @@
 
 ## 분류
 
-## JPA
+### JAVA
 
-### [자바 ORM 표준 JPA 프로그래밍](https://www.inflearn.com/course/ORM-JPA-Basic)
+* [람다식](https://github.com/dididiri1/javajungsuk_basic/blob/main/study/02_lambda.md)
+
+
+* [스트림](https://github.com/dididiri1/javajungsuk_basic/blob/main/study/02_lambda.md)
+
+
+### JPA
+
+#### [자바 ORM 표준 JPA 프로그래밍](https://www.inflearn.com/course/ORM-JPA-Basic)
 
 * [섹션 1. JPA 소개](https://github.com/dididiri1/jpabook/blob/main/study/01_jpa_introduction.md)
 
@@ -43,9 +51,9 @@
 * [섹션 11. 객체지향 쿼리 언어2 - 중급 문법](https://github.com/dididiri1/jpabook/blob/main/study/11_jpql_2.md)
 
 
-## Spring Boot
+### Spring Boot
 
-### [실전! 스프링 부트와 JPA 활용1 - 웹 애플리케이션 개발](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JPA-%ED%99%9C%EC%9A%A9-1/dashboard)
+#### [실전! 스프링 부트와 JPA 활용1 - 웹 애플리케이션 개발](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JPA-%ED%99%9C%EC%9A%A9-1/dashboard)
 
 * [섹션 1. 프로젝트 환경설정](https://github.com/dididiri1/jpashop/blob/main/study/01_spring_boot_and_jpa.md)
 
@@ -68,7 +76,7 @@
 * [섹션 7. 웹 계층 개발](https://github.com/dididiri1/jpashop/blob/main/study/01_spring_boot_and_jpa.md)
 
 
-### [실전! 스프링 부트와 JPA 활용2 - API 개발과 성능 최적화](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JPA-API%EA%B0%9C%EB%B0%9C-%EC%84%B1%EB%8A%A5%EC%B5%9C%EC%A0%81%ED%99%94/dashboard)
+#### [실전! 스프링 부트와 JPA 활용2 - API 개발과 성능 최적화](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JPA-API%EA%B0%9C%EB%B0%9C-%EC%84%B1%EB%8A%A5%EC%B5%9C%EC%A0%81%ED%99%94/dashboard)
 
 * [섹션 1. API 개발 기본](https://github.com/dididiri1/jpashop/blob/main/study/02_spring_boot_and_jpa.md)
 
@@ -85,9 +93,9 @@
 * [섹션 5. API 개발 고급 - 실무 필수 최적화](https://github.com/dididiri1/jpashop/blob/main/study/02_spring_boot_and_jpa.md)
 
 
-## QueryDsl
+### QueryDsl
 
-### [자바 ORM 표준 JPA 프로그래밍](https://www.inflearn.com/course/querydsl-%EC%8B%A4%EC%A0%84/dashboard)
+#### [자바 ORM 표준 JPA 프로그래밍](https://www.inflearn.com/course/querydsl-%EC%8B%A4%EC%A0%84/dashboard)
 
 * [섹션 1. 프로젝트 환경설정](https://github.com/dididiri1/querydsl/blob/main/study/01_project_setting.md)
 
@@ -110,9 +118,9 @@
 * [섹션 7. 스프링 데이터 JPA가 제공하는 Querydsl 기능]()
 
 
-## Spring Data JPA
+### Spring Data JPA
 
-### [실전! 스프링 데이터 JPA](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%EB%8D%B0%EC%9D%B4%ED%84%B0-JPA-%EC%8B%A4%EC%A0%84/dashboard)
+#### [실전! 스프링 데이터 JPA](https://www.inflearn.com/course/%EC%8A%A4%ED%94%84%EB%A7%81-%EB%8D%B0%EC%9D%B4%ED%84%B0-JPA-%EC%8B%A4%EC%A0%84/dashboard)
 
 * [섹션 1. 프로젝트 환경설정](https://github.com/dididiri1/data-jpa/tree/main/study/01_spring_data_jpa.md)
 
@@ -135,9 +143,9 @@
 * [섹션 7. 나머지 기능들](https://github.com/dididiri1/data-jpa/tree/main/study/01_spring_data_jpa.md)
 
 
-## TDD
+### TDD
 
-### [Practical Testing: 실용적인 테스트 가이드](https://www.inflearn.com/course/practical-testing-%EC%8B%A4%EC%9A%A9%EC%A0%81%EC%9D%B8-%ED%85%8C%EC%8A%A4%ED%8A%B8-%EA%B0%80%EC%9D%B4%EB%93%9C/dashboard)
+#### [Practical Testing: 실용적인 테스트 가이드](https://www.inflearn.com/course/practical-testing-%EC%8B%A4%EC%9A%A9%EC%A0%81%EC%9D%B8-%ED%85%8C%EC%8A%A4%ED%8A%B8-%EA%B0%80%EC%9D%B4%EB%93%9C/dashboard)
 
 
 * [섹션 1. 테스트는 왜 필요할까?](https://github.com/dididiri1/cafekiosk/tree/main/study/01_ttd.md)
@@ -167,6 +175,6 @@
 * [섹션 9. Outro](https://github.com/dididiri1/cafekiosk/tree/main/study/01_ttd.md)
 
 
-## Docker 
+### Docker 
 
 * [도커 명령어](https://github.com/dididiri1/TIL/blob/main/Docker/README.md)
