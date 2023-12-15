@@ -39,7 +39,62 @@
 ### Redis 설차
 - [MacOS](https://redis.io/docs/install/install-redis/install-redis-on-mac-os/)
 - [Windows](https://redis.io/docs/install/install-redis/install-redis-on-windows/)
-
+  - [Redis 다운로드](https://github.com/microsoftarchive/redis/releases)
 ### Redis 실행
+
 * `$ redis-cli`
 * `$ ping`
+```
+```
+
+### 데이터 저장/조회/삭제
+#### 저장
+* `$ SET lecture inflearn-redis`
+#### 조회
+* `$ GET lecture`
+#### 삭제
+* `$ DEL lecture`
+
+## 섹션 3. 데이터 타입 알아보기
+
+### Strings
+- String
+  - 문자열, 숫자, serialized object(JSON string) 등 저장
+#### 저장
+
+| 명령어                                  |                           예시                            | 설명                                            |
+|:-------------------------------------|:-------------------------------------------------------:|:----------------------------------------------|
+| set [key] [value]                    |              $ SET lecture inflearn-redis               | key, value 저장                                 |
+| set [key] [value]                    | $ SET ‘{“lecture”: “inflearn-redis”, “language”: “en”}’ | json sring 형태로 저장                             |
+| mset [key] [value] [key] [value] ... |               $ MSET name kangmin age 10                | 여러 개의 key, value를 한번에 저장                      |
+| setex [key] [scond] [value]          |                 $ SETEX name 10 kangmin                 | key, seconds, value 저장(설정한 시간 *seconds 뒤에 소멸) |
+| incr [key]                           |                      $ INCR price                       | 숫자형 스트링 값을 1로 올릴때 사용                          |
+| INCRBY [key] [value]                 |                     $ INCR price 10                     | 숫자형 스트링 값에 특정 값을 더할 때 사용                      |
+
+
+#### 조회
+
+| 명령어                      |              예시               | 설명                                               |
+|:-------------------------|:-----------------------------:|:-------------------------------------------------|
+| keys *                   |           $ keys *            | 현재 저장된 키값 모두 확인(부하가 심한 명령어라 운영중인 서비스 사용 X        |
+| get [key]                |         $ GET lecture         | 지정한 key 에 해당하는 value 를 가져온다                      |
+| mget key [key] [key] ... | $ MSET price 100 name kangmin | 여러 개의 key 에 해당하는 value 를 한번에 가져온다                |
+| ttl [key]                |          $ TTL name           | key 의 만료 시간을 초 단위로 보여준다(-1 만료시간 없음, -2 는 데이터 없음) |
+| pttl [key]               |          $ PTTL name          | key 의 만료 시간을 밀리초 단위로 보여준다                        |
+| type [key]               |          $ TYPE name          | 해당 key의 value 타입 확인                              |
+
+#### 삭제
+| 명령어       |       예시       | 설명           |
+|:----------|:--------------:|:-------------|
+| del [key] | $ DEL lecture  | 해당 key 들을 삭제 |
+| flushall  | $ flushall  | 전체 삭제        |
+
+#### 수정
+| 명령어                   |         예시          | 설명               |
+|:----------------------|:-------------------:|:-----------------|
+| rename [key] [newKey] | $ rename name redis | key 이름 변경        |
+| expire [key] [second] |  $ expire name 10   | 해당 키 값의 만료 시간 설정 |
+
+
+
+
