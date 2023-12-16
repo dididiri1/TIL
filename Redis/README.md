@@ -3,7 +3,7 @@
 ## 섹션 1. Redis 알아보기
 
 ### Redis 소개
-&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: red">Re</span>mote <span style="color: red">Di</span>ctionary <span style="color: red">S</span>erver  
+&nbsp;&nbsp;&nbsp;&nbsp;Remote Dictionary Server  
 &nbsp;&nbsp;&nbsp;&nbsp;Open Source In-Memory Data Store written in ANSI-C
 
 ### Redis 특징
@@ -58,8 +58,7 @@
 ## 섹션 3. 데이터 타입 알아보기
 
 ### Strings
-- String
-  - 문자열, 숫자, serialized object(JSON string) 등 저장
+- 문자열, 숫자, serialized object(JSON string) 등 저장
 #### 저장
 
 | 명령어                                  |                           예시                            | 설명                                            |
@@ -74,14 +73,14 @@
 
 #### 조회
 
-| 명령어                      |              예시               | 설명                                               |
-|:-------------------------|:-----------------------------:|:-------------------------------------------------|
-| keys *                   |           $ keys *            | 현재 저장된 키값 모두 확인(부하가 심한 명령어라 운영중인 서비스 사용 X        |
-| get [key]                |         $ GET lecture         | 지정한 key 에 해당하는 value 를 가져온다                      |
-| mget key [key] [key] ... | $ MSET price 100 name kangmin | 여러 개의 key 에 해당하는 value 를 한번에 가져온다                |
-| ttl [key]                |          $ TTL name           | key 의 만료 시간을 초 단위로 보여준다(-1 만료시간 없음, -2 는 데이터 없음) |
-| pttl [key]               |          $ PTTL name          | key 의 만료 시간을 밀리초 단위로 보여준다                        |
-| type [key]               |          $ TYPE name          | 해당 key의 value 타입 확인                              |
+| 명령어                          |         예시          | 설명                                               |
+|:-----------------------------|:-------------------:|:-------------------------------------------------|
+| keys *                       |      $ keys *       | 현재 저장된 키값 모두 확인(부하가 심한 명령어라 운영중인 서비스 사용 X        |
+| get [key]                    |    $ GET lecture    | 지정한 key 에 해당하는 value 를 가져온다                      |
+| mget [key] [key] [key] ...   | $ MGET name kangmin | 여러 개의 key 에 해당하는 value 를 한번에 가져온다                |
+| ttl [key]                    |     $ TTL name      | key 의 만료 시간을 초 단위로 보여준다(-1 만료시간 없음, -2 는 데이터 없음) |
+| pttl [key]                   |     $ PTTL name     | key 의 만료 시간을 밀리초 단위로 보여준다                        |
+| type [key]                   |     $ TYPE name     | 해당 key의 value 타입 확인                              |
 
 #### 삭제
 | 명령어       |       예시       | 설명           |
@@ -95,6 +94,9 @@
 | rename [key] [newKey] | $ rename name redis | key 이름 변경        |
 | expire [key] [second] |  $ expire name 10   | 해당 키 값의 만료 시간 설정 |
 
+### Lists
+- String을 Linked List로 저장 -> push / pop에 최적화 O(1)
+- Queue(FIFO) / Stack(FILO) 구현에 사용
 
 
-
+![](https://github.com/dididiri1/java-algorithm/blob/main/study/images/04_01.png?raw=true)
