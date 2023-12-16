@@ -98,5 +98,14 @@
 - String을 Linked List로 저장 -> push / pop에 최적화 O(1)
 - Queue(FIFO) / Stack(FILO) 구현에 사용
 
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_01.png?raw=true)
 
-![](https://github.com/dididiri1/java-algorithm/blob/main/study/images/04_01.png?raw=true)
+| 명령어                            |              예시              | 설명                            |
+|:-------------------------------|:----------------------------:|:------------------------------|
+| lpush [key] [value] [value] .. | $ LPUSH queue job1 job2 job3 | 왼쪽에서 리스트의 오른쪽에 데이터를 저장        |
+| rpop [key]                     |         $ RPOP queue         | 리스트 오른쪽에서 데이터를 꺼내오고, 리스트에서 제거 |
+| lpop [key]                     |         $ LPOP stack         | 리스트 왼쪽에서 데이터를 꺼내오고, 리스트에서 제거  |
+| rpush [key] [value] [value] .. | $ RPUSH queue job1 job2 job3 | 오른쪽에서 리스트의 왼쪽에 데이터를 저장        |
+| lrange [key]                   |     $ LRANGE queue 0 -4      | 인덱스로 범위를 지정해서 리스트 조회          |
+| ltrim [key]                    |      $ LTRIM queue 0 1       | 값을 지정해서 삭제                    |
+
