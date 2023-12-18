@@ -21,17 +21,17 @@
 
 
 ### Redus 사용 사레
-- Caching 
+- Caching
   - 임시 비밀번호(One-Time Password) 로그인 세션(Session)
-- Rate 
+- Rate
   - Limiter Fixed-Window / Sliding-Window Rate Limiter(비율 계산기)
-- Message Broker 
+- Message Broker
   - 메시지 큐(Message Queue)
-- 실시간 분석 / 계산 
+- 실시간 분석 / 계산
   - 순위표(Rank / Leaderboard)
   - 반경 탐색(Geofencing)
   - 방문자 수 계산(Visitors Count)
-- 실시간 채팅 
+- 실시간 채팅
   - Pub/Sub 패턴
 
 ## 섹션 2. Redis 설치
@@ -44,8 +44,7 @@
 
 * `$ redis-cli`
 * `$ ping`
-```
-```
+
 
 ### 데이터 저장/조회/삭제
 #### 저장
@@ -109,3 +108,65 @@
 | lrange [key]                   |     $ LRANGE queue 0 -4      | 인덱스로 범위를 지정해서 리스트 조회          |
 | ltrim [key]                    |      $ LTRIM queue 0 1       | 값을 지정해서 삭제                    |
 
+### Sets
+- Unique String을 저장하는 정렬되지 않은 집합 순서X, 중복X
+- Set Operation 사용 가능(e.g. intersection, union, difference
+
+| 명령어                         |                       예시                        | 설명                                      |
+|:----------------------------|:-----------------------------------------------:|:----------------------------------------|
+| sadd [key] [value]          | $ SADD user:1:fruits apple banana orange orange | 셋의 key에 value 삽입                        |
+| smembers [key]              |            $ SMEMBERS user:1:fruits             | 셋의 모든 멤버 출력                             |
+| scard [key]                 |              $ SCARD user:1:fruits              | 셋의 카디널리티 출력 (아이템 갯수)                    |
+| sismember [key]             |        $ SISMEMBER user:1:fruits banana         | 특정 아이템이 셋이 포함되어있는지 확인(없으면 0, 있으면 1 반환)  |
+| sunion [key1] [key2]        |          $ SUNION user:1:fruits banana          | 주어진 키에 저장된 요소들의 합집합을 돌려줌  |
+| sinter [key1] [key2]        |      $ SINTER user:1:fruits user:2:fruits       | user1과 user2가 공통으로 좋아하는 과일 출력 (교집합)     |
+| sdiff [key1] [key2]         |       $ SDIFF user:1:fruits user:2:fruits       | user1은 좋아하지만 user2가 좋아하지 않는 과일 출력 (차집합) |
+
+#### SADD
+- sadd
+``` log
+127.0.0.1:6379> SADD user:1:fruist apple banana orange orange
+(integer) 3
+```
+#### SMEMBERS
+- smembers 명령어는 셋의 모든 멤버 출력
+``` log
+127.0.0.1:6379> SMEMBERS user:1:fruits
+1) "orange"
+2) "banana"
+3) "apple"
+```
+#### SCARD
+- scard는 셋의 카디널리티 출력 
+``` log
+127.0.0.1:6379> SCARD user:1:fruits
+(integer) 3
+```
+#### SISMEMBER
+- scard는 셋의 카디널리티 출력
+``` log
+127.0.0.1:6379> SISMEMBER user:1:fruits banana
+(integer) 1
+```
+#### SUNION
+- 주어진 키에 저장된 요소들의 합집합을 돌려줌
+``` log
+127.0.0.1:6379> sunion user:1:fruits user:2:fruits
+1) "orange"
+2) "lemon"
+3) "banana"
+4) "apple"
+```
+#### SINTER
+- 주어진 키에 저장된 요소들의 교집합을 돌려줌
+``` log
+127.0.0.1:6379> SINTER user:1:fruits user:2:fruits
+1) "apple"
+```
+#### SDIFF
+- 주어진 키에 저장된 요소들의 차집합을 돌려줌
+``` log
+127.0.0.1:6379> sdiff user:1:fruits user:2:fruits
+1) "orange"
+2) "banana"
+```
