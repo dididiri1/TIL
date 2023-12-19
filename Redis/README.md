@@ -112,24 +112,16 @@
 - Unique String을 저장하는 정렬되지 않은 집합 순서X, 중복X
 - Set Operation 사용 가능(e.g. intersection, union, difference
 
-| 명령어                         |                       예시                        | 설명                                      |
-|:----------------------------|:-----------------------------------------------:|:----------------------------------------|
-| sadd [key] [value]          | $ SADD user:1:fruits apple banana orange orange | 셋의 key에 value 삽입                        |
-| smembers [key]              |            $ SMEMBERS user:1:fruits             | 셋의 모든 멤버 출력                             |
-| scard [key]                 |              $ SCARD user:1:fruits              | 셋의 카디널리티 출력 (아이템 갯수)                    |
-| sismember [key]             |        $ SISMEMBER user:1:fruits banana         | 특정 아이템이 셋이 포함되어있는지 확인(없으면 0, 있으면 1 반환)  |
-| sunion [key1] [key2]        |          $ SUNION user:1:fruits banana          | 주어진 키에 저장된 요소들의 합집합을 돌려줌  |
-| sinter [key1] [key2]        |      $ SINTER user:1:fruits user:2:fruits       | user1과 user2가 공통으로 좋아하는 과일 출력 (교집합)     |
-| sdiff [key1] [key2]         |       $ SDIFF user:1:fruits user:2:fruits       | user1은 좋아하지만 user2가 좋아하지 않는 과일 출력 (차집합) |
-
 #### SADD
-- sadd
+- 셋의 key에 value 삽입
+- SADD [key] [value]
 ``` log
 127.0.0.1:6379> SADD user:1:fruist apple banana orange orange
 (integer) 3
 ```
 #### SMEMBERS
-- smembers 명령어는 셋의 모든 멤버 출력
+- 셋의 모든 멤버 출력
+- SMEMBERS [key]
 ``` log
 127.0.0.1:6379> SMEMBERS user:1:fruits
 1) "orange"
@@ -137,19 +129,22 @@
 3) "apple"
 ```
 #### SCARD
-- scard는 셋의 카디널리티 출력 
+- 셋의 카디널리티 출력 
+- SCARD [key]
 ``` log
 127.0.0.1:6379> SCARD user:1:fruits
 (integer) 3
 ```
 #### SISMEMBER
-- scard는 셋의 카디널리티 출력
+- 특정 아이템이 셋이 포함되어있는지 확인
+- SISMEMBER [key]
 ``` log
 127.0.0.1:6379> SISMEMBER user:1:fruits banana
 (integer) 1
 ```
 #### SUNION
 - 주어진 키에 저장된 요소들의 합집합을 돌려줌
+- SUNION [key] .. [key]
 ``` log
 127.0.0.1:6379> sunion user:1:fruits user:2:fruits
 1) "orange"
@@ -159,14 +154,170 @@
 ```
 #### SINTER
 - 주어진 키에 저장된 요소들의 교집합을 돌려줌
+- SINTER [key] .. [key]
 ``` log
 127.0.0.1:6379> SINTER user:1:fruits user:2:fruits
 1) "apple"
 ```
 #### SDIFF
 - 주어진 키에 저장된 요소들의 차집합을 돌려줌
+- SDIFF [key] .. [key]
 ``` log
 127.0.0.1:6379> sdiff user:1:fruits user:2:fruits
 1) "orange"
 2) "banana"
 ```
+
+### Hashes
+- filed-value 구조를 갖는 데이터 타입
+- 다양한 속성을 갖는 객체의 데이터를 저장할 때 유용
+
+#### HSET
+- 해시의 key의 filed에 value 저장하고 필드 값이 존재하면 덮어쓴다
+- HSET [key] [field] [value]
+``` log
+127.0.0.1:6379> HSET lecutre name inflean-redis
+(integer) 1
+```
+
+#### HMSET
+- 해시의 key의 **여러 filed**에 value 저장하고 필드 값이 존재하면 덮어쓴다
+- HMSET [key] [field] [value] .. [value]
+``` log
+HMSET lecutre name inflean-redis price 100
+OK
+```
+
+#### HGET
+- 해시의 key의 field값을 반환한다. 
+- HGET [key] [field]
+``` log
+127.0.0.1:6379> HGET lecutre name
+"inflean-redis"
+```
+
+#### HMGET
+- 해시의 key의 하나 이상의 field값을 반환한다.
+- HMGET [key] [field] .. [field]
+``` log
+127.0.0.1:6379> HMGET lecutre name price
+1) "inflean-redis"
+2) "100"
+```
+
+#### HKEYS
+- 해시의 key의 모든 field의 name을 반환한다.
+- HKEYS [key] [field] .. [field]
+``` log
+127.0.0.1:6379> HKEYS lecutre
+1) "name"
+2) "price"
+```
+
+#### HVALS
+- 해시의 key의 모든 value를 반환한다.
+- HVALS [key] [field] .. [field]
+``` log
+127.0.0.1:6379> HVALS lecutre
+1) "inflean-redis"
+2) "100"
+```
+
+#### HGETALL
+- 해시의 key의 모든 field와 value값을 반환한다.
+- HGETALL [key]
+``` log
+127.0.0.1:6379> HGETALL lecutre
+1) "name"
+2) "inflean-redis"
+3) "price"
+4) "100"
+```
+
+#### HEXISTS
+- 해시의 key의 field가 있는지 확인. 있으면 1, 없으면 0을 리턴한다.
+- HEXISTS [key] [field]
+``` log
+127.0.0.1:6379> HEXISTS lecutre name
+(integer) 1
+```
+
+#### HDEL
+- 해시의 key의 field 삭제
+- HDEL [key] [field]
+``` log
+127.0.0.1:6379> HDEL lecutre price
+(integer) 1
+```
+
+#### DEL
+- 해시의 key를 삭제
+- DEL [key]
+``` log
+127.0.0.1:6379> DEL lecutre
+(integer) 1
+```
+
+### Sorted Sets
+- Set과 Hash가 혼합된 타입이다.
+- 하나의 Key에 Socre와 Value로 구성이된다.
+- Unique string을 연관된 score를 통해 정렬된 집합(Set의 기능 + 추가로 score 속성 저장)
+- 내부적으로 Skip List + Hash Table로 이루어져 있고, score 값에 따라 정렬 유지
+- 만약 score가 동일하면 lexicographically(사전 편찬 순) 정렬됨
+- SortedSet은 줄여서 ZSet이라고 불린다
+
+#### ZADD
+- key의 member 추가하기
+- ZADD [key] [score] [member] .. [score] [member]
+``` log
+127.0.0.1:6379> ZADD points 10 TeamA 10 TeamB 50 TeamC
+(integer) 3
+```
+
+#### ZCARD
+- key의 member 갯수 반환한다.
+- ZCARD [key] 
+``` log
+127.0.0.1:6379> ZCARD points
+(integer) 3
+```
+
+#### ZSCORE
+- member의 score 값 조회하기
+- ZSCORE [key] [member]
+``` log
+127.0.0.1:6379> ZSCORE points TeamA
+"10"
+```
+
+#### ZREVRAGNE
+- key에 member들을 score의 역정렬로 반환한다.
+- ZREVRAGNE [key] [START INDEX] [END IDEX] [WITHSCORE]
+``` log
+127.0.0.1:6379> ZRANGE points 0 -1
+1) "TeamA"
+2) "TeamB"
+127.0.0.1:6379> ZRANGE points 0 -1 WITHSCORES
+1) "TeamA"
+2) "10"
+3) "TeamB"
+4) "10"
+5) "TeamC"
+6) "50"
+```
+
+#### ZRANK
+- key에 member의 score 순위를 반환한다.
+- ZRANK  [key] [member]
+``` log
+127.0.0.1:6379> ZRANK points TeamA
+(integer) 0
+127.0.0.1:6379> ZRANK points TeamB
+(integer) 1
+127.0.0.1:6379> ZRANK points TeamC
+(integer) 2
+127.0.0.1:6379>
+```
+
+
+
