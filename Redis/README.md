@@ -280,7 +280,7 @@ OK
 ``` log
 127.0.0.1:6379> ZCARD points
 (integer) 3
-```
+``` 
 
 #### ZSCORE
 - member의 score 값 조회하기
