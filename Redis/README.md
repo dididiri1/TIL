@@ -319,5 +319,53 @@ OK
 127.0.0.1:6379>
 ```
 
+### Streams
+- Stream은 Redis 5.0에 새롭게 도입된 데이터 유형
+- 로그 데이터 구조를 모델링 함
+- append-only log에 consumer groups과 같은 기능을 더한 자료 구조
+- Consumer groups 개념은 메시징 시스템 Kafka에서 처음 도입됐지만 Redis의 consumer group은 완전히 다름.
+- 추가 기능 
+  - unique id를 통해 하나의 entry를 읽을 때, O(1) 시간 복잡도
+  - Consumer Group을 통해 분산 시스템에서 다수의 consumer가 event 처리
 
+> 참고 : append-only log란 데이터베이스나 분산 시스템에 주로 사용되는 데이터저장 알고리즘으로  
+> 데이터가 수정되거나 삭제되지 않고 항상 추가만 되는 구조를 갖는다.
 
+#### XADD
+- 스트림에 데이터 추가
+- XADD [key] [messsage-id] [filed] [value] .. [filed] [value]
+``` log
+127.0.0.1:6379> XADD events * action like user_id 1 product_id 1
+"1703048194616-0"
+127.0.0.1:6379> XADD events * action like user_id 2 product_id 1
+"1703048200069-0"
+```
+
+#### XRANGE
+- 스트림 이벤트 출력
+- XRANGE [key] [start-id] [end-id]
+``` log
+127.0.0.1:6379> XRANGE events - +
+1) 1) "1703048194616-0"
+   2) 1) "action"
+      2) "like"
+      3) "user_id"
+      4) "1"
+      5) "product_id"
+      6) "1"
+2) 1) "1703048200069-0"
+   2) 1) "action"
+      2) "like"
+      3) "user_id"
+      4) "2"
+      5) "product_id"
+      6) "1"
+```
+
+#### XDEL
+- 스트림 이벤트 삭제
+- XDEL [key] [event-id] [end-id]
+``` log
+127.0.0.1:6379> XDEL events 1703048194616-0
+(integer) 1
+```
