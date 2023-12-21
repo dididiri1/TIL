@@ -378,16 +378,59 @@ OK
 > 홍대역의 좌표를 저장하면 GEODIST 명령어를 이용하여 두 역의 거리를 구할 수 있다.
 
 #### GEOADD
-- 지리공간 인덱스 위치를 추가한다 (경도, 위도)
+- 위치를 추가한다 (경도, 위도)
 - GEOADD [key] [longitude] [latitude] [member]
 ``` log
 127.0.0.1:6379> GEOADD seoul:station 126.923917 37.556944 hong-dae 127.027583 37.497928 gang-nam
 (integer) 2
 ```
 #### GEODIST
-- -- geospatial 인덱스에서 두 맴버간 거리를 반환한다.  unit : [m, km, pt, mi]
+- 두 맴버간 거리를 반환한다.  unit : [m, km, pt, mi]
 - GEODIST [key] [member1] [member2] [unit]
 ``` log
 127.0.0.1:6379> GEODIST seoul:station hong-dae gang-nam km
 "11.2561"
+```
+
+### Bitmaps
+- 실제 데이터 타입은 아니고, String에 binary operation 쉽게 사용할 수 있도록 만들어놓은 인터페이스
+- 최대 42억개 binary 데이터 표현 = 2^32(4,294,967,296) 
+
+#### SETBIT
+- 비트 값 추가. key: 해당 비트맵을 칭할 값, offset: 0 보다 큰 정수의 값, value: 0 또는 1의 비트 값
+- SETBIT [key] [offset] [value]
+``` log
+127.0.0.1:6379> SETBIT user:log-in:23-01-01 123 1
+(integer) 0
+127.0.0.1:6379> SETBIT user:log-in:23-01-01 456 1
+(integer) 0
+127.0.0.1:6379> SETBIT user:log-in:23-01-02 123 1
+(integer) 0
+```
+
+#### BITCOUNT
+- 범위 내의 1로 설정된 bit의 개수를 반환
+- SETBIT [key] [offset] [value]
+``` log
+127.0.0.1:6379> BITCOUNT user:log-in:23-01-01
+(integer) 2
+```
+
+#### BITOP
+- 두개의 공통된 비트를 확인할때 사용. bit 연산(AND, OR, XOR, NOT) 실행
+- Destination Key에 비트맵으로 생성 한다.
+- BITOP [operation] [destkey] [key] .. [key]
+``` log
+127.0.0.1:6379> BITOP AND result user:log-in:23-01-01 user:log-in:23-01-02
+(integer) 58
+```
+
+#### GETBIT
+- 비트 값 조회
+- GETBIT [key] [offset] 
+``` log
+127.0.0.1:6379> GETBIT result 123
+(integer) 1
+127.0.0.1:6379> GETBIT result 456
+(integer) 0
 ```
