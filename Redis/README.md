@@ -369,3 +369,25 @@ OK
 127.0.0.1:6379> XDEL events 1703048194616-0
 (integer) 1
 ```
+
+### Geospatials
+- 좌표를 저장하고, 검색하는 데이터 타입
+- 거리 계산, 범위 탐색 등 지원
+
+> 예를 들어 서울에 있는 지하철 역들의 좌표를 알고 있을때 GEOADD를 이용하여 강남역과  
+> 홍대역의 좌표를 저장하면 GEODIST 명령어를 이용하여 두 역의 거리를 구할 수 있다.
+
+#### GEOADD
+- 지리공간 인덱스 위치를 추가한다 (경도, 위도)
+- GEOADD [key] [longitude] [latitude] [member]
+``` log
+127.0.0.1:6379> GEOADD seoul:station 126.923917 37.556944 hong-dae 127.027583 37.497928 gang-nam
+(integer) 2
+```
+#### GEODIST
+- -- geospatial 인덱스에서 두 맴버간 거리를 반환한다.  unit : [m, km, pt, mi]
+- GEODIST [key] [member1] [member2] [unit]
+``` log
+127.0.0.1:6379> GEODIST seoul:station hong-dae gang-nam km
+"11.2561"
+```
