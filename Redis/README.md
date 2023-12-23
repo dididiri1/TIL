@@ -434,3 +434,34 @@ OK
 127.0.0.1:6379> GETBIT result 456
 (integer) 0
 ```
+
+### HyperLogLog
+- 집합의 cardinality를 추정할 수 있는 확률형 자료구조
+- 정확성을 일부 포기하는 대신 저장공간을 효율적으로 사용(평균 에러 0.81%)
+- HeyperLogLog를 이용하면 상대적으로 매우 적은 메모리로 카디널리티를 계산할수 있다.
+- 다만 HeyperLogLog는 실제 값을 저장하지 않기 때문에 모든 아이템을 다시 출력하는 경우에는 활용할 수 없음
+
+> 참고: 효율적인 unique item count 기능을 제공해주는 기능이다.  
+> 예를 들어 아래와 같이 특정 사이트에 방문자수를 count 해주는 기능이 있을때  
+> 정확한 방문자수의 집계를 위해선, 동일 정보를 가진 방문자는 count에서 제외해야 합니다.
+> 
+> 정확도를 완벽하게 알 필요는 없고 근사치만 알아도 되는 경우에 HyperLogLog를 이용하면  
+> 메모리를 적게 사용하면서 카디널리티를 계산할 수 있다.
+
+
+
+#### PFADD
+- key의 item를 추가 한다.
+- PFADD [key] [item] .. [item]
+``` log
+127.0.0.1:6379>  PFADD fruits apple orange grape kiwi
+(integer) 1
+```
+
+#### PFCOUNT
+- key의 item 갯수를 반환.
+- PFCOUNT [key] [item] .. [item]
+``` log
+127.0.0.1:6379> PFCOUNT fruits
+(integer) 4
+```
