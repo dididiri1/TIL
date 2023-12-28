@@ -465,3 +465,50 @@ OK
 127.0.0.1:6379> PFCOUNT fruits
 (integer) 4
 ```
+
+## BloomFilter
+- Bloom Filter는 어떠한 값이 특정 데이터 집합에 속하는지를 판단하는데 사용하는 확률적 자료구조이다.   
+  주로 데이터 집합의 크기가 매우 커서 데이터가 집합에 속해있는지 판단하는데 오래걸리는 경우 Bloom Filter를 사용한다.
+- HyperLogLog 처럼 정확성을 일부 포기하는 대신 저장공간을 효율적으로 사용
+- element가 집합에 실제로 포함되지 않은데 포함되었다고 잘못 예측하는 경우
+- 실제 값을 저장하지 않기 때문에 매우 적은 메모리 사용
+
+Docker Desktop 설치
+BloomFilter 실습 진행을 위해서는 Docker가 필요합니다.
+Docker Desktop을 이용하면 Docker를 쉽게 다운 받을 수 있습니다.
+
+- [Mac](https://docs.docker.com/desktop/install/mac-install/)
+- [Windows](https://docs.docker.com/desktop/install/windows-install/)
+
+### 컨테이너 실행(Windows PowerShell)
+* `$ docker run -p 63790:6379 -d --rm redis/redis-stack-server`
+* `$ docker exec -it [CONTAINER ID] redis-cli`
+
+#### BF.MADD
+- key의 item를 추가 한다.
+- BF.MADD [key] [item] .. [item]
+``` log
+127.0.0.1:6379> BF.MADD fruits apple orange grape
+1) (integer) 1
+2) (integer) 1
+3) (integer) 1
+```
+
+#### BF.EXISTS
+- 해당 아이템이 집합에 이미 포함되어있는지 여부 확인
+- BF.EXISTS [key] [item] .. [item]
+``` log
+127.0.0.1:6379> BF.EXISTS fruits apple
+(integer) 1
+127.0.0.1:6379> BF.EXISTS fruits banana
+(integer) 0
+```
+
+#### BF.MEXISTS
+- 해당 여러 아이템이 집합에 이미 포함되어있는지 여부 확인
+- BF.MEXISTS [key] [item] .. [item]
+``` log
+127.0.0.1:6379> BF.MEXISTS fruits apple banana
+1) (integer) 1
+2) (integer) 0
+```
