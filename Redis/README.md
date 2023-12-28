@@ -512,3 +512,45 @@ Docker Desktop을 이용하면 Docker를 쉽게 다운 받을 수 있습니다.
 1) (integer) 1
 2) (integer) 0
 ```
+
+### Expiration
+- 데이터를 특정시간 이후에 만료 시키는 기능
+- TTL(Time To Live) 데이터가 유효한 시간(초 단위)
+  - TTL60이라고 하면 해당 데이터가 저장된 이후 60초만 유효하다는 의미이다.
+- 특징
+  - 데이터 조회 요청시에 만료된 데이터는 조회되지 않음
+  - 데이터가 만료되자마자 삭제하지 않고, 만료로 표시했다가 백그라운드에서 주기적으로 삭제됨.
+> 참고: Redis에서 데이터를 저장한 이후에 만료시키지 않게 되면 해당 데이터가 계속 저장공간을  
+> 차지하고 있기 때문에 데이터를 삭제하거나 만료시키는게 중요.
+
+#### EXPIRE
+- Key 만료 시간 설정
+- EXPIRE [key] [second]
+``` log
+127.0.0.1:6379> SET greeting hello
+OK
+127.0.0.1:6379> TTL greeting **-1은 데이터 만료가 설정되어 있지 않다는 의미**
+(integer) -1
+127.0.0.1:6379> EXPIRE greeting 10
+(integer) 1
+127.0.0.1:6379> GET greeting **만료 전**
+"hello"
+127.0.0.1:6379> GET greeting **만료 후**
+(nil)
+```
+
+#### TTL 
+- Key 만료 시간 확인
+- TTL [key] 
+``` log
+127.0.0.1:6379> TTL greeting
+(integer) 5
+```
+
+#### SETEX
+- Key 설정 및 만료 시간 설정
+- SETEX [key] [second] [member]
+``` log
+127.0.0.1:6379> SETEX greeting 10 hello
+OK
+```
