@@ -529,13 +529,13 @@ Docker Desktop을 이용하면 Docker를 쉽게 다운 받을 수 있습니다.
 ``` log
 127.0.0.1:6379> SET greeting hello
 OK
-127.0.0.1:6379> TTL greeting **-1은 데이터 만료가 설정되어 있지 않다는 의미**
+127.0.0.1:6379> TTL greeting /*-1은 데이터 만료가 설정되어 있지 않다는 의미*/
 (integer) -1
 127.0.0.1:6379> EXPIRE greeting 10
 (integer) 1
-127.0.0.1:6379> GET greeting **만료 전**
+127.0.0.1:6379> GET greeting /*만료 전**
 "hello"
-127.0.0.1:6379> GET greeting **만료 후**
+127.0.0.1:6379> GET greeting /*만료 후*/
 (nil)
 ```
 
@@ -553,4 +553,33 @@ OK
 ``` log
 127.0.0.1:6379> SETEX greeting 10 hello
 OK
+```
+
+## SET NX/XX
+- NX
+  - 해당 Key가 존재하지 않는 경우에만 SET
+- XX
+  - 해당 Key가 이미 존재하는 경우에만 SET
+- Null Reply
+  - SET이 동작하지 않은 경우 (nil) 응답
+
+> 참고 : 만약 이런 옵션이 없다면 직접 키를 get 해서 데이터 존재 여부를 확인하고 이후 set  
+> 명령어를 별도로 해야되는데 nx, xx 옵션을 활용하면 좋음
+
+#### SET NX
+- SET [key] [value] [NX|XX]
+``` log
+127.0.0.1:6379> SET greeting hello NX
+OK
+127.0.0.1:6379> SET greeting hi NX /*이미 존재하는 key라 nil 반환*/
+(nil)
+```
+
+#### SET XX
+- SET [key] [value] [NX|XX]
+``` log
+127.0.0.1:6379> SET greeting hello XX
+OK
+127.0.0.1:6379> SET invalid abcd XX /*존재 하지 않는 key라 nil 반환*/
+(nil)
 ```
