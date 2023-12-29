@@ -513,6 +513,8 @@ Docker Desktop을 이용하면 Docker를 쉽게 다운 받을 수 있습니다.
 2) (integer) 0
 ```
 
+## 섹션 4. Redis 특수 명령어
+
 ### Expiration
 - 데이터를 특정시간 이후에 만료 시키는 기능
 - TTL(Time To Live) 데이터가 유효한 시간(초 단위)
@@ -582,4 +584,45 @@ OK
 OK
 127.0.0.1:6379> SET invalid abcd XX /*존재 하지 않는 key라 nil 반환*/
 (nil)
+```
+
+### Pub/Sub
+- Publisher와 Subscriber가 서로 알지 못해도 통신이 가능한 메세지 패턴, decoupling 된 패턴
+- Pub/Sub의 최대 장접은 두 시스템 간의 강한 커플링을 줄일 수 있다.
+- **Publisher**는 Subscriber에게 직접 메시지를 보내지 않고, Channel에 Publish하게 되고  
+- **Subscriber**는 관심이 있는 Channel을 필요에 따라 Subscribe하며 메시지 수신을 한다.
+
+- vs. Stream 메시지가 보관되는 Stream과 달리 Pub/Sub은 Subscribe 하지 않을 때 발행된 메시지 수신 불가
+
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_03.png?raw=true)
+> 참고: 창고를 관리하는 stock 서비스는 주문 상태에 따라서만 영향을 받기 때문에 Order 채널만 구독하면 되고  
+> 알림을 전송하는 Notification 서비스는 Order(주문), Payment(결제), Delivery(배송) 이벤트를 추척하기 위해  
+> 여러 개의 채널을 모두 구독할 수 있다.
+
+#### SUBSCRIBE
+- SUBSCRIBE [channel] .. [channel] 
+``` log
+127.0.0.1:6379> SUBSCRIBE ch:order ch:payment
+Reading messages... (press Ctrl-C to quit)
+1) "subscribe"
+2) "ch:order"
+3) (integer) 1
+1) "subscribe"
+2) "ch:payment"
+3) (integer) 2
+1) "message"
+2) "ch:order"
+3) "new-order"
+1) "message"
+2) "ch:payment"
+3) "new-payment"
+```
+
+#### PUBLISH
+- PUBLISH [channel] [message]
+``` log
+127.0.0.1:6379> PUBLISH ch:order new-order
+(integer) 1
+127.0.0.1:6379> PUBLISH ch:payment new-payment
+(integer) 1
 ```
