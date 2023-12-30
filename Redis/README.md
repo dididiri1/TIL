@@ -626,3 +626,16 @@ Reading messages... (press Ctrl-C to quit)
 127.0.0.1:6379> PUBLISH ch:payment new-payment
 (integer) 1
 ```
+
+### Pipeline
+- 다수의 commands를 한 번에 요청하여 네트워크 성능을 향상 시키는 기술
+- 파이프 라인은 Round-Trip 횟수를 줄여서 Round-Trip Times 최소화하는 기술이며,  
+  대부분 Redis 클라이언트 라이브러리에 구현이 되어 있다.
+> 참고: RTT(Round-Trip Time, 왕복시간)는 네트워크 요청이 시작점에서 목적지로 갔다가 다시 시작점으로  
+> 돌아오는데 걸리는 시간(밀리초)이다. 즉 RTT는 패킷 왕복시간이다.
+
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_04.png?raw=true)
+
+> 정리: 구체적인 수치를 기억하기 보다는 파이프라이닝을 통해 네트워크 라운드 트립의 횟수를  
+> 줄임으로써 전체적인 지연시간을 줄일 수 있다는 개념만 이해하면 된다.
+
