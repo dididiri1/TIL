@@ -711,3 +711,17 @@ QUEUED
 > DB는 레코드가 존재하지 않는 경우에는 락을 사용할 수 없고 락으로 인한 DB 성능 저하도 발생할 수 있기 때문에  
 > 필요에 맞게 분산락과 레코드 락을 사용하는 것이 필요하다.
 
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_06.png?raw=true)
+
+### Rate Limiter
+#### Rate Limite
+- 시스템 안정성/보안을 위해 요청의 수를 제한하는 기술이다.
+- IP-Based, User-Based, Application-Based, etc.
+- 예를 들어 특정 IP별로 초당 요청할 수 있는 요청수를 제한한다거나 특정 유저별로 횟수를 제한한다거나  
+  특정 어플리케이션 별로 요청을 제한하는 식의 방법이 있다.
+
+#### Fixed-window Rate Limiting
+- 고정된 시간(e.g. 1분) 안에 요청 수를 제한하는 방법
+- Fixed-window 방식의 특징은 몇 분인지에 따라 요청수가 제한되기 때문에 만약 11분이 되는 경우 요청 횟수를  
+  처음부터 다시 사용할 수 있게 된다.
+
