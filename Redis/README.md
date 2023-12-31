@@ -652,4 +652,51 @@ Reading messages... (press Ctrl-C to quit)
 - Transcation은 작업의 원자성을 보장하기 위해 다수의 명령어 일괄적용되거나 모두 적용되지 않는다.
 - Transaction과 Pipeline을 서로 동시에 사용할 수 도 있다.
 
+#### MULTI
+- 트랜잭션 진입, 트랜잭션을 시작하면 Redis는 이후 커맨드는 바로 실행되지 않고 queue에 쌓임
+- MULTI
+``` log
+127.0.0.1:6379> MULTI
+OK
+127.0.0.1:6379> INCR foo  # 아직 증가하지는 않음 commit 안되어있는 상태.
+QUEUED
+127.0.0.1:6379> GET foo
+(nil)
+```
+
+#### DISCARD
+- 롤백, queue에 쌓여있는 명령어를 실괄적으로 폐기 또는 중단됨
+- DISCARD
+``` log
+127.0.0.1:6379> DISCARD
+OK
+127.0.0.1:6379> GET foo
+(nil)
+```
+
+#### EXEC
+- 커밋, 정상적으로 처리되어 queue에 쌓여있는 명령어를 일괄적으로 실행함
+- EXEC
+``` log
+127.0.0.1:6379> MULTI
+OK
+127.0.0.1:6379> INCR foo  # 아직 증가하지는 않음 commit 안되어있는 상태.
+QUEUED
+127.0.0.1:6379> EXEC   # commit 상태.
+1) (integer) 1
+127.0.0.1:6379> GET foo
+"1"
+```
+
+## 섹션 5. 데이터 타입 활용
+
+### One-Time Password
+- 어떤 유저가 새로운 서비스에 회원가입할 때 인증번호 6자리 코드를 제공 할때 사용
+- 인증을 위해 사용되는 임시 비밀번호(e.g. 6자리 랜덤 숫자)
+- OTP는 일정 시간 동안만 유효하고 회원 가입 과정에서만 사용되는 데이터이기 때문에 Redis로 쉽게 구현 가능
+
+> 참고: 휴대폰 번호에 맞게 캐시 키를 생성한 뒤 set 명령어를 통해 임시 코드 값을 저장하고 유효한 시간만큼  
+> TTL을 설정한다.
+
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_05.png?raw=true)
 
