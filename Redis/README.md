@@ -700,3 +700,14 @@ QUEUED
 
 ![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_05.png?raw=true)
 
+### Distributed Lock
+- 분산락이란 다수의 프로세스에서 동일한 자원을 접근할 때 동시성 문제를 해결하기 위해 사용되는 것.
+- 분산 환경의 다수의 프로세스에서 동일한 자원에 접근할 때, 동시성 문제 해결
+
+
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_07.png?raw=true)
+> 참고: 예를 들어 은행 시스템에서 사용자의 잔고를 변경할 때 관계형 데이터베이스에 레코드 락을 걸어 해결할 수 있지만  
+> Redis를 이용해서도 분산락을 구현하여 동시에 여러 프로세스에서 데이터를 변경하는 문제를 막을 수도 있다.  
+> DB는 레코드가 존재하지 않는 경우에는 락을 사용할 수 없고 락으로 인한 DB 성능 저하도 발생할 수 있기 때문에  
+> 필요에 맞게 분산락과 레코드 락을 사용하는 것이 필요하다.
+
