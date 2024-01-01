@@ -725,3 +725,14 @@ QUEUED
 - Fixed-window 방식의 특징은 몇 분인지에 따라 요청수가 제한되기 때문에 만약 11분이 되는 경우 요청 횟수를  
   처음부터 다시 사용할 수 있게 된다.
 
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_08.png?raw=true)
+
+### SNS Activity Feed
+#### 활동 피드(Activity Feed)
+- 활동 피드란 사용자 또는 시스템과 관련된 활동이나 업데이트를 시간순으로 정렬하여 보여주는 기능.
+#### Fan-Out
+- 소셜 피드에서는 Fan-Out 기술이 사용된다.
+- 단일 데이터를 한 소스에서 여러 목적지로 전달하는 메시징 패턴을 의미한다.
+- 하나의 메세지가 여러 개의 목적지로 확산되는 구조를 생각하면 됨.
+
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_08.png?raw=true)
