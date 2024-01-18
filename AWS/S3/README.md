@@ -4,7 +4,6 @@
 
 ## 1. S3 버킷 만들기
 
-
 ### AWS 리전, 버킷 이름 설정 [1/1]
 - 원하는 버킷 이름을 입력하고, AWS 리전을 선택한 후 "Next"를 클릭한다.
 ![](https://github.com/dididiri1/TIL/blob/main/AWS/S3/images/01.png?raw=true)
