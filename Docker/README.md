@@ -1,5 +1,8 @@
 ## Docker 명령어
 
+### 이미지 생성
+* `$ docker build -t ubuntu:18.04`
+
 ### 이미지 Pull 받기
 
 * `$ docker pull ubuntu:18.04`
@@ -61,6 +64,36 @@
     
   - While process (https, nginx)
     - exec 사용
+
+## Docker Hub
+### 도커 파일 이미지 생성
+- $ docker build -t {이미지ID} 
+* `$ docker build -t instagram-service:0.0 ./`
+``` log
+#> docker images
+REPOSITORY                                                TAG
+IMAGE ID       CREATED         SIZE
+instagram-service                                         0.0
+``` 
+
+### 도커 이미지 태그 변경
+- $ docker tag {이미지ID} {DockerHub ID}/{이미지ID}
+* `docker tag instagram-service:0.0 dididiri1/instagram-service:0.0`
+``` log
+#> docker images
+REPOSITORY                                                TAG
+IMAGE ID       CREATED         SIZE
+dididiri1/instagram-service                               0.0
+``` 
+
+### 도커 이미지 Push
+- $ docker push {이미지ID}
+* `docker push dididiri1/instagram-service:0.0`
+
+### 도커 이미지 Pull
+- $ docker pull {이미지ID}
+* `docker pull dididiri1/instagram-service:0.0`
+
 
 ### Reference
 
