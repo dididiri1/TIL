@@ -11,6 +11,13 @@
 
 * `$ docker images`
 
+### 이미지 ID 조회
+``` log
+#> docker images -q {이미지ID}
+7cf909497857
+``` 
+
+
 ### 이미지 실행
 
 * `$ docker run -d -p 8080:80 tomcat`
@@ -25,8 +32,6 @@
 * `$ docker rm $(docker ps -a -q)`
 * `$ docker rmi -f $(docker images -q)`
 
-
-
 ### 컨테이너 목록
 
 * `$ docker ps`
@@ -35,13 +40,23 @@
 
 * `$ docker ps -a`
 
+### 컨테이너 시작 
+* `$ docker start {컨테이너ID}`
+
+### 컨테이너 재시작
+* `$ docker restart {컨테이너ID}`
+
+### 컨테이너 종료
+* `$ docker stop {컨테이너ID}`
+
 ### 컨테이너 삭제
 
 * `$ docker rm {컨테이너ID}`
 
-### 컨테이너 종료
-
-* `$ docker stop {컨테이너ID}`
+### 컨테이너 로그 실시간 확인
+- -tail 숫자 : 발생한 로그 숫자만큼 보여주는 옵션
+- -f : foreground로 실행
+* `$ docker logs --tail 10 -f {컨테이너ID}`
 
 ## Dit 옵션과 Attach 명령어
 
@@ -68,7 +83,7 @@
 ## Docker Hub
 ### 도커 파일 이미지 생성
 - $ docker build -t {이미지ID} 
-* `$ docker build -t instagram-service:0.0 ./`
+* `$ docker build --no-cache=true -t instagram-service:0.0 ./`
 ``` log
 #> docker images
 REPOSITORY                                                TAG
@@ -83,16 +98,27 @@ instagram-service                                         0.0
 #> docker images
 REPOSITORY                                                TAG
 IMAGE ID       CREATED         SIZE
-dididiri1/instagram-service                               0.0
+kmkim6368/instagram-service                               0.0
 ``` 
 
 ### 도커 이미지 Push
 - $ docker push {이미지ID}
-* `docker push dididiri1/instagram-service:0.0`
+* `docker push kmkim6368/instagram-service:0.0`
 
 ### 도커 이미지 Pull
 - $ docker pull {이미지ID}
-* `docker pull dididiri1/instagram-service:0.0`
+* `docker pull kmkim6368/instagram-service:0.0`
+
+## Spring Boot 도커 파일 생성
+``` Dockerfile
+FROM openjdk:11-jdk-slim-buster
+COPY build/libs/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java","-Dspring.profiles.active=prod","-jar","/app.jar"]
+``` 
+
+### Spring boot 도커 실행
+* `docker run -d -p 8080:8080 --name instagram-service instagram-service:0.0`
 
 
 ### Reference
