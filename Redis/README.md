@@ -714,7 +714,7 @@ QUEUED
 ![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_06.png?raw=true)
 
 ### Rate Limiter
-#### Rate Limite
+#### Rate Limiter
 - 시스템 안정성/보안을 위해 요청의 수를 제한하는 기술이다.
 - IP-Based, User-Based, Application-Based, etc.
 - 예를 들어 특정 IP별로 초당 요청할 수 있는 요청수를 제한한다거나 특정 유저별로 횟수를 제한한다거나  
@@ -735,4 +735,9 @@ QUEUED
 - 단일 데이터를 한 소스에서 여러 목적지로 전달하는 메시징 패턴을 의미한다.
 - 하나의 메세지가 여러 개의 목적지로 확산되는 구조를 생각하면 됨.
 
-![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_08.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_09.png?raw=true)
+
+### Login Session
+- 사용자의 로그인 상태를 유지하기 위한 기술
+- 로그인시 세션의 개수를 제한하여, 동시에 로그인 가능한 디바이스 개수
+  ![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_10.png?raw=true)

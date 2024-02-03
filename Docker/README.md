@@ -120,7 +120,7 @@ ENTRYPOINT ["java","-Dspring.profiles.active=prod","-jar","/app.jar"]
 ### Spring boot 도커 실행
 * `docker run -d -p 8080:8080 --name instagram-service instagram-service:0.0`
 
-
+ 
 ### Reference
 
 - [메타코딩 | 도커 입문](https://www.youtube.com/watch?v=BivQIVzsiTM&list=PL93mKxaRDidGMzIllhYKx1d6aMg6_5wW3)
