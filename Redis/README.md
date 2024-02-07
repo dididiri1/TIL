@@ -41,10 +41,18 @@
 - [Windows](https://redis.io/docs/install/install-redis/install-redis-on-windows/)
   - [Redis 다운로드](https://github.com/microsoftarchive/redis/releases)
 ### Redis 실행
-
+- 파일 설치경로: C:\Program Files\Redis\redis-cli.exe 실행
 * `$ redis-cli`
 * `$ ping`
 
+### Docker
+- WSL 실행 또는 인텔리제이
+``` commend
+#> docker pull redis
+#> docker run --name [서버이름] -d -p 6379:6379 redis
+#> docker exec -it redis /bin/bash
+#> redis-cli
+```
 
 ### 데이터 저장/조회/삭제
 #### 저장
@@ -740,4 +748,36 @@ QUEUED
 ### Login Session
 - 사용자의 로그인 상태를 유지하기 위한 기술
 - 로그인시 세션의 개수를 제한하여, 동시에 로그인 가능한 디바이스 개수
-  ![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_10.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_10.png?raw=true)
+
+
+### Sliding Window Rate Limiter
+- Sliding Window Rate Limiter시간에 따라 Window를 이동시켜 동적으로 요청수를 조절하는 기술
+- vs. Fixed Window Fixed Window는 window 시간마다 허용량이 초기화 되지만,  
+  Sliding Window는 시간이 경과함에 따라 window가 같이 움직인다.
+
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_11.png?raw=true)
+
+### Geofencing
+- 위치를 활용하여 지도 상의 가상의 경계 또는 지리적 영역을 정의하는 기술
+``` commend
+127.0.0.1:6379> GEOADD gang-nam:burgers
+                 127.025705 37.501272 five-guys
+                 127.025699 37.502775 shake-shack
+                 127.028747 37.498668 mc-donalds
+                 127.027531 37.498847 burger-king
+(integer) 4
+127.0.0.1:6379> GEORADIUS gang-nam:burgers 127.027583 37.497928 0.5 km
+1) "burger-king"
+2) "mc-donalds"
+3) "five-guys"
+127.0.0.1:6379> GEORADIUS gang-nam:burgers 127.027583 37.497928 500 m
+1) "burger-king"
+2) "mc-donalds"
+3) "five-guys"
+127.0.0.1:6379> GEORADIUS gang-nam:burgers 127.027583 37.497928 600 m
+1) "burger-king"
+2) "mc-donalds"
+3) "five-guys"
+4) "shake-shack"
+```
