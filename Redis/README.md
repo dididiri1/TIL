@@ -53,6 +53,14 @@
 #> docker exec -it redis /bin/bash
 #> redis-cli
 ```
+- redis 컨테이너 재시작
+``` commend
+#> docker ps -a
+CONTAINER ID   IMAGE     COMMAND                  CREATED        STATUS                            PORTS                    NAMES
+f2effc632237   redis     "docker-entrypoint.s…"   24 hours ago   Exited (255) About a minute ago   0.0.0.0:6379->6379/tcp   redis
+#> docker start [컨테이너 ID]
+```
+
 
 ### 데이터 저장/조회/삭제
 #### 저장
