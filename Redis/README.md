@@ -460,27 +460,35 @@ OK
 > 참고: 효율적인 unique item count 기능을 제공해주는 기능이다.  
 > 예를 들어 아래와 같이 특정 사이트에 방문자수를 count 해주는 기능이 있을때  
 > 정확한 방문자수의 집계를 위해선, 동일 정보를 가진 방문자는 count에서 제외해야 합니다.
-> 
 > 정확도를 완벽하게 알 필요는 없고 근사치만 알아도 되는 경우에 HyperLogLog를 이용하면  
 > 메모리를 적게 사용하면서 카디널리티를 계산할 수 있다.
 
- 
-
 #### PFADD
-- key의 item를 추가 한다.
-- PFADD [key] [item] .. [item]
+- key의 element 추가 한다.
+- PFADD [key] [element] .. [element]
 ``` log
 127.0.0.1:6379>  PFADD fruits apple orange grape kiwi
 (integer) 1
 ```
 
 #### PFCOUNT
-- key의 item 갯수를 반환.
-- PFCOUNT [key] [item] .. [item]
+- key의 element 갯수를 반환.
+- PFCOUNT [key] [element] .. [element]
 ``` log
 127.0.0.1:6379> PFCOUNT fruits
 (integer) 4
 ```
+
+## Docker Desktop 설치
+> BloomFilter 실습 진행을 위해서는 Docker가 필요합니다.  
+> Docker Desktop을 이용하면 Docker를 쉽게 다운 받을 수 있습니다.
+- [Mac](https://docs.docker.com/desktop/install/mac-install/)
+- [Windows](https://docs.docker.com/desktop/install/windows-install/)
+
+
+### 컨테이너 실행(Windows PowerShell)
+* `$ docker run -p 63790:6379 -d --rm redis/redis-stack-server`
+* `$ docker exec -it [CONTAINER ID] redis-cli`
 
 ## BloomFilter
 - Bloom Filter는 어떠한 값이 특정 데이터 집합에 속하는지를 판단하는데 사용하는 확률적 자료구조이다.   
@@ -489,20 +497,9 @@ OK
 - element가 집합에 실제로 포함되지 않은데 포함되었다고 잘못 예측하는 경우
 - 실제 값을 저장하지 않기 때문에 매우 적은 메모리 사용
 
-Docker Desktop 설치
-BloomFilter 실습 진행을 위해서는 Docker가 필요합니다.
-Docker Desktop을 이용하면 Docker를 쉽게 다운 받을 수 있습니다.
-
-- [Mac](https://docs.docker.com/desktop/install/mac-install/)
-- [Windows](https://docs.docker.com/desktop/install/windows-install/)
-
-### 컨테이너 실행(Windows PowerShell)
-* `$ docker run -p 63790:6379 -d --rm redis/redis-stack-server`
-* `$ docker exec -it [CONTAINER ID] redis-cli`
-
 #### BF.MADD
-- key의 item를 추가 한다.
-- BF.MADD [key] [item] .. [item]
+- key의 element 추가 한다.
+- BF.MADD [key] [element] .. [element]
 ``` log
 127.0.0.1:6379> BF.MADD fruits apple orange grape
 1) (integer) 1
@@ -512,7 +509,7 @@ Docker Desktop을 이용하면 Docker를 쉽게 다운 받을 수 있습니다.
 
 #### BF.EXISTS
 - 해당 아이템이 집합에 이미 포함되어있는지 여부 확인
-- BF.EXISTS [key] [item] .. [item]
+- BF.EXISTS [key] [element] .. [element]
 ``` log
 127.0.0.1:6379> BF.EXISTS fruits apple
 (integer) 1
@@ -522,7 +519,7 @@ Docker Desktop을 이용하면 Docker를 쉽게 다운 받을 수 있습니다.
 
 #### BF.MEXISTS
 - 해당 여러 아이템이 집합에 이미 포함되어있는지 여부 확인
-- BF.MEXISTS [key] [item] .. [item]
+- BF.MEXISTS [key] [element] .. [element]
 ``` log
 127.0.0.1:6379> BF.MEXISTS fruits apple banana
 1) (integer) 1
@@ -789,3 +786,81 @@ QUEUED
 3) "five-guys"
 4) "shake-shack"
 ```
+
+### Online Status
+- 소셜 서비스나 게임을 보면 사용자의 현재 상태가 표시되는 서비스들이 있다.
+- 해당 사용자가 현재 온라인 상태인지 오프라인 상태인지를 표시하는 기능이다.
+- Redis 비트맵을 이용하면 이런 데이터를 효율적으로 관리할 수 있다.
+- 특징
+  - 실시간성을 완벽히 보장하지는 않는다. 수시로 변경되는 값이다.
+
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_12.png?raw=true)
+
+> Redis 비트맵을 이용하면 이런 데이터를 효율적으로 관리할 수 있다.  
+> 앞서 FixedWindowRateLimiter를 구현했던 것처럼 현재 시간의 분을 기준으로  
+> 키를 생성해서 해당 유저가 서브와 통신을 주고받고 있는 경우 비트값을 1로 업데이트한다.  
+> 그리고 이를 표시해주는 부분에서는 동일한 방법으로 키를 생성해 해당 유저의 온라인 상태를 조회 할 수 있다.  
+> 이후 해당 유저가 더 이상 서버와 통신을 하고 있지 않으면 비트값이 추가로 업데이트 되지 않는다.  
+> 유저의 상태를 조회했을 때 해당 유저는 오프라인으로 표시 된다.
+
+### Visitors Coun
+- HyperLogLog를 이용하여 방문자 수를 추정하는 기능을 구현하는 방법이다.
+- Visitors Count Approximation
+  - 방문자 수(또는 특정 횟수)를 대략적으로 추정하는 경우
+  - 정확한 횟수를 셀 필요 없이 대략적인 어림치만 알고자 하는 경우  
+    HyperLogLog를 이용하면 해당 기능을 쉽게 구현할 수 있다.
+
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_13.png?raw=true)
+
+> HyperLogLog는 기본적으로 동일한 값을 한 번만 카운팅한다.  
+> 따라서 값을 어떻케 추가하는지에 따라 카운팅 방식을 조절할 수 있다.  
+> 예를 들어 오늘의 방문자를 셀 때 같은 유저의 요청을 중복으로 한 번만 카운팅할 수도 있고  
+> 유닉스 타임을 함께 추가해서 초당 요청을 다르게 셀 수도 있다.
+
+``` log
+127.0.0.1:6379> PFADD today:users 
+                user:1:1693494070 
+                user:1:1693494071 
+                user:2:1693494071
+(integer) 1
+127.0.0.1:6379> PFCOUNT today:users
+(integer) 3
+```
+
+### Unique Events
+- Bloom 필터를 이용해서 동일한 요청의 중복 처리를 방지하는 방법이다.
+- 동일 요청이 중복으로 처리되지 않기 위해 빠르게 해당 item이 중복인지 확인하는 방법
+  - 클라이언트에서 발생하는 이벤트를 수집하는 서버가 있다고 할 때 클라이언트의 실수로 중복되는 이벤트를
+  - 여러번 요청할 수 있다. 이벤트 수집 서버는 이런 경우 대비해서 중복 데이터를 제거하는 기능을 가지고 있어야 한다.
+
+![](https://github.com/dididiri1/TIL/blob/main/Redis/images/01_14.png?raw=true)
+
+> 이벤트의 데이터를 기준으로 해싱하거나 아니면 이벤트의 발생 시간에 따라 고유한 아이디를 발급 한다.  
+> 이렇게 생성한 고유 아이디는 중복 데이터의 경우 동일하게 생성될 것이고 이벤트를 처리하기 전에  
+> 고유 아이디를 기준으로 Bloom 필터에 먼저 조회를 요청하고 Bloom 필터에 존재하지 않는다면 해당 데이터는  
+> 처리 되지 않은것이기 때문에 데이터를 저장한다. 이후 Bloom 필터에 아이디를 추가 한다.
+
+## 섹션 6. Redis 사용시 주의사항
+### O(N) 명령어
+- Redis의 대부분의 명령어는 O(1)의 시간복잡도를 갖고 있어 빠르게 동작한다. 일부 명령어의 경우 O(N)
+- Redis는 Single Thread로 명령어를 순차적으로 수행하기 때문에, 오래 걸리는 O(N) 명령어 수행시, 전체적인 어플리케이션 성능 저하
+
+### O(N) 명령어 에시
+| 명령어      |                                  설명                                  |
+|:---------|:--------------------------------------------------------------------:|
+| KEYS *   | 지정된 패턴과 일치하는 모든 키 Key 조회 <br/> Production 환경에서 사용 금지 -> SCAN 명령어로 대체 |
+| SMEMBERS |                Set의 모든 member 반환 (N = Set Cardinality                |
+| HGETALL  |                 Hash의 모든 field 반환(N = Size of Hash)                  |
+| SORT     |                    List, Set, ZSet의 item 정렬하여 반환                     |
+
+
+
+
+
+
+
+
+
+
+
+
