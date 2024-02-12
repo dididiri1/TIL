@@ -16,7 +16,7 @@
 
 ### 자바로 작성된 프로그램은 자바 가상 머신(Java Virtual Machine) 위에서 실해되며 이런 특징으로 인해 자바 프로그램은  어떤 운영체제(OS)에서도 실행 가능
 
-![](https://github.com/dididiri1/TIL/blob/main/java/images/01_01.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Java/images/01_01.png?raw=true)
 
 ### Reference
 

@@ -26,7 +26,7 @@
 - 클래스에는 필드와 메소드 외에 생성자(Constructor)라는 특수한 메소드도 반드시 하나 이상 갖는다.
 
 
-![](https://github.com/dididiri1/TIL/blob/main/java/images/02_01.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Java/images/02_01.png?raw=true)
 
 # 자바 기초 강의 - 2-2강 클래스의 이해 - 필드의 정의
 
@@ -37,7 +37,7 @@
   클래스의 핵심 속성들들 정의한다.
 - 필드를 정의할 떄는 반드시 접근지정자(Access Modifier), 타입, 필드명을 명시한다.
 
-![](https://github.com/dididiri1/TIL/blob/main/java/images/02_02.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Java/images/02_02.png?raw=true)
 
 ## 변수의 유형
 ### 변수는 정의된 위체 따리 4가지의 유형으로 구분하며 각 유형에 따라 갖는 특성에 차이가 있다.
@@ -114,7 +114,7 @@ System.out.println("PI is " + PI);
 - 참조 자료형 변수는 4byte의 크기를 갖으며 인스턴스 객체에 접근할 수 있는 정보를 갖는다.
 - 객체의 삭제는 객체가 더 이상 사용되지 않을 때 자바의 Garbage Collector에 의해 자동적으로 제거된다.
 
-![](https://github.com/dididiri1/TIL/blob/main/java/images/02_03.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Java/images/02_03.png?raw=true)
 
 
 # 2.5 연산자(Operators)의 이해
@@ -213,7 +213,7 @@ int i2 = (int) 20.5; // 20
 - 필드와 마찬가지로 메소드르에도 접근 지정자를 지정하여 메소드를 호출에 대한 범위를 정할 수 있다.
 - 메소드는 static 키워드를 이용해 클래스 메소드와 인스턴스 메소드로 정의할 수 있다.
 -
-![](https://github.com/dididiri1/TIL/blob/main/java/images/02_04.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Java/images/02_04.png?raw=true)
 
 
 ## 오버로딩(Overloading)

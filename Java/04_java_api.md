@@ -1,4 +1,4 @@
-# 4. Java API
+# 4. main/Java
 
 > 4.1 문자열 클래스
 > 4.2 Wrapper 클래스

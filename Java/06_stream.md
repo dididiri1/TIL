@@ -240,7 +240,7 @@ public class Ex04 {
 - 스트림을 이용한 연산 처리는 스트림 객체의 생성부터 중간 연산, 그리고 최종 연산 단계로 구분할 수 있다.
 - 스트림 객체가 제공하는 다양한 연산을 이해하고 연산에 필요한 람다표현식을 이해하고 적용하는 것이 중요함.
 
-![](https://github.com/dididiri1/TIL/blob/main/java/images/05_01.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Java/images/05_01.png?raw=true)
 
 ## Stream 연산[2/3]
 - 스트림의 연산은 중간 연산(intermediate operation)과 최종 연산(ㅅterminal operation) 이 있다.

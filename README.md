@@ -6,18 +6,17 @@
 ## 분류
 
 ### JAVA
-* [Java 소개](https://github.com/dididiri1/TIL/blob/main/java/01_java_intro.md)
+* [Java 소개](https://github.com/dididiri1/TIL/blob/main/Java/01_java_intro.md)
 
-* [클래스의 이해](https://github.com/dididiri1/TIL/blob/main/java/02_class_understand.md)
+* [클래스의 이해](https://github.com/dididiri1/TIL/blob/main/Java/02_class_understand.md)
 
-* [클래스의 관계](https://github.com/dididiri1/TIL/blob/main/java/03_class_relationship.md)
+* [클래스의 관계](https://github.com/dididiri1/TIL/blob/main/Java/03_class_relationship.md)
 
-* [Java API](https://github.com/dididiri1/TIL/blob/main/java/04_java_api.md)
+* [Java API](https://github.com/dididiri1/TIL/blob/main/Java/04_java_api.md)
 
-* [람다식](https://github.com/dididiri1/TIL/blob/main/java/05_lambda.md)
+* [람다식](https://github.com/dididiri1/TIL/blob/main/Java/05_lambda.md)
 
-* [스트림](https://github.com/dididiri1/TIL/blob/main/java/06_stream.md)
-
+* [스트림](https://github.com/dididiri1/TIL/blob/main/Java/06_stream.md)
 
 ### JPA
 
