@@ -3,15 +3,20 @@
 
 * 좋은 개발자가 되기 위해 하루동안 학습 내용을 경험들을 기록으로 남긴다.
 
-
 ## 분류
 
 ### JAVA
+* [Java 소개](https://github.com/dididiri1/TIL/blob/main/java/01_java_intro.md)
 
-* [스트림](https://github.com/dididiri1/javajungsuk_basic/blob/main/study/01_stream.md)
+* [클래스의 이해](https://github.com/dididiri1/TIL/blob/main/java/02_class_understand.md)
 
+* [클래스의 관계](https://github.com/dididiri1/TIL/blob/main/java/03_class_relationship.md)
 
-* [람다식](https://github.com/dididiri1/javajungsuk_basic/blob/main/study/02_lambda.md)
+* [Java API](https://github.com/dididiri1/TIL/blob/main/java/04_java_api.md)
+
+* [람다식](https://github.com/dididiri1/TIL/blob/main/java/05_lambda.md)
+
+* [스트림](https://github.com/dididiri1/TIL/blob/main/java/06_stream.md)
 
 
 ### JPA
@@ -198,6 +203,22 @@
 ### Docker 
 
 * [도커 명령어](https://github.com/dididiri1/TIL/blob/main/Docker/README.md)
+
+### Redis
+
+* [섹션 1. Redis 알아보기](https://github.com/dididiri1/TIL/blob/main/Redis/01_redis_learn.md)
+
+* [섹션 2. Redis 설치](https://github.com/dididiri1/TIL/blob/main/Redis/02_redis_install.md)
+
+* [섹션 3. 데이터 타입](https://github.com/dididiri1/TIL/blob/main/Redis/03_redis_datatype.md)
+
+* [섹션 4. Redis 특수 명령어](https://github.com/dididiri1/TIL/blob/main/Redis/04_redis_special_command.md)
+
+* [섹션 5. 데이터 타입 활용](https://github.com/dididiri1/TIL/blob/main/Redis/05_redis_datatype_use.md)
+
+* [섹션 6. Redis 사용시 주의사항](https://github.com/dididiri1/TIL/blob/main/Redis/06_redis_caution.md)
+
+* [Grafana 설치하기](https://github.com/dididiri1/TIL/blob/main/Redis/07_grafana.md)
 
 ### Tools
 
