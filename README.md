@@ -139,32 +139,28 @@
 
 ### TDD
 
-* [섹션 1. 테스트는 왜 필요할까?](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
+* [섹션 1. 테스트는 왜 필요할까?](https://github.com/dididiri1/TIL/blob/main/TDD/01_test.md)
 
 
-* [섹션 2. 단위 테스트](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
+* [섹션 2. 단위 테스트](https://github.com/dididiri1/TIL/blob/main/TDD/02_unit_testing.md)
 
 
-* [섹션 3. TDD: Test Driven Development](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
+* [섹션 3. TDD: Test Driven Development](https://github.com/dididiri1/TIL/blob/main/TDD/03_ttd.md)
 
 
-* [섹션 4. 테스트는 [ ]다.](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
+* [섹션 4. 테스트는 [ ]다.](https://github.com/dididiri1/TIL/blob/main/TDD/04_tests_are_documents.md)
 
 
-* [섹션 5. Spring & JPA 기반 테스트](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
+* [섹션 5. Spring & JPA 기반 테스트](https://github.com/dididiri1/TIL/blob/main/TDD/05_spring_and_Jpa_based_testing.md)
 
 
-* [섹션 6. Mock을 마주하는 자세](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
+* [섹션 6. Mock을 마주하는 자세](https://github.com/dididiri1/TIL/blob/main/TDD/06_mock.md)
 
 
-* [섹션 7. 더 나은 테스트를 작성하기 위한 구체적 조언](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
+* [섹션 7. 더 나은 테스트를 작성하기 위한 구체적 조언](https://github.com/dididiri1/TIL/blob/main/TDD/07_specific_advice.md)
 
 
-* [섹션 8. Appendix](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
-
-
-* [섹션 9. Outro](https://github.com/dididiri1/cafekiosk/blob/main/study/01_tdd.md)
-
+* [섹션 8. Appendix & Outro](https://github.com/dididiri1/TIL/blob/main/TDD/08_appendix_and_outro.md)
 
 
 ### Algorithm
