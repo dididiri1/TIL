@@ -1,4 +1,6 @@
-# S3(Simple,Storage, Service)란
+# AWS - S3 사용하기
+
+## S3(Simple,Storage, Service)란
 > S3는 AWS(Amazon Web Service)에서 제공하는 인터넷 스토리지 서비스이다.  
 > S3(Simple Storage Service) 를 뜻함.
 

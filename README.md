@@ -219,6 +219,20 @@
 
 * [Grafana 설치하기](https://github.com/dididiri1/TIL/blob/main/Redis/07_grafana.md)
 
+### Git
+* [Git Commit Message Convention](https://github.com/dididiri1/TIL/blob/main/Git/01_git_convention.md)
+
+* [Gitmoji 사용법 정리](https://github.com/dididiri1/TIL/blob/main/Git/02_gitmoji.md)
+
+
+### AWS
+
+* [AWS - S3 사용하기](https://github.com/dididiri1/TIL/blob/main/AWS/S3/README.md)
+
+* [AWS - Spring Boot와 S3 연동하기](https://github.com/dididiri1/TIL/blob/main/AWS/Springboot/README.md)
+
+* [AWS - EC2 인스턴스에 HTTPS 적용하기](https://github.com/dididiri1/TIL/blob/main/AWS/Https/README.md)
+
 ### Tools
 
 * [IntelliJ IDEA 단축키](https://github.com/dididiri1/TIL/blob/main/Tools/intellj_shortcut_keys.md)

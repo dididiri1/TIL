@@ -1,4 +1,4 @@
-# EC2 인스턴스에 HTTPS 적용하기
+# AWS - EC2 인스턴스에 HTTPS 적용하기
 
 ## 1. Route 53 도메인 연결
 

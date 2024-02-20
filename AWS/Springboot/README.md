@@ -1,4 +1,4 @@
-# Spring boot AWS S3 연동
+# AWS - Spring Boot와 S3 연동하기
 
 ## AWS S3 설정
 ### 사용자 생성 [1/1]
