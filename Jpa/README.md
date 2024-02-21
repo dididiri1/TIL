@@ -1,0 +1,2 @@
+# @MappedSuperclass vs Embedded Type
+

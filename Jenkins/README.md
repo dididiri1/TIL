@@ -35,23 +35,23 @@
 
 ## 7. Jenkins 포트 변경 두가지 방법
 
-### EC2 방화벽 9090 포트 개방
+### EC2 방화벽 9090 포트 개방 [7/1]
 ![](https://github.com/dididiri1/TIL/blob/main/Jnekins/images/01_03.png?raw=true)
 
-### 1. Jenkins 설정 파일을 수정
+### 1. Jenkins 설정 파일을 수정 [7/2]
 - 파일 내에서 '--httpPort=9090' 변경한다.
 * `vi /etc/default/jenkins`
 
 
-### 2. Jenkins 설정 파일을 수정
+### 2. Jenkins 설정 파일을 수정 [7/3]
 - 파일 내에서 'Environment="JENKINS_PORT=9090' 변경한다.
 * `vi /lib/systemd/system/jenkins.service`
 
 
-### 설정 변경사항을 적용하기 위해 Jenkins 서비스를 재시작한다.
+### 설정 변경사항을 적용하기 위해 Jenkins 서비스를 재시작한다.[7/4]
 * `service jenkins restart`
 
-### Jenkins 상태 확인 & 포트 확인
+### Jenkins 상태 확인 & 포트 확인 [7/5]
 * `service jenkins status`
 
 ``` log
@@ -66,4 +66,12 @@
              └─115526 /usr/bin/java -Djava.awt.headless=true -jar /usr/share/java/jenkins.war --webroot=/var/cache/jenkins/war --httpPort=9090
 ``` 
 
-### 웹 브라우저에서 변경된 포트를 사용하여 Jenkins에 접속해 확인
+### 웹 브라우저에서 변경된 포트를 사용하여 Jenkins에 접속해 확인 [7/6]
+![](https://github.com/dididiri1/TIL/blob/main/Jnekins/images/01_05.png?raw=true)
+
+
+## 8. Plugins 설치
+- Dashboard > Jenkins 관리 > Plugins > Available plugins
+  - 1. deploy to container
+  - 2. Bitbucket
+
