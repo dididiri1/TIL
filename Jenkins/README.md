@@ -75,3 +75,21 @@
   - 1. deploy to container
   - 2. Bitbucket
 
+## 9. Jenkins 환경설정
+- Dashboard > Jenkins 관리 > Tools
+
+### JDK 설정
+- Add JDK 버튼을 클릭 
+- 'Name' JDK의 이름을 입력하고 'JAVA_HOME' 필드에는 JDK의 경로를 입력한다.
+``` 
+echo $JAVA_HOME
+/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.252.b09-2.el7_8.x86_64
+``` 
+
+### Git 설정
+- Add Git 버튼을 클릭
+- 'Name' Git의 이름을 입력하고 'Path to Git executable' 필드에는 Git 실행 파일의 경로를 입력한다.
+``` 
+echo $JAVA_HOME
+/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.252.b09-2.el7_8.x86_64
+``` 
