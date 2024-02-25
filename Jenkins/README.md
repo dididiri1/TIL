@@ -77,7 +77,7 @@
 
 ## 9. Jenkins 환경설정
 - Dashboard > Jenkins 관리 > Tools
-
+  
 ### JDK 설정
 - Add JDK 버튼을 클릭 
 - 'Name' JDK의 이름을 입력하고 'JAVA_HOME' 필드에는 JDK의 경로를 입력한다.
