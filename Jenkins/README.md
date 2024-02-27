@@ -35,21 +35,23 @@
 
 ## 7. Jenkins 포트 변경 두가지 방법
 
-### EC2 방화벽 9090 포트 개방
+### EC2 방화벽 9090 포트 개방 [7/1]
 ![](https://github.com/dididiri1/TIL/blob/main/Jnekins/images/01_03.png?raw=true)
 
-### 1. Jenkins 설정 파일을 수정
+### 1. Jenkins 설정 파일을 수정 [7/2]
 - 파일 내에서 '--httpPort=9090' 변경한다.
 * `vi /etc/default/jenkins`
 
-### 2. Jenkins 설정 파일을 수정
+
+### 2. Jenkins 설정 파일을 수정 [7/3]
 - 파일 내에서 'Environment="JENKINS_PORT=9090' 변경한다.
 * `vi /lib/systemd/system/jenkins.service`
 
-### 설정 변경사항을 적용하기 위해 Jenkins 서비스를 재시작한다.
+
+### 설정 변경사항을 적용하기 위해 Jenkins 서비스를 재시작한다.[7/4]
 * `service jenkins restart`
 
-### Jenkins 상태 확인 & 포트 확인
+### Jenkins 상태 확인 & 포트 확인 [7/5]
 * `service jenkins status`
 
 ``` log
@@ -64,4 +66,30 @@
              └─115526 /usr/bin/java -Djava.awt.headless=true -jar /usr/share/java/jenkins.war --webroot=/var/cache/jenkins/war --httpPort=9090
 ``` 
 
-### 웹 브라우저에서 변경된 포트를 사용하여 Jenkins에 접속해 확인
+### 웹 브라우저에서 변경된 포트를 사용하여 Jenkins에 접속해 확인 [7/6]
+![](https://github.com/dididiri1/TIL/blob/main/Jnekins/images/01_05.png?raw=true)
+
+
+## 8. Plugins 설치
+- Dashboard > Jenkins 관리 > Plugins > Available plugins
+  - 1. deploy to container
+  - 2. Bitbucket
+
+## 9. Jenkins 환경설정
+- Dashboard > Jenkins 관리 > Tools
+  
+### JDK 설정
+- Add JDK 버튼을 클릭 
+- 'Name' JDK의 이름을 입력하고 'JAVA_HOME' 필드에는 JDK의 경로를 입력한다.
+``` 
+echo $JAVA_HOME
+/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.252.b09-2.el7_8.x86_64
+``` 
+
+### Git 설정
+- Add Git 버튼을 클릭
+- 'Name' Git의 이름을 입력하고 'Path to Git executable' 필드에는 Git 실행 파일의 경로를 입력한다.
+``` 
+echo $JAVA_HOME
+/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.252.b09-2.el7_8.x86_64
+``` 
