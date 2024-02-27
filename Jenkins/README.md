@@ -42,11 +42,9 @@
 - 파일 내에서 '--httpPort=9090' 변경한다.
 * `vi /etc/default/jenkins`
 
-
 ### 2. Jenkins 설정 파일을 수정
 - 파일 내에서 'Environment="JENKINS_PORT=9090' 변경한다.
 * `vi /lib/systemd/system/jenkins.service`
-
 
 ### 설정 변경사항을 적용하기 위해 Jenkins 서비스를 재시작한다.
 * `service jenkins restart`
