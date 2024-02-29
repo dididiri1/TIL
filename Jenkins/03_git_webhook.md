@@ -46,5 +46,8 @@
 ## 6. Execute shell에서 deploy.sh 실행하기
 - Build 섹션으로 이동하여 Add build step을 클릭하고, Execute shell을 선택
 - deploy.sh 쉘 스크립트 실행 명령어 추가
-![](https://github.com/dididiri1/TIL/blob/main/Jenkins/images/03_08.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Jenkins/images/03_10.png?raw=true)
+
+## 7. 배포 완료
+![](https://github.com/dididiri1/TIL/blob/main/Jenkins/images/03_11.png?raw=true)
 
