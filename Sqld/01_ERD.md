@@ -15,7 +15,7 @@
 ## 4. 식별자(주식별자)
 ![](https://github.com/dididiri1/TIL/blob/main/Sqld/images/01_04.png?raw=true)
 
-## 5. 속성(널 허용여부)
+## 5. 속성(널 허용여부) 
 ![](https://github.com/dididiri1/TIL/blob/main/Sqld/images/01_05.png?raw=true)
 
 ### Reference
