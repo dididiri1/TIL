@@ -118,7 +118,109 @@ WHERE SAL > (SELECT AVG(SAL)
 ### 2. UNION ALL 
 - 중복된 데이터도 전체 출력
 
+## 교집합 
+- 두 집합 사이에 INTERSECT 
+- - 두집합의 교집합(공통으로 있는 행) 출력
+
 ## 차집합 
 - 두 집합 사이에 MINUS 전달 
 - 두 집합의 차집합(한 쪽 집합에만 존재하는 행) 출력 
 - A-B와 B-A는 다르므로 집합의 순서 주의
+
+# 그룹 함수 
+## 그룹함수 
+- 숫자함수 중 여러값을 전달하여 하나의 요약값을 출력하는 다중행 함수 
+- 수학/통계 함수들(기술통계 함수) 
+- GROUP BY절에 의해 그룹별 연산 결과를 리턴 함 
+- 반드시 한 컬럼만 전달 - NULL은 무시하고 연산
+- 
+### COUNT 
+- 행의 수를 세는 함수 
+- 대상 컬럼은 * 또는 단 하나의 컬럼만 전달 가능(* 사용 시 모든 컬럼의 값이 널일 때만 COUNT 제외) 
+- **문자, 숫자, 날짜 컬럼 모두 전달 가능** 
+- 행의 수를 세는 경우 NOT NULL 컬럼을 찾아 세는 것이 좋음(PK 컬럼) 
+
+```
+SELECT COUNT(*),
+       COUNT(EMPNO)
+FROM EMP;
+```
+
+### SUM
+- 총 합 출력 
+- 숫자 컬럼만 전달 가능
+
+```
+SELECT SUM(*)
+FROM EMP;
+```
+
+### AVG 
+- 평균 출력 
+- 숫자 컬럼만 전달 가능 
+- **NULL을 제외한 대상의 평균을 리턴하므로 전체 대상 평균 연산 시 주의 **
+
+```
+SELECT AVG(*)
+FROM EMP;
+```
+
+### MIN / MAX 
+- 최대, 최소 출력 
+- **날짜,숫자,문자 모두 가능(오름차순 순서대로 최소, 최대 출력)**
+```
+SELECT MIN(SAL), MAX(SAL)
+FROM EMP;
+```
+
+### VARIANCE / STDDEV 
+- 평균과 표준편차
+- 표준편차는 분산의 루트값 
+```
+SELECT VARIANCE(SAL), STDDEV(SAL)
+FROM EMP;
+```
+
+### GROUP BY FUNCTION 
+- GROUP BY절에 사용하는 함수 
+- 여러 GROUP BY결과를 동시에 출력(합집합)하는 기능 
+- 그룹핑 할 그룹을 정의(전체 소계 등) 
+
+```
+SELECT DEPTNO, SUM(SAL)
+FROM EMP
+GROUP BY DEPTNO;
+```
+
+## 1. GROUPING SETS
+- **A별, B별 그룹 연산 결과 출력** 
+- 나열 순서 중요하지 X 
+- 기본 출력에 전체 총계는 출력되지 X 
+- NULL 혹은 () 사용하여 전체 총 합 출력 가능
+
+```
+SELECT DEPTNO, JOB, SUM(SAL)
+FROM EMP
+GROUP BY GROUPING SETS(DEPTNO, JOB;
+```
+>  GROUPING SETS에 나열한 대상에 대해 각 GROUP BY의 결과를 출력해 줌
+
+## 2. ROLLUP
+- **A별, (A,B)별, 전체 그룹 연산 결과 출력** 
+- 나열 대상의 순서가 중요함 
+- 기본적으로 전체 총 계가 출력됨
+```
+SELECT DEPTNO, JOB, SUM(SAL)
+FROM EMP
+GROUP BY ROLLUP(DEPTNO, JOB;
+```
+
+## 3. CUBE
+- **A별, B별, (A,B)별, 전체 그룹 연산 결과 출력됨** 
+- 그룹으로 묶을 대상의 나열 순서 중요하지 않음 
+- 기본적으로 전체 총 계가 출력
+```
+SELECT DEPTNO, JOB, SUM(SAL)
+FROM EMP
+GROUP BY CUBE(DEPTNO, JOB;
+```
