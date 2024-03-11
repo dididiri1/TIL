@@ -224,3 +224,153 @@ SELECT DEPTNO, JOB, SUM(SAL)
 FROM EMP
 GROUP BY CUBE(DEPTNO, JOB;
 ```
+
+# 윈도우 함수
+## WINDOW FUNCTION 
+- 서로 다른 행의 비교나 연산을 위해 만든 함수 
+- GROUP BY를 쓰지 않고 그룹 연산 가능 
+- LAG, LEAD, SUM, AVG, MIN, MAX, COUNT, RANK
+
+```
+SELECT 윈도우함수([대상]) OVER([PARTITION BY 칼럼]
+                             [ORDER BY 컬럼 ASC|DESC]
+                             [ROW|RANGE BETWEEN A AND B]);
+```
+### ** PARTITION BY 절 : 출력할 총 데이터 수 변화 없이 그룹연산 수행할 GROUP BY 컬럼
+
+### ** ORDER BY절 - RANK의 경우 필수(정렬 컬럼 및 정렬 순서에 따라 순위 변화) - SUM, AVG, MIN, MAX, COUNT 등은 누적값 출력 시 사용
+
+### ** ROWS|RANGE BETWEEN A AND B - 연산 범위 설정 - ORDER BY절 필수
+
+## 그룹 함수의 형태 
+- SUM, COUNT, AVG, MIN, MAX 등 
+- OVER절을 사용하여 윈도우 함수로 사용 가능 
+- 반드시 연산할 대상을 그룹함수의 입력값으로 전달 
+```
+SELECT SUM([대상]) OVER([PARTITION BY 칼럼]
+                             [ORDER BY 컬럼 ASC|DESC]
+                             [ROW|RANGE BETWEEN A AND B]);
+```
+
+## 1. ROWS, RANGE 차이
+- ROWS : 값이 같더라도 각 행씩 연산 
+- RANGE : 같은 값의 경우 하나의 RANGE로 묶어서 동시 연산(DEFAULT)
+
+## 2. BETWEEN A AND B
+- 시작점 정의 
+  - CURRENT ROW : 현재행부터 
+  - UNBOUNDED PRECEDING : 처음부터(DEFAULT) 
+  - N PRECEDING : N 이전부터
+- 마지막 시점 정의
+  - CURRENT ROW : 현재행까지(DEFAULT) 
+  - UNBOUNDED FOLLOWING : 마지막까지 
+  - N FOLLOWING : N 이후까지
+
+### ROWS 범위 설정 시 : 각 행 별로 연산 수행
+```
+SELECT R.*,
+       SUM(SAL) OVER(ORDER BY SAL
+                     ROWS BETWEEN UNBOUNDED PRECEDING
+                     AND CURRENT ROW) AS RESULT1
+FROM EMP;                     
+```
+
+### BETWEEN A AND B 수정 시
+```
+SELECT R.*,
+       SUM(SAL) OVER(ORDER BY SAL
+                     ROWS BETWEEN UNBOUNDED PRECEDING
+                     AND 1 FOLLOWING) AS RESULT1
+FROM EMP;                     
+```
+
+## 순위 관련 함수
+
+### 1. RANK
+- 전체 중/특정 그룹 중 값의 순위 확인 
+- ORDER BY절 필수 
+- 순위를 구할 대상을 ORDER BY절에 명시(여러 개 나열 가능) 
+- 그룹 내 순위 구할 시 PARTITION BY 절 사용
+
+### 문법
+```
+SELECT RANK() OVER([PARTITION BY 컬럼]
+                    ORDER BY 컬럼 ASC|DESC);                  
+```
+
+### 각 직원 이름, 부서번호, 급여, 부서별 급여 순위(큰순서대로)
+```
+SELECT ENAME, DEPTNO, SAL
+       RANK() OVER(PARTITION BY DEPTNO
+                    ORDER BY SAL ADESC) AS RANK1
+FROM EMP:                                
+```
+
+### 2. DENSE_RANK 
+- 누적순위 
+- 값이 같을 때 동일한 순위 부여 후 다음 순위가 바로 이어지는 순위 부여 방식
+ex) 1 등이 5명이더라도 그 다음 순위가 2등
+
+### 3. ROW_NUMBER 
+- 연속된 행 번호 
+- 동일한 순위를 인정하지 않고 단순히 순서대로 나열한대로의 순서 값 리턴
+
+### LAG, LEAD  
+- 행 순서대로 각각 이전 값(LAG), 이후 값(LEAD) 가져오기 
+- ORDER BY절 필수 
+
+### 예제) EMP에서 바로 이전 입사자와 급여 비교 
+```
+SELECT ENAME, DEPTNO, SAL
+       LAG(SAL) OVER(PARTITION BY DEPTNO) AS 바로직전상사급여
+FROM EMP:                                
+```
+
+### FIRST_VALUE, LAST_VALUE 
+- 정렬 순서대로 정해진 **범위에서의 처음 값, 마지막 값 출력** 
+- 순서와 범위 정의에 따라 최솟값과 최댓값 리턴 가능 
+- PARTITION BY, ORDER BY절 생략 가능
+
+### NTILE 
+- 행을 특정 컬럼 순서에 따라 정해진 수의 그룹으로 나누기 위함 함수 
+- 그룹 번호가 리턴됨 - ORDER BY 필수 
+- PARTITION BY를 사용하여 특정 그룹을 또 원하는 수 만큼 그룹 분리 가능
+
+### 예제) NTILE을 사용한 그룹 분리
+```
+SELECT ENAME, SAL, DEPTNO
+       NTILE(2) OVER (ORDER BY SAL) AS GROUP_NUMBER
+FROM EMP:                         
+```
+
+## 비율관련 함수
+### 1. RATIO_TO_REPORT 
+- 각 값의 비율 리턴(전체 비율 또는 특정 그룹 내 비율 가능) 
+- ORDER BY 사용 불가
+
+### 문법
+```
+SELECT RATIO_TO_REPORT(대상) OVER([PARTITION BY 컬럼])                      
+```
+
+### 2. CUME_DIST : 누적비율 
+- 각 값의 누적 비율 리턴(전체 비율 또는 특정 그룹 내 비율 가능) 
+- ORDER BY를 사용하여 누적비율을 구하는 순서 정할 수 있음 
+- ORDER BY 필수 - 특정 값의 비율이 아닌 행의 비율
+- 특정 값의 비율이 아닌 행의 비율을 의미함
+
+### 문법
+```
+SELECT CUME_DIST() OVER([PARTITION BY 컬럼]
+                                  ORDER BY 컬럼 ASC|DESC)                      
+```
+
+### 3. PERCENT_RANK 
+- PERCENTILE(분위수) 출력 
+- 전체 COUNT중 상대적 위치 출력(0~1 범위 내) 
+- ORDERY BY 필수 
+- ### 문법
+```
+SELECT PERCENT_RANK() OVER([PARTITION BY 컬럼]
+                                  ORDER BY 컬럼 ASC|DESC)                      
+```
