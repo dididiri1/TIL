@@ -374,3 +374,65 @@ SELECT CUME_DIST() OVER([PARTITION BY 컬럼]
 SELECT PERCENT_RANK() OVER([PARTITION BY 컬럼]
                                   ORDER BY 컬럼 ASC|DESC)                      
 ```
+
+# TOP N QUERY
+
+## TOP N QUERY 
+- 페이징 처리를 효과적으로 수행하기 위해 사용 
+- 전체 결과에서 특정 N개 추출  
+  예) 성적 상위자 3명
+
+##  TOP-N 행 추출 방법
+#### 1. ROWNUM
+#### 2. RANK
+#### 3. FETCH
+
+###  ROWNUM
+- 출력된 데이터 기준으로 행 번호 부여 
+- 절대적인 행 번호가 아닌 가상의 번호이므로 특정 행을 지정할 수 없음(=연산 붙가) 
+- 첫번재 행이 증가한 이후 할당되므로 '>' 연산 사용 불가(0은
+
+### 예제) ROWNUM을 출력 형태
+```
+SELECT ROWNUM, EMP.*
+FROM EMP 
+WHERE SAL >= 1000;                    
+```
+
+### ROWNUM 잘못된 사용
+```
+SELECT EMPNO, ENAME, DEPTNO, SAL
+FROM EMP 
+WHERE ROWNUM > 5;                        
+```
+
+### 예제) ROWNUM 올바른 사용
+```
+SELECT EMPNO, ENAME, DEPTNO, SAL
+FROM EMP 
+WHERE ROWNUM <= 5;                    
+```
+> EQAUL 비교 시 작다(<)와 함께 사용하면 1부터 순서대로 뽑을 수 있기 때문에 출력 가능함  
+> 정렬 순서에 따라 출력되는 ROWNUM이 달라짐
+
+### FETCH절 
+- 출력될 행의 수를 제한하는 절 
+- ORACLE 12C 이상부터 제공(이전버전에는 ROWNUM 주로 사용) 
+- SQL-Server 사용 가능 - ORDER BY절 뒤에 사용(내부 파싱 순서도 ORDER BY 뒤)
+
+### 문법
+```
+SELECT *
+FROM EMP 
+WHERE 
+GROUP BY 
+HAVING
+ORDER BY
+OFFSET N {ROW|ORWS}
+FETCH {FIRST|NEXT} N {ROW|ORWS} ONLY               
+```
+
+- OFFSET : 건너뛸 행의 수 ex) 성적 높은순 1등 제외, 나머지 3명 
+- N : 출력할 행의 수 - FETCH : 출력할 행의 수를 전달하는 구문 - FIRST : OFFSET을 쓰지 않았을 때 처음부터 N 행 출력 명령 
+- NEXT : OFFSET을 사용했을 경우 제외한 행 다음부터 N 행 출력 명령 
+- ROW | ROWS : 행의 수에 따라 하나일 경우 단수, 여러값이면 복수형(특별히 구분하지 않아도 됨) 
