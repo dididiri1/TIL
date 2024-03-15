@@ -431,8 +431,128 @@ ORDER BY
 OFFSET N {ROW|ORWS}
 FETCH {FIRST|NEXT} N {ROW|ORWS} ONLY               
 ```
-
 - OFFSET : 건너뛸 행의 수 ex) 성적 높은순 1등 제외, 나머지 3명 
 - N : 출력할 행의 수 - FETCH : 출력할 행의 수를 전달하는 구문 - FIRST : OFFSET을 쓰지 않았을 때 처음부터 N 행 출력 명령 
 - NEXT : OFFSET을 사용했을 경우 제외한 행 다음부터 N 행 출력 명령 
-- ROW | ROWS : 행의 수에 따라 하나일 경우 단수, 여러값이면 복수형(특별히 구분하지 않아도 됨) 
+- ROW | ROWS : 행의 수에 따라 하나일 경우 단수, 여러값이면 복수형(특별히 구분하지 않아도 됨)
+
+## 계층형 질의
+
+### 계층형 질의 
+- 하나의 테이블 내 각 행끼리 관계를 가질 때, 연결고리를 통해 행과 행 사이의 계층(depth)을 표현하는 기법
+- **PRIOR의 위치에 따라 연결하는 데이터가 달라짐**
+
+### 문법
+```
+SELECT *
+FROM EMP 
+START WITH 시작조건          -- 시작점을 지정하는 조건 전달
+CONNECT BY PRIOR 연결조건;   -- 시작점 기준으로 하위 계급을 찾아가는 조건           
+```
+> ** START WITH : 데이터를 출력할 시작 지정하는 조건  
+> ** CONNECT BY PRIOR : 행을 이어나갈 조건 
+
+### 예시) DEPT2 테이블에 대해 각 부서의 레벨을 출력(최상위 부서가 1 레벨)
+```
+SELECT D.* LEVEL
+FROM DEPT D
+START WITH PDEPT IS NULL
+CONNECT BY PRIOR DCODE = PDEPT;          
+```
+
+### 예시) 연결조건에 추가 조건이 붙는 경우
+```
+SELECT D.* LEVEL
+FROM DEPT D
+START WITH PDEPT IS NULL
+CONNECT BY PRIOR DCODE = PDEPT AND AREA = '서울지사';          
+```
+
+### 계층형 질의 가상 컬럼
+#### 1) LEVEL : 각 DEPTH를 표현(시작점부터 1)
+#### 2) CONNECT_BY_ISLEAF : LEAF NODE(최하위노드) 여부(참:1, 거짓:0)
+
+### 계층형 질의 가상 함수
+#### 1) CONNECT_BY_ROOT 컬럼명 : 루트노드의 해당 컬럼명의 값이 출력
+#### 2) SYS_CONNECT_BY_PATH(컬럼, 구분자) : 이어지는 경로 출력
+#### 3) ORDER SIBLINGS BY 컬럼 : 같은 LEVEL일 경우 정렬 수행
+
+### 예제) 계층형 가상컬럼, 함수 결과
+```
+SELECT D.* LEVEL,
+       LPAD('',(LEVEL-1)*4,'')||DNAME AS 학과명,
+       CONNECT_BY_ROOT DNAME,
+       SYS_CONNECT_BY_PATH(DNAME, '_')
+FROM DEPT D
+START WITH PDEPT IS NULL
+CONNECT BY PRIOR DCODE = PDEPT
+ORDER SIBLINGS BY DNAME;    
+```
+
+## PIVOT 과 UNPIVOT
+#### 1) LONG DATA(Tidy data) 
+- 하나의 속성이 하나의 컬럼으로 정의되어 값들이 여러 행으로 쌓이는 구조 
+- RDBMS의 테이블 설계 방식 
+- 다른 테이블과의 조인 연산이 가능한 구조
+#### 2) WIDE DATA(Cross table)
+   ** WIDE DATA - 행과 컬럼에 유의미한 정보 전달을 목적으로 작성하는 교차표 
+- 하나의 속성값이 여러 컬럼으로 분리되어 표현 
+- RDBMS에서 WIDE 형식으로 테이블 설계시 값이 추가될 때 마다 컬럼이 추가돼야 하므로 비효울적! 
+- 다른 테이블과의 조인 연산이 불가함 
+- 주로 데이터를 요약할 목적으로 사용 
+
+## 정규 표현식
+### 정규 표현식
+- 문자열의 공통된 규칙을 보다 일반화 하여 표현하는 방법 
+- 정규 표현식 사용 가능한 문자함수 제공(regexp_replace, regexp_substr, regexp_instr, ....)
+  ex) 숫자를 포함하는, 숫자로 시작하는 4자리, 두번째 자리가 A인 5글자 
+
+### REGEXP_REPLACE - 정규식 표현을 사용한 문자열 치환 가능
+** 문법
+(대상, 찾을문자열, [바꿀문자열], [검색위치], [발견횟수], [옵션])
+#### 1. 특징 
+- 바꿀문자열 생략 시 문자열 삭제 
+- 검색위치 생략 시 1 
+- 발견횟수 생략 시 0(모든)
+#### 2. 옵션 
+- c : 대소를 구분하여 검색 
+- i : 대소를 구분하지 않고 검색 
+- m : 패턴을 다중라인으로 선언 가능
+
+### 예제) ID에서 숫자 삭제
+```
+SELECT ID,
+       REGEXP_REPLACE(ID, '\d',''),
+       REGEXP_REPLACE(ID, '[[:digit:]]','')
+FROM EMP       
+```
+
+### 예제) ID에서 특수기호 삭제
+```
+SELECT ID,
+       REGEXP_REPLACE(ID, '\w',''),
+       REGEXP_REPLACE(ID, '\w|_',''),
+       REGEXP_REPLACE(ID, '[[:punct:]]',''),
+FROM EMP       
+```
+
+### REGEXP_SUBSTR 
+- 정규식 표현식을 사용한 문자열 추출 
+- 옵션은 REGEXP_SUBSTR과
+#### ** 문법
+#### REGEXP_SUBSTR(대상, 패턴, [검색위치], [발견횟수], [옵션], [추출그룹])
+#### ** 특징  
+- 검색위치 생략 시 1 
+- 발견횟수 생략 시 1 
+- 추출그룹은 서브패턴을 추출 시 그 중 추출할 서브패턴 번호  
+  예제) 전화번호를 분리하여 지역번호 추출 
+```
+SELECT TEL,
+       REGEXP_SUBSTR(TEL,                    -- 원본
+                     '(\d+)\)(\d+)-(\d+)',   -- 패턴(서브패턴과함께표현)
+                     1,                      -- 시작위치
+                     1,                      -- 발견횟수
+                     null,                   -- 옵션
+                     1) AS 지역번호           -- 추출할 서브패턴(그룹)번호
+FROM EMP       
+```
