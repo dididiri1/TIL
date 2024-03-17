@@ -40,6 +40,27 @@
 - "s3:PutObject": 객체(파일) 쓰기(업로드) 권한
 - "s3:ListBucket": 버킷 내 객체 목록 조회 권한
 
+``` log
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::{bucket}",
+                "arn:aws:s3:::{bucket}/*"
+            ]
+        }
+    ]
+}
+``` 
+
 ## 3. 이미지 확인
 ![](https://github.com/dididiri1/TIL/blob/main/AWS/S3/images/08.png?raw=true)
 ![](https://github.com/dididiri1/TIL/blob/main/AWS/S3/images/09.png?raw=true)
