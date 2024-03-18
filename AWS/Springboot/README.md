@@ -16,7 +16,10 @@
 ![](https://github.com/dididiri1/TIL/blob/main/AWS/Springboot/images/04.png?raw=true)
 
 ## 엑세스 키 발급 [1/2]
-- AWS Console > IAM > 엑세스 관리자 > 사용자 > 생성한 사용자 이름 클릭 > 엑세스키 만들기
+- AWS Console > IAM > 엑세스 관리자 > 사용자 > 생성한 사용자 이름 클릭 > 엑세스키 만들기 클릭
+![](https://github.com/dididiri1/TIL/blob/main/AWS/Springboot/images/06_1.png?raw=true)
+
+
 ![](https://github.com/dididiri1/TIL/blob/main/AWS/Springboot/images/06.png?raw=true)
 
 ## Spring boot 설정

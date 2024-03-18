@@ -137,6 +137,9 @@
 * [섹션 7. 나머지 기능들](https://github.com/dididiri1/data-jpa/tree/main/study/01_spring_data_jpa.md)
 
 
+### Spring Batch
+* [스프링 배치 시작](https://github.com/dididiri1/TIL/blob/main/Batch/03_spring_batch_start.md)
+
 ### TDD
 
 * [섹션 1. 테스트는 왜 필요할까?](https://github.com/dididiri1/TIL/blob/main/TDD/01_test.md)
@@ -230,6 +233,23 @@
 * [AWS - EC2 인스턴스에 HTTPS 적용하기](https://github.com/dididiri1/TIL/blob/main/AWS/Https/README.md)
 
 * [AWS - S3 CLI](https://github.com/dididiri1/TIL/blob/main/AWS/S3/README2.md)
+
+
+### Jenkins
+* [Jenkins - 설치](https://github.com/dididiri1/TIL/blob/main/Jenkins/01_설치.md)
+
+* [Jenkins - 환경설정](https://github.com/dididiri1/TIL/blob/main/Jenkins/02_환경설정.md)
+
+* [Jenkins - GitHub Webhook 연동](https://github.com/dididiri1/TIL/blob/main/Jenkins/03_git_webhook.md)
+
+### Ubuntu
+* [Ubuntu - 도커 설치](https://github.com/dididiri1/TIL/blob/main/Ubuntu/Docker.md)
+
+* [Ubuntu - 타임존 설정](https://github.com/dididiri1/TIL/blob/main/Ubuntu/Timezon.md)
+
+* [Ubuntu - Java 11 설치](https://github.com/dididiri1/TIL/blob/main/Ubuntu/Java.md)
+
+* [Ubuntu - Nginx 설치](https://github.com/dididiri1/TIL/blob/main/Ubuntu/Nginx.md)
 
 
 ### Tools
