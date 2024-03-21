@@ -14,11 +14,11 @@
 
 #### 2. 조인 결과에 따라
 1) INNER JOIN : JOIN 조건에 성립하는 데이터만 출력하는 경우
-2) OUTER JOIN: JOIN 조건에 성립하지 않는 데이터도 출력하는 경우  
+2) OUTER JOIN: JOIN 조건에 성립하지 않는 데이터도 출력하는 경우    
    (LEFT/RIGHT/FULL OUTER JOIN으로 나뉨)
-3. NATURAL JOIN : 조인조건 생략 시 두 테이블에 같은 이름으로 자연 연결되는 조인
-4. CROSS JOIN : 조인조건 생략 시 두 테이블의 발생 가능한 모든 행을 출력하는 조인
-5. SELF JOIN: 하나의 테이블을 두 번 이상 참조하여 연결하는 조인
+3) NATURAL JOIN : 조인조건 생략 시 두 테이블에 같은 이름으로 자연 연결되는 조인
+4) CROSS JOIN : 조인조건 생략 시 두 테이블의 발생 가능한 모든 행을 출력하는 조인 
+5) SELF JOIN: 하나의 테이블을 두 번 이상 참조하여 연결하는 조인
 
 ## 표준 조인 
 ### 표준조인 
@@ -30,8 +30,8 @@
 
 ### ON절  
 - 조인할 양 컬럼의 컬럼명이 서로 다르더라도 사용 가능 
-- - ON 조건의 괄호는 옵션(생략가능) 
-- - 컬럼명이 같을 경우 테이블 이름이나 별칭을 사용하여 명확하게 지정(테이블 출처 명확히) 
+- ON 조건의 괄호는 옵션(생략가능) 
+- 컬럼명이 같을 경우 테이블 이름이나 별칭을 사용하여 명확하게 지정(테이블 출처 명확히) 
 - ON 조건절에서 조인조건 명시, WHERE절에서는 일반조건 명시
 
 ### 예시
@@ -79,15 +79,15 @@ FROM EMP CROSS JOIN DEPT;
 - 두 테이블 중 한쪽에 NULL.을 가지면 EQUI JOIN시 출력되지 않음 -> 이를 출력 시 OUTER JOIN사용 
 - 테이블 기준 방향에 따라 LEFT OUTER JOIN, RIGHT OUTER JOIN, FULL OUTER JOIN으로 구분
 ### OUTER JOIN 종류
-1) LEFT OUTER JOIN
-- FROM절에 나열된 왼쪽 테이블에 해당하는 데이터를 읽은 후, 우측 테이블에서 JOIN 대상 읽어옴 
-- 즉, 왼쪽 테이블이 기준이 되어 오른쪽 데이터를 채우는 방식 
-- 우측 값에서 같은 같이 없는 경우 NULL 값으로 출력
-2) RIGHT OUTER JOIN  
-- LEFT OUTER JOIN의 반대 
-- 즉, 오른쪽 테이블 기준으로 왼쪽 테이블 데이터를 채우는 방식
-- FROM절에 테이블 순서를 변경하면 LEFT OUTER JOIN으로 수행 가능
-3) FULL OUTER JOIN  
+#### 1) LEFT OUTER JOIN
+* FROM절에 나열된 왼쪽 테이블에 해당하는 데이터를 읽은 후, 우측 테이블에서 JOIN 대상 읽어옴 
+* 즉, 왼쪽 테이블이 기준이 되어 오른쪽 데이터를 채우는 방식 
+* 우측 값에서 같은 같이 없는 경우 NULL 값으로 출력
+#### 2) RIGHT OUTER JOIN  
+* LEFT OUTER JOIN의 반대 
+* 즉, 오른쪽 테이블 기준으로 왼쪽 테이블 데이터를 채우는 방식
+* FROM절에 테이블 순서를 변경하면 LEFT OUTER JOIN으로 수행 가능
+#### 3) FULL OUTER JOIN  
 - 두 테이블 전체 기준으로 결과를 생성하여 중복 데이터는 삭제 후 리턴 
 - LEFT OUTER JOIN 결과와 RIGHT OUTER JOIN 결과의 UNION 연산 리턴과 동일함 
 - ORACLE 표준에는 없음 
@@ -107,3 +107,6 @@ FROM STUDENT S LEFT JOIN PROFESSOR P
 ON S.PRFONO = P.PRFONO
 WHERE S.GRADE IN (1,4);
 ```
+
+### Reference
+- [SQLD - 홍쌤의 데이터 랩](https://www.youtube.com/@hongdatalab)

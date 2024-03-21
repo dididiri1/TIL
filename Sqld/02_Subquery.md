@@ -556,3 +556,6 @@ SELECT TEL,
                      1) AS 지역번호           -- 추출할 서브패턴(그룹)번호
 FROM EMP       
 ```
+
+### Reference
+- [SQLD - 홍쌤의 데이터 랩](https://www.youtube.com/@hongdatalab)

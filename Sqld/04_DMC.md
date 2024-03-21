@@ -126,7 +126,143 @@ ALTER TABLE EMP ADD BIRTHDAY DATE;
 ALTER TABLE 테이블명 MODIFY (칼럼명 DEFAULT 값);
 ```
 
-#### 예제) 컬럼 추가
+#### 예제) 컬럼 변경
 ```
 ALTER TABLE EMP MODIFY (COL_A NUMBER(10), COL_B VARCHAR(6));
 ```
+
+#### 3. 컬럼 이름 변경 - 항상 가능 
+- **동시 여러 컬럼 이름 변경 불가(괄호 전달 불가)**
+- ALTER ... RENAME 명령어로 처리
+#### 문법 
+```
+ALTER TABLE 테이블명 RENAME COLUMN 기존칼럼명 TO 새 컬럼명;
+```
+
+#### 예제) 컬럼 이름 변경
+```
+ALTER TABLE EMP RENAME COLUMN ENAME TO NAME;
+```
+
+4. 컬럼 삭제 
+- **데이터 존재 여부와 상관없이 언제나 가능** 
+- RECYCLEBIN에 남지 X(FLASHBACK으로 복구 불가) 
+- **동시 삭제 불가**
+
+#### 예제) COL_A 컬럼의 삭제 
+```
+ALTER TABLE TEST DROP COLUMN COL_A;           -- 가능
+ALTER TABLE TEST DROP COLUMN COL_A, COL_B;    -- 에러
+```
+
+### DROP 
+- 객체(테이블, 인덱스 등) 삭제
+- DROP 후에는 조회 불가
+
+#### 문법
+```
+DROP TABLE 테이블명 [PURGE];
+```
+> PURGE로 테이블 삭제시 RECUCLEBIN 에서 조회 불가
+
+### TRUNCATE 
+- 구조 남기고 데이터만 즉시 삭제, 즉시 반영(AUTO COMMIT) 
+- RECYCLEBIN에 남지 않음
+#### 문법
+```
+TRUNCATE TABLE 테이블명;
+```
+
+### DELETE / DROP / TRUNCATE 차이 
+- DELETE : 데이터 일부 또는 전체 삭제, 롤백 가능 
+- TRUNCATE : 데이터 전체 삭제만 가능(일부 삭제 불가), 즉시 반영(롤백 불가) 
+- DROP : 데이터와 구조를 동시 삭제, 즉시 반영(롤백 불가)
+
+## DCL
+### DCL(Data Contol Language) 
+- 데이터 제어어로 객체에 대한 권한을 부여(GRANT)하거나 회수(REVOKE)하는 기능 
+- 테이블 소유자는 타계정에 테이블 조회 및 수정 권한 부여 및 회수 가능
+
+### 권한 
+- 일반적으로 본인(접속한 계정) 소유가 아닌 테이블은 원칙적으로 조회 불가(권한 통제) 
+- 업무적으로 필요시 테이블 소유자가 아닌 계정에 테이블 조회, 수정 권한 부여 가능
+
+### 권한 종류
+#### 1) 오브젝트권한 
+- 테이블에 대한 권한 제어(SELECT, INSERT, UPDATE, DELETE, MERGE 권한) 
+- 테이블 소유자는 타계정에 소유 테이블에 대한 조회 및 수정 권한 부여 및 회수 가능
+#### 2) 시스템권한  
+- 시스템 작업(테이블생성 등)등을 제어(테이블 생성 권한, 인덱스 삭제 권한)
+- 관리자 권한만 권한 부여 및 회수 가
+
+### GRANT 
+- 권한 부여 시 반드시 테이블 소유자나 관리자계정(SYS, SYSTEM)으로 접속하여 권한을 부여하여야 함 
+- 동시에 여러 유저에 대한 권한 부여 가능 
+- 동시 여러 권한 부여 가능 -  동시 여러 객체 권한 부여 불가
+#### 문법
+```
+GRANT 권한 ON 테이블명 TO 유저;
+```
+
+#### 예제) 오브젝트 권한 부여(PROFESSOR 소유자 실행)
+```
+GRANT SELECT ON PROFESSOR TO HR;                   -- 가능
+GRANT SELECT ON PROFESSOR TO HR, BI;               -- 가능
+GRANT SELECT, UPDATE, INSERT ON PROFESSOR TO HR;   -- 가능
+GRANT SELECT ON PROFESSOR, DEPT TO HR;             -- 에러
+```
+
+#### 예제) 시스템 권한 부여(관리자 권한으로 실행) 
+```
+GRANT CREATE ON TABLE TO HR;                   -- 가능
+GRANT CREATE ON TABLE TO HR, BI;               -- 가능
+GRANT CREATE ON TABLE, DROP TABLE TO HR;       -- 에러
+```
+
+### REVOKE 
+- **동시 여러 권한 회수 가능**
+- 이미 회수된 권한 재회수 불가 
+- **동시 여러 유저로부터의 권한 회수 가능**
+#### 문법
+```
+REVOKE 권한 ON 테이블명 FROM 유저;
+```
+
+#### 예제) 오브젝트 권한 부여(PROFESSOR 소유자 실행)
+```
+REVOKE SELECT ON PROFESSOR FROM HR, BI;
+REVOKE SELECT, UPDATE, INSERT ON PROFESSOR FROM HR;           
+```
+
+### 롤(ROLE) 
+- 권한의 묶음(생성 가능한 객체)
+- SYSTEM 계정에서 ROLE 생성 가능 
+#### 문법
+```
+CREATE ROLE 롤이름;
+```
+#### 예제
+```
+CREATE ROLE ROLE_SEL;                      -- 생성
+
+GRANT SELECT ON EMP TO ROLE_SEL;           -- 롤에 권한 담기
+
+GRANT ROLE_SEL TO HR                       -- 롤 부여
+
+REVOKE SELECT ON DEPARTMENT FORM ROLE_SEL; -- 롤에서 권한 빼기
+```
+
+### 권한부여 옵션(중간관리자의 권한)
+#### 1. WITH GRANT OPTION
+- WITH GRANT OPTION으로 받은 **오브젝트 권한을 다른 사용자에게 부여할 수 있음** 
+- 중간관리자(WITH GRANT OPTION으로 권한을 부여받은 자)가 부여한 권한은 **중간관리자만 회수 가능** 
+- **중간관리자에게 부여된 권한 회수 시 제 3자에게 부여된 권한도 함께 회수됨**
+
+#### 2. WITH ADMIN OPTION
+- WITH ADMIN OPTION을 통해 부여 받은 **시스템 권한/롤 권한을 다른 사용자에게 부여할 수 있음** 
+- 중간관리자를 거치지 않고 **직접 회수 가능** 
+- **중간관리자 권한 회수시 제 3자에게 부여된 권한도 함께 회수X(남아있음)**
+
+
+### Reference
+- [SQLD - 홍쌤의 데이터 랩](https://www.youtube.com/@hongdatalab)

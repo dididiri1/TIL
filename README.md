@@ -218,6 +218,14 @@
 
 * [Ubuntu - Nginx 설치](https://github.com/dididiri1/TIL/blob/main/Ubuntu/Nginx.md)
 
+### Sqld
+* [ERD](https://github.com/dididiri1/TIL/blob/main/Sqld/01_ERD.md)
+
+* [서브쿼리](https://github.com/dididiri1/TIL/blob/main/Sqld/02_Subquery.md)
+
+* [Join](https://github.com/dididiri1/TIL/blob/main/Sqld/03_Join.md)
+
+* [DMC](https://github.com/dididiri1/TIL/blob/main/Sqld/04_DMC.md)
 
 ### Tools
 
