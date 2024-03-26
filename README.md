@@ -185,6 +185,9 @@
 
 * [Grafana 설치하기](https://github.com/dididiri1/TIL/blob/main/Redis/07_grafana.md)
 
+### Algorithm
+* [빅오(Big-O)표기법](https://github.com/dididiri1/TIL/blob/main/Algorithm/README.md)
+
 ### Git
 * [Git Commit Message Convention](https://github.com/dididiri1/TIL/blob/main/Git/01_git_convention.md)
 
