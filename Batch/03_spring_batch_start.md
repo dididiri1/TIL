@@ -146,16 +146,6 @@ public class HelloJobConfiguration {
  
 > 참고: 운영에서는 ALWAYS 위험하고 그래서 NEVER로 하고 수동으로 메타 테이블 스키마를 생성하는 것을 권장함.
 
-- Job 관련 테이블
-  - BATCH_JOB_INSTANCE
-    - Job 이 실행될 떄 JobInstance 정보가 저장되며 job_name과 job_key를 키로 하여 하나의 데이터가 저장
-    - 동일한 job_name 과 job_key 로 중복 저장될 수 없다.
-    
-  - BATCH_JOB_EXECUTION
-    - job 의 실행정보가 저장되며 Job 생성, 시작, 종료 시간, 실행상태, 메세지 등을 관리
-  - BATCH_JOB_EXECUTION_PARAMS
-    - Job과 함께 실행되는 JobParameter 정보를 저장
-
 ### Docker & Mysql 설치
 
 #### 1. Mysql 이미지 다운
@@ -340,3 +330,128 @@ spring:
 
 #### 3. intellij active profiles 변경(우선순위 높음 yml보다)
 ![](https://github.com/dididiri1/TIL/blob/main/Batch/images/03_05.png?raw=true)
+
+## DB 스키마 생성 및 이해 (2)
+
+- Job 관련 테이블
+    - BATCH_JOB_INSTANCE
+        - Job 이 실행될 떄 JobInstance 정보가 저장되며 job_name과 job_key를 키로 하여 하나의 데이터가 저장
+        - 동일한 job_name 과 job_key 로 중복 저장될 수 없다.
+
+    - BATCH_JOB_EXECUTION
+        - job 의 실행정보가 저장되며 Job 생성, 시작, 종료 시간, 실행상태, 메세지 등을 관리
+    - BATCH_JOB_EXECUTION_PARAMS
+        - Job과 함께 실행되는 JobParameter 정보를 저장
+    - BATCH_JOB_EXECUTION_CONTEXT
+        - Job 의 실행동안 여러가지 상태정보, 공유 데이터를 직렬화 (Json 형식) 해서 저장
+        - Step 간 서로 공유 가능함
+
+- Step 관련 테이블
+    - BATCH_STEP_EXECUTION
+        - Step 의 실행정보가 저장되며 생성, 시작, 종료 시간, 실행상태, 메세지 등을 관리
+    - BATCH_STEP_EXECUTION
+        - Step 의 실행동안 여러가지 상태정보, 공유 데이터를 직렬화 (Json 형식) 해서 저장
+        - Step 별로 저장되면 Step 간 서로 공유할 수 없음
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/03_04.png?raw=true)
+
+### BATCH_JOB_INSTANCE
+```
+CREATE TABLE BATCH_JOB_INSTANCE  (
+	JOB_INSTANCE_ID BIGINT  NOT NULL PRIMARY KEY ,
+	VERSION BIGINT ,
+	JOB_NAME VARCHAR(100) NOT NULL,
+	JOB_KEY VARCHAR(32) NOT NULL,
+	
+	constraint JOB_INST_UN unique (JOB_NAME, JOB_KEY)
+);
+```
+| 컬럼        | 설명                                    |
+|:----------|:--------------------------------------|
+| JOB_INSTANCE_ID | 고유하게 식별할 수 있는 키                       |
+| VERSION  | 업데이트 될 때 마다 1씩 증가                     |
+| JOB_NAME  | Job 을 구성할 때 부여하는 Job의 이름              |
+| JOB_KEY  | job_name과 jobParameter 를 합쳐 해싱한 값을 저장 |
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/03_06.png?raw=true)
+
+### BATCH_JOB_EXECUTION
+```
+CREATE TABLE BATCH_JOB_EXECUTION  (
+	JOB_EXECUTION_ID BIGINT  NOT NULL PRIMARY KEY ,
+	VERSION BIGINT  ,
+	JOB_INSTANCE_ID BIGINT NOT NULL,
+	CREATE_TIME DATETIME(6) NOT NULL,
+	START_TIME DATETIME(6) DEFAULT NULL ,
+	END_TIME DATETIME(6) DEFAULT NULL ,
+	STATUS VARCHAR(10) ,
+	EXIT_CODE VARCHAR(2500) ,
+	EXIT_MESSAGE VARCHAR(2500) ,
+	LAST_UPDATED DATETIME(6),
+	JOB_CONFIGURATION_LOCATION VARCHAR(2500) NULL,
+	
+	constraint JOB_INST_EXEC_FK foreign key (JOB_INSTANCE_ID)
+	references BATCH_JOB_INSTANCE(JOB_INSTANCE_ID)
+);
+```
+| 컬럼        | 설명                                                                               |
+|:----------|:---------------------------------------------------------------------------------|
+| JOB_EXECUTION_ID | JobExection 을 고유하게 식별할 수 있는 기본 키, JOB_INSTANCE 와 일대 다 관계                         |
+| VERSION  | 업데이트 될 때 마다 1씩 증가                                                                |
+| JOB_INSTANCE_ID  | JON_INSTANCE 의 키 저장                                                              |
+| CREATE_TIME  | 실행(Exection)이 생성된 시점을 TimeStamp 형식으로 기록                                          |
+| START_TIME  | 실행(Exection)이 시작된 시점을 TimeStamp 형식으로 기록                                          |
+| END_TIME  | 실행이 종료된 시점을 TimeStamp으로 기록하며 Job 실행 도중 오류가 발생해서 Job 이 **중단된 경우 값이 저장되지 않을 수 있음** |
+| STATUS  | 실행 상태(BatchStatus)를 저장 (COMPLETED, FAILED, STOPPED ...)                          |
+| EXIT_CODE  | 실행 종료코드(ExitStatus)를 저장 (COMPLETED, FAILED ...)                                  |
+| EXIT_MESSAGE  | Status가 **실패일 경우 실패 원인 등의 내용**을 저장                                               |
+| LAST_UPDATED  | 마지막 실행(Exection) 시점을 TimeStamp 형식으로 기록                                           |
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/03_06.png?raw=true)
+
+### BATCH_JOB_EXECUTION_PARAMS
+```
+CREATE TABLE BATCH_JOB_EXECUTION_PARAMS  (
+	JOB_EXECUTION_ID BIGINT NOT NULL,
+	TYPE_CD VARCHAR(6) NOT NULL,
+	KEY_NAME VARCHAR(100) NOT NULL,
+	STRING_VAL VARCHAR(250),
+	DATE_VAL DATETIME(6) DEFAULT NULL,
+	LONG_VAL BIGINT,
+	DOUBLE_VAL DOUBLE PRECISION,
+	IDENTIFYING CHAR(1) NOT NULL,
+	
+	constraint JOB_EXEC_PARAMS_FK foreign key (JOB_EXECUTION_ID)
+	references BATCH_JOB_EXECUTION(JOB_EXECUTION_ID)
+) ENGINE=InnoDB;
+
+```
+| 컬럼        | 설명                                        |
+|:----------|:------------------------------------------|
+| JOB_EXECUTION_ID | JobExecution 식별키, JOB_EXECUTION 과는 일대다 관계 |
+| TYPE_CD  | STRING, LONG, DATE, DOUBLE 타입 정보          |
+| KEY_NAME  | 파라미터 키 값                                  |
+| STRING_VAL  | 파라미터 문자 값                                 |
+| DATE_VAL  | 파라미터 날짜 값                                 |
+| LONG_VAL  | 파라미터 LONG 값                               |
+| DOUBLE_VAL  | 파라미터 DOUBLE 값                             |
+| IDENTIFYING  | 식별여부 (TRUE, FALSE)                        |
+
+### BATCH_JOB_EXECUTION_CONTEXT
+```
+CREATE TABLE BATCH_JOB_EXECUTION_CONTEXT  (
+	JOB_EXECUTION_ID BIGINT NOT NULL PRIMARY KEY,
+	SHORT_CONTEXT VARCHAR(2500) NOT NULL,
+	SERIALIZED_CONTEXT TEXT,
+	
+	constraint JOB_EXEC_CTX_FK foreign key (JOB_EXECUTION_ID)
+	references BATCH_JOB_EXECUTION(JOB_EXECUTION_ID)
+) ENGINE=InnoDB;
+```
+| 컬럼        | 설명                                      |
+|:----------|:----------------------------------------|
+| JOB_EXECUTION_ID | JobExecution 식별키, JOB_EXECUTION 마다 각 생성 |
+| SHORT_CONTEXT  | JOB 의 실행 상태정보, 공유데이터 등의 정보를 문자열로 저장     |
+| SERIALIZED_CONTEXT  | 직렬화(serialized)된 전체 컨텍스트                |
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/03_08.png?raw=true)
