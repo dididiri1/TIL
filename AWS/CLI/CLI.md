@@ -1,4 +1,11 @@
 # AWS CLI
+![](https://github.com/dididiri1/TIL/blob/main/AWS/CLI/images/aws-cli-logo.svg?raw=true)
+
+## AWS CLI란?
+> AWS CLI는 AWS Command Line Interface(AWS CLI)의 줄일말로 명령줄 셸의 명령을 사용하여     
+> AWS 서비스와 상호 작용할 수 있는 오픈 소스 도구입니다. 최소한의 구성으로 AWS CLI를 사용하면      
+> 터미널 프로그램에 있는 명령 프롬프트에서 브라우저 기반 AWS Management Console에서 제공하는     
+> 것과 동일한 기능을 구현하는 명령을 실행할 수 있습니다.
 
 ## CLI 다운받기
 * [AWS CLI 설치](https://docs.aws.amazon.com/ko_kr/cli/latest/userguide/getting-started-install.html)
