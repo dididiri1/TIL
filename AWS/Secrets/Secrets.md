@@ -1,4 +1,11 @@
 # AWS Secrets Manager
+![](https://github.com/dididiri1/TIL/blob/main/AWS/Secrets/images/00.png?raw=true)
+
+## AWS Secrets Manager란?
+> AWS Secrets Manager는 AWS(Amazon Web Services)에서 제공하는 관리형 서비스로, 애플리케이션, 서비스,    
+> IT 리소스를 위한 비밀(예: 데이터베이스 비밀번호, API 키, 액세스 키 등)을 안전하게 저장, 관리 및 검색할 수 있게 해줍니다.  
+> 이 서비스는 중요한 정보를 암호화하여 저장하는 동시에, 필요할 때 이러한 비밀을 안전하게 검색할 수 있는 기능을 제공합니다.
+
 
 ## 1. AWS Secrets Manager 생성
 
