@@ -1,4 +1,4 @@
-# AWS S3 다운받기 (AWS CLI)
+# AWS CLI 설치 및 S3 다운받기
 
 ## 1. CLI 다운받기
 * [AWS CLI 설치](https://docs.aws.amazon.com/ko_kr/cli/latest/userguide/getting-started-install.html)
@@ -30,4 +30,9 @@ Default output format [None]:   # 안해도됨 엔터.
 ### 개별파일 말고 한번에 다운받으려면 recursive 설정을 붙여줘야 한다고 한다.
 ``` log
 aws s3 cp s3://{버킷이름}/{디렉토리} C:\Users\USER\Downloads --recursive
+``` 
+
+## 5. 파일에 저장된 값 확인하기(Power Shell)
+``` 
+cat ~/.aws/credentials
 ``` 

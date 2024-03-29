@@ -1,4 +1,4 @@
-# 스프링 배치 시작
+# 섹션 2 스프링 배치 시작
 
 ## 프로젝트 구성 및 의존성 설정
 
@@ -455,3 +455,67 @@ CREATE TABLE BATCH_JOB_EXECUTION_CONTEXT  (
 | SERIALIZED_CONTEXT  | 직렬화(serialized)된 전체 컨텍스트                |
 
 ![](https://github.com/dididiri1/TIL/blob/main/Batch/images/03_08.png?raw=true)
+
+### BATCH_STEP_EXECUTION
+```
+REATE TABLE BATCH_STEP_EXECUTION  (
+	STEP_EXECUTION_ID BIGINT  NOT NULL PRIMARY KEY ,
+	VERSION BIGINT NOT NULL,
+	STEP_NAME VARCHAR(100) NOT NULL,
+	JOB_EXECUTION_ID BIGINT NOT NULL,
+	START_TIME DATETIME(6) NOT NULL ,
+	END_TIME DATETIME(6) DEFAULT NULL ,
+	STATUS VARCHAR(10) ,
+	COMMIT_COUNT BIGINT ,
+	READ_COUNT BIGINT ,
+	FILTER_COUNT BIGINT ,
+	WRITE_COUNT BIGINT ,
+	READ_SKIP_COUNT BIGINT ,
+	WRITE_SKIP_COUNT BIGINT ,
+	PROCESS_SKIP_COUNT BIGINT ,
+	ROLLBACK_COUNT BIGINT ,
+	EXIT_CODE VARCHAR(2500) ,
+	EXIT_MESSAGE VARCHAR(2500) ,
+	LAST_UPDATED DATETIME(6),
+	
+	constraint JOB_EXEC_STEP_FK foreign key (JOB_EXECUTION_ID)
+	references BATCH_JOB_EXECUTION(JOB_EXECUTION_ID)
+) ENGINE=InnoDB;
+```
+
+| 컬럼        | 설명                                                                            |
+|:----------|:------------------------------------------------------------------------------|
+| STEP_EXECUTION_ID | Step의 실행정보를 고유하게 식별할 수 있는 기본키                                                 |
+| VERSION  | 업데이트 될때마다 1씩 증가                                                               |
+| STEP_NAME  | Step을 구성할 때 부여하는 Step                                                         |
+| JOB_EXECUTION_ID  | JobExecution 기본키, JobExecution 과는 일대 다 관계                                     |
+| START_TIME  | 실행(Execution)이 시작된 시점을 TimeStamp 형식으로 기록                                      |
+| END_TIME  | 실행이 종료된 시점을 TimeStamp 으로 기록하며 Job 실행 도중 오류가 발상해서 Job 이 중단된 겨우 값이 저장되지 않을 수 있음 |
+| STATUS  | 실행 상태(BatchStatus)를 저장 (COMPLETED, FAILED, STOPPED...)                        |
+| COMMIT_COUNT  | 트랜잭션 당 커밋되는 수를 기록                                                             |
+| READ_COUNT  | 실행시점에 Read한 Item 수를 기록                                                        |
+| FILTER_COUNT  | 실행도중 필터링된 Item 수를 기록                                                          |
+| WRITE_COUNT  | 실행도중 저장되고 커밋된 Item 수를 기록                                                      |
+| PROCESS_SKIP_COUNT  | 실행도중 Process가 Skip 된 Item 수를 기록                                               |
+| ROLLBACK_COUNT  | 실행도중 rollback이 일어난 수를 기록                                                      |
+| EXIT_CODE  | 실행 종료코드(ExitStatus)를 저장 (COMPLETED, FAILED..)                                 |
+| EXIT_MESSAGE  | Status가 실패일 경우 실패 원인 등의 내용을 저장                                                |
+| LAST_UPDATED  | 마지막 실행(Execution) 시점을 TimeStamp 형식으로 기록                                       |
+
+### BATCH_STEP_EXECUTION_CONTEXT
+```
+CREATE TABLE BATCH_STEP_EXECUTION_CONTEXT  (
+	STEP_EXECUTION_ID BIGINT NOT NULL PRIMARY KEY,
+	SHORT_CONTEXT VARCHAR(2500) NOT NULL,
+	SERIALIZED_CONTEXT TEXT ,
+	
+	constraint STEP_EXEC_CTX_FK foreign key (STEP_EXECUTION_ID)
+	references BATCH_STEP_EXECUTION(STEP_EXECUTION_ID)
+) ENGINE=InnoDB;
+```
+
+| 컬럼        | 설명                                         |
+|:----------|:-------------------------------------------|
+| STEP_EXECUTION_ID | StepExecution 식별 키, STEP_EXECUTION 마다 각 생성 |
+| SHORT_CONTEXT  | STEP 의 실행 상태정보, 공유데이터 등의 정보를 문자열로 저장       |
+| SERIALIZED_CONTEXT  | 직렬화(serialized)된 전체 컨텍스트                   |

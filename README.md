@@ -204,6 +204,8 @@
 
 * [AWS - S3 CLI](https://github.com/dididiri1/TIL/blob/main/AWS/S3/README2.md)
 
+* [AWS - Secrets Manager](https://github.com/dididiri1/TIL/blob/main/AWS/Secrets/Secrets.md)
+
 
 ### Jenkins
 * [Jenkins - 설치](https://github.com/dididiri1/TIL/blob/main/Jenkins/01_설치.md)
