@@ -1,5 +1,5 @@
 # AWS Secrets Manager
-![](https://github.com/dididiri1/TIL/blob/main/AWS/Secrets/images/00.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/AWS/Secrets/images/aws-secrets-logo.png?raw=true)
 
 ## AWS Secrets Manager란?
 > AWS Secrets Manager는 AWS(Amazon Web Services)에서 제공하는 관리형 서비스로, 애플리케이션, 서비스,    

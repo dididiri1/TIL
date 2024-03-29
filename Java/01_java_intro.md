@@ -1,5 +1,7 @@
 # 자바 기초 강의 - 1-1강 자바란? 자바 소개
 
+![](https://github.com/dididiri1/TIL/blob/main/JAVA/images/java-logo.png?raw=true)
+
 ## 1.1 Java 소개
 - 자바 언어는 1996년 JDK(Java Development Kit) 1.0이 발표된 이후 현재까지 발전을 거듭하고 있다.
 - 각각의 버전마다 크고 작은 변화들이 있었으며 Java 5과 Java 8 버전에서 가장 큰 변화가 있었다.

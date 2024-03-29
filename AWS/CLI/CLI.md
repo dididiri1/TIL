@@ -56,7 +56,7 @@ sudo ./aws/install
 aws --version
 ```
 
-## aws configure 등록
+- AWS CLI에서 자격 증명
 ``` log
 aws configure
 ``` 
@@ -70,6 +70,11 @@ aws s3 cp s3://{버킷이름}/{디렉토리} C:\Users\USER\Downloads --recursive
 ## 파일에 저장된 값 확인하기(Power Shell)
 ``` 
 cat ~/.aws/credentials
+``` 
+
+## 설정한 인증 정보를 확인
+``` 
+aws configure list
 ``` 
 
 

@@ -1,5 +1,8 @@
 # AWS - RDS 사용하기
 
+![](https://github.com/dididiri1/TIL/blob/main/AWS/RDS/images/aws-rds-logo.pngraw=true)
+
+
 ## RDS(Relational Database Service)란
 > 간단히 말하면 관계형 데이터베이스를 제공하는 AWS의 서비스이다.     
 > 유저가 사용하기 쉽도록 인프라 등을 자동화 시켜주고 유저들은 앤드포인트로   
