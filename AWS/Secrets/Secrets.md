@@ -41,9 +41,8 @@
 ![](https://github.com/dididiri1/TIL/blob/main/AWS/Secrets/images/08.png?raw=true)
 
 
-## 3. CLI 설치 후
-- CIL 설치 밑에꺼 참고.
-[AWS CLI 설치 및 S3 다운받기](https://github.com/dididiri1/TIL/blob/main/AWS/S3/README2.md)
+## 3. CLI 설치
+[AWS CLI 설치](https://github.com/dididiri1/TIL/blob/main/AWS/CLI/CLI.md)
 
 - 인텔리제이의 또는 PowerShell 아무거나 터미널 사용하면 된다.
 - aws configure 명령어 실행 Access Key, Secret Access Key 등록 한다.

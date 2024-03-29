@@ -202,7 +202,7 @@
 
 * [AWS - EC2 인스턴스에 HTTPS 적용하기](https://github.com/dididiri1/TIL/blob/main/AWS/Https/README.md)
 
-* [AWS - S3 CLI](https://github.com/dididiri1/TIL/blob/main/AWS/S3/README2.md)
+* [AWS - S3 CLI](https://github.com/dididiri1/TIL/blob/main/AWS/CLI/CLI.md)
 
 * [AWS - Secrets Manager](https://github.com/dididiri1/TIL/blob/main/AWS/Secrets/Secrets.md)
 
