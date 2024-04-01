@@ -48,18 +48,6 @@
 ### 예제
 #### JobInstanceConfiguration 
 ``` java
-import lombok.RequiredArgsConstructor;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 @Configuration
 @RequiredArgsConstructor
 public class JobInstanceConfiguration {
@@ -104,15 +92,6 @@ public class JobInstanceConfiguration {
 
 #### JobRunner
 ``` java
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
-
 @Component
 public class JobRunner implements ApplicationRunner {
 
@@ -136,3 +115,61 @@ public class JobRunner implements ApplicationRunner {
 #### BATCH_JOB_EXECUTION_PARAMS 테이블 데이터 생성 
 - 같은 job, jobParameters 실행시 에러 발생
 ![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_04.png?raw=true)
+
+## jobParameter
+### 1. 기본 개념
+- Job을 실행할 때 함께 포함되어 사용되는 파라미터를 가진 도메인 객체
+- 하나의 Job에 존자할 수 있는 여러개의 **JobInstance를 구분하기 위한 용도**
+- JobParameters와 JobInstance는 1:1 관계
+
+### 2. 생성 및 바인딩
+- 어플리케이션 실행 시 주입
+  - Java -jar LogBatch.jar requestData=20210101
+- 코드로 생성(2가지)
+  - JobParamterBuilder, DefaultJobParamtersConverter
+    - 주로 JobParamterBuilder를 많이 사용함!
+- SpEL 이용(Spring에서 제공하는 표현식 언어)
+  - @Value("#{jobParamter[requestDate]}"), @JobScope, @StepScope 선언 필수
+
+### 3. BATCH_JOB_EXECUTION_PARAM 테이블과 매핑
+  - JOB_EXECUTION 과 1:M의 관계
+
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_05.png?raw=true)
+
+### BATCH_JOB_EXECUTION_PARAMS
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_04.png?raw=true)
+
+### 예제(코드로 생성)
+``` java
+@Component
+public class JobParameterTest implements ApplicationRunner {
+
+    @Autowired
+    private JobLauncher jobLauncher;
+
+    @Autowired
+    private Job job;
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addString("name", "user1")
+                .addLong("seq", 2L)
+                .addDate("date", new Date())
+                .addDouble("age", 16.5)
+                .toJobParameters();
+
+        jobLauncher.run(job, jobParameters);
+    }
+}
+``` 
+
+
+
+### 예제(어플리케이션 실행 시 주입)
+- build 후 jar 파일 생성후 명령어 실행
+``` java
+java -jar spring-batch-0.0.1-SNAPSHOT.jar name=user1 seq=2L data=2021-01-01 age=16.5
+``` 
