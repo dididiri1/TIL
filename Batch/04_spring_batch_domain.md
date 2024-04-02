@@ -138,7 +138,7 @@ public class JobRunner implements ApplicationRunner {
 ![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_05.png?raw=true)
 
 ### BATCH_JOB_EXECUTION_PARAMS
-![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_04.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_06.png?raw=true)
 
 ### 예제(코드로 생성)
 ``` java
@@ -173,3 +173,26 @@ public class JobParameterTest implements ApplicationRunner {
 ``` java
 java -jar spring-batch-0.0.1-SNAPSHOT.jar name=user1 seq=2L data=2021-01-01 age=16.5
 ``` 
+
+## JobExecution
+
+
+### 1. 기본 개념
+- JobInstance에 대한 한 번의 시도를 의미하는 객체로서 Job 실행 중에 발생한 정보들을 저장하고 있는 객체
+  - 시작시간, 종료시간, 상태(시작됨,완료,실패) 종료상태의 속성을 가짐
+- JobInstance 과의 관계
+  - JobExecution은 'FAILED' 또는 'COMPLETED' 등의 Job의 실행 결과 상태를 가지고 있음
+  - JobExecution 의 실행 상태 결과가 'COMPLETED' 면 JobInstance 실행이 완료된 것으로 간주해서 재 실행이 불가함
+  - JobExecution 의 실행 상태 결과가 'FAILED' 면 JobInstance 실행이 완료되지 않은 것으로 간주해서 재실행이 가능함
+    - JobParameter 가 동일한 값으로 Job 을 실행할지라도 JobInstance 를 계속 실행할 수 있음
+  - JobExection 의 실행 상태 결과가 'COMPLETED'될 떄까지 하나의 JobInstance 내에서 여러 번의 시도가 생길 수 있음
+### 2. BATCH_JOB_EXECUTION 테이블과 매핑
+- JobInstance 와 JobExecution 는 1:M 의 관계로서 JobInstance에 대한 성공/실패의 내역을 가지고 있음
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_07.png?raw=true)  
+
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_08.png?raw=true)
+
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_09.png?raw=true)  
