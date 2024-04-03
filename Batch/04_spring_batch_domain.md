@@ -196,3 +196,92 @@ java -jar spring-batch-0.0.1-SNAPSHOT.jar name=user1 seq=2L data=2021-01-01 age=
 
 
 ![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_09.png?raw=true)  
+
+## Step
+- Step
+- StepExecution
+- StepContribution
+
+### 1. 기본 개념
+- Batch Job을 구성하는 독립적인 하나의 단계로서 실제 배치 처리를 정의하고 컨트롤하는 데 필요한 모든 정보를 가지고 있는 도메인 객체
+- 단순한 단일 태스크 뿐 아니라 입력과 처리 그리고 출력과 관련된 복잡한 비즈니스 로직을 포함하는 모든 설정들을 담고 있다.
+- 배치작업을 어떻게 구성하고 실행할 것인지 Job 의 세부 작업을 Task 기반으로 설정하고 명세해 놓는 객체
+- 모든 Job은 하나 이상의 Step으로 구성됨
+
+### 2. 기본 구현체
+- TaskletStep
+  - 가장 기본이 되는 클래스로서 Tasklet 타입의 구현체들을 제어한다.
+
+- Partition Step
+  - 멀티 스레드 방식으로 Step 을 여러 개로 분리해서 실행한다.
+
+- JobStep
+  - Step 내에서 Job 을 실행하도록 한다
+- FlowStep
+  - Step 내에서 Flow 를 실행하도록 한다
+
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_10.png?raw=true)  
+
+### CustomTasklet
+``` java
+public class CustomTasklet implements Tasklet {
+    @Override
+    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        System.out.println("step1 has execution");
+
+        return RepeatStatus.FINISHED;
+    }
+}
+``` 
+
+### CustomTasklet
+``` java
+    ``` 
+
+    @Bean
+    public Job job() {
+        return jobBuilderFactory.get("job")
+                .start(step1())
+                .next(step2())
+                .build();
+    }
+
+    @Bean
+    public Step step1() {
+        return stepBuilderFactory.get("step1")
+                .tasklet(new CustomTasklet())
+                .build();
+    }
+    
+    ``` 
+``` 
+
+## StepExecution
+### 1. 기본 개념 
+- Step 에 대한 한번의 시도를 의미하는 개체로서 **Step 실행 중에 발상한 정보들을 저장하고 있는 객체**
+  - 시작시간, 종료시간, 상태(시작됨, 완료, 실패), commit count, rollback count 등의 속성을 가짐
+- Step이 매번 시도될 때마다 생성되며 각 Step 별로 생성 된다.
+- Job 이 재시작 하더라도 이미 성공적으로 완료된 Step 은 재 실행되지 않고 실패한 Step 만 실행된다.
+> 참고: job - StepExecution - step1, step2 ,step3 중 step3이 실패하면 job 재실행할수 있다   
+> 성공한 step1~2는 skip 해버리고 실패한 Step3만 실해 된다.
+> 그리고 성공했어도 job 재시작 시 모든 스텝들을 다시 실행할 수 있는 옵션이 있음
+- 이전 단게 Step이 실패해서 현재 Step을 실행하지 않았다면 StepExecution을 생성하지 않는다. Step이 실제로 시작됐을 때만 StepExecution을 생성한다
+ 
+- JobExecution 과의 관계
+  - Step의 StepExecution 이 **모두 정상적으로 완료** 되어야 JobExecution이 정상적으로 완료된다.
+  - Step의 StepExecution 중 **하나라도 실패**하면 JobExecution 은 실패한다
+
+### 2. BATCH_STEP_EXECUTION 테이블과 매핑
+- JobExecution 와 StepExecution 는 1:M 의 관계
+- 하나의 Job 에 여러 개의 Step 으로 구성했을 경우 각 StepExecution 은 하나의 JobExecution 을 부모로 가진다.
+
+> 참고: 동일한 잡 파라미터의 값을 전달하더라도 실패한 잡은 재시작이 가능하다.
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_11.png?raw=true)  
+
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_12.png?raw=true)
+
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_13.png?raw=true)  
