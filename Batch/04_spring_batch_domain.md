@@ -140,7 +140,7 @@ public class JobRunner implements ApplicationRunner {
 ### BATCH_JOB_EXECUTION_PARAMS
 ![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_06.png?raw=true)
 
-### 예제(코드로 생성)
+### 실습(코드로 생성)
 ``` java
 @Component
 public class JobParameterTest implements ApplicationRunner {
@@ -168,7 +168,7 @@ public class JobParameterTest implements ApplicationRunner {
 
 
 
-### 예제(어플리케이션 실행 시 주입)
+#### 예제(어플리케이션 실행 시 주입)
 - build 후 jar 파일 생성후 명령어 실행
 ``` java
 java -jar spring-batch-0.0.1-SNAPSHOT.jar name=user1 seq=2L data=2021-01-01 age=16.5
@@ -223,7 +223,8 @@ java -jar spring-batch-0.0.1-SNAPSHOT.jar name=user1 seq=2L data=2021-01-01 age=
 
 ![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_10.png?raw=true)  
 
-### CustomTasklet
+### 실습
+#### CustomTasklet
 ``` java
 public class CustomTasklet implements Tasklet {
     @Override
@@ -235,7 +236,7 @@ public class CustomTasklet implements Tasklet {
 }
 ``` 
 
-### CustomTasklet
+#### CustomTasklet
 ``` java
     ``` 
 
@@ -298,3 +299,59 @@ public class CustomTasklet implements Tasklet {
 
 
 ![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_15.png?raw=true) 
+
+## ExecutionContext
+### 1. 기본 개념
+- 프레임워크에서 유지 및 관리하는 키/값으로 된 컬렉션으로 SepExecution 또는 JobExecuion 객체의 상태(state)를 저장하는 공유 객체
+- DB 에 직렬화 한 값으로 저장됨 - {"key": "value"}
+- 공유 범위
+  - Step 범위 - 각 Step 의 StepExecution 에 저장되며 Step 간 서로 공유 안됨
+  - Job 범위 - 각 Job위 JobExecution 에 저장되며 Job 간 서로 공유 안되며 해당 Job의 Step 간 서로 공유됨
+- Job 재 시작시 이미 처리한 Row 데이터는 건너뛰고 이후로 수행하도록 할 때 상태 정보를 활용한다
+
+### 2. 구조
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_16.png?raw=true)
+
+
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_17.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/Batch/images/04_18.png?raw=true)
+
+### 실습
+### ExecutionContextTasklet1
+- 최초 실행되는 Tasklet으로 JobExecution 및 StepExecution 내에 존재하는 ExecutionContext에 key가 jobName, stepName인 데이터를 조회하고 없으면 데이터를 저장함
+- 참고로 execute 메서드의 contribution, context 어떠한 Execution를 참조하든 상관이 없습니다.
+``` 
+@Component
+public class ExecutionContextTasklet1 implements Tasklet {
+
+    @Override
+    public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        System.out.println("step1 was execution");
+
+        ExecutionContext jobExecutionContext = contribution.getStepExecution().getJobExecution().getExecutionContext();
+        ExecutionContext stepExecutionContext = contribution.getStepExecution().getExecutionContext();
+
+        String jobName = chunkContext.getStepContext().getStepExecution().getJobExecution().getJobInstance().getJobName();
+        String stepName = chunkContext.getStepContext().getStepExecution().getStepName();
+
+        if (jobExecutionContext.get("jobName") == null) {
+            jobExecutionContext.put("jobName", jobName);
+        }
+
+        if (stepExecutionContext.get("stepName") == null) {
+            stepExecutionContext.put("stepName", stepName);
+        }
+
+        System.out.println("jobName = " + jobExecutionContext.get("jobName"));
+        System.out.println("stepName = " + stepExecutionContext.get("stepName"));
+
+
+        return RepeatStatus.FINISHED;
+    }
+}
+``` 
+
+#### ExecutionContextTasklet2
+- ExecutionContext가 Job, Step 간 데이터 공유가 가능한지 파악하기 위해 Tasklet1에서 저장한 데이터를 조회하여 확인한다.
