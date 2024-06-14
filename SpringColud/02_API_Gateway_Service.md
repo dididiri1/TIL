@@ -68,16 +68,16 @@ public class FirstServiceController {
 
 ```
 server:
-	port: 8001
-    
+  port: 8001
+
 spring:
-	application:
-    	name: my-first-service
+  application:
+    name: my-first-service
 
 eureka:
-	client:
-    	fetch-registry: false
-        register-with-eureka: false
+  client:
+    fetch-registry: false
+    register-with-eureka: false
 ```
 
 ## Netflix Zuul - Filter 적용
@@ -142,4 +142,176 @@ public class ZuulLoggingFilter extends ZuulFilter {
         return true;
     }
 }
+```
+
+## Spring Cloud Gateway 란?
+Spring Cloud Gateway(SCG)란 MSA 환경에서 사용하는 API Gateway중 하나로 Spring5, Spring Boot2, Project Reactor로 
+구축된Spring 환경의 API Gateway다. Spring Cloud Gateway는 API 라우팅 및 보안, 모니터링/메트릭 등의 기능을 간단하고 효과적인   
+방법으로 제공한다.
+
+- Dependecies
+  - DevTools, EureKa Discovery Clinet, Gateway
+
+![](https://github.com/dididiri1/TIL/blob/main/SpringColud/images/02_01.png?raw=true)
+
+
+- aplication.yml
+```
+server:
+  port: 8000
+
+eureka:
+  client:
+    register-with-eureka: false // 일단 false
+    fetch-registry: false // 일단 false
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka
+
+
+spring:
+  application:
+    name: apigateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: first-service
+          uri: http://localhost:8081/
+          predicates:
+            - Path=/first-service/**
+        - id: second-service
+          uri: http://localhost:8082/
+            - Path=/second-service/**
+```
+
+> 지금까지의 실습에서는 톰캣으로 서버를 띄웠으나, 지금은 Netty라는 내장 서버를 사용해 띄운 것이다.  
+> Tomcat: 동기 방식  
+> Spring Cloud Gateway: 비동기 방식
+
+## Spring Cloud Gateway - Filter 적용
+
+![](https://github.com/dididiri1/TIL/blob/main/SpringColud/images/02_02.png?raw=true)
+
+- 필터 빈으로 등록해서 사용하기
+```
+import org.springframework.cloud.gateway.route.RouteLocator;
+import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class FilterConfig {
+
+    @Bean
+    public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
+        return builder.routes()
+                .route(r -> r.path("/first-service/**")
+                        .filters(f -> f.addRequestHeader("first-request", "first-request-header")
+                                .addResponseHeader("first-response", "first-response"))
+                        .uri("http://localhost:8081"))
+                .route(r -> r.path("/second-service/**")
+                        .filters(f -> f.addRequestHeader("second-request", "second-request-header")
+                                .addResponseHeader("second-response", "second-response"))
+                        .uri("http://localhost:8082"))
+                .build();
+    }
+}
+
+```
+
+- yml으로 필터 사용하기
+```
+server:
+  port: 8000
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka
+
+
+spring:
+  application:
+    name: apigateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: first-service
+          uri: http://localhost:8081/
+          predicates:
+            - Path=/first-service/**
+          filters:
+            - AddRequestHeader=first-request, first-requests-header2
+            - AddResponseHeader=first-reponse, first-reponse-header2
+        - id: second-service
+          uri: http://localhost:8082/
+          predicates:
+            - Path=/second-service/**
+          filters:
+            - AddRequestHeader=second-request, second-requests-header2
+            - AddResponseHeader=second-repon
+```
+
+## Spring Cloud Gateway - Custom Filter
+```
+server:
+  port: 8000
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka
+
+
+spring:
+  application:
+    name: apigateway-service
+  cloud:
+    gateway:
+      routes:
+        - id: first-service
+          uri: http://localhost:8081/
+          predicates:
+            - Path=/first-service/**
+          filters:
+            - CustomFilter
+        - id: second-service
+          uri: http://localhost:8082/
+          predicates:
+            - Path=/second-service/**
+          filters:
+            - CustomFilter
+```
+
+```
+@Component
+@Slf4j
+public class CustomFilter extends AbstractGatewayFilterFactory<CustomFilter.Config> {
+
+    public CustomFilter() {
+        super(Config.class);
+    }
+
+    @Override
+    public GatewayFilter apply(CustomFilter.Config config) {
+        return (exchange, chain) -> {
+            ServerHttpRequest request = exchange.getRequest();
+            ServerHttpResponse response = exchange.getResponse();
+
+            log.info("Custom PRE filter: reqeust id -> {}", request.getId());
+
+            return chain.filter(exchange).then(Mono.fromRunnable(() -> {
+                log.info("Custom PRE filter: response code -> {}", response.getStatusCode());
+            }));
+        };
+    }
+
+    public static class Config {
+
+    }
+}
+
 ```
