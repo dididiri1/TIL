@@ -315,3 +315,174 @@ public class CustomFilter extends AbstractGatewayFilterFactory<CustomFilter.Conf
 }
 
 ```
+
+## Spring Cloud Gateway - Global Filter
+- CustomFilter와 생성하는 방법은 동일하지만, route 별로 적용하는 것이 아닌 공통적으로 실행되는 필터
+- 모든 필터의 가장 첫번째로 실행이 되고 가장 마지막에 종료가 된다.
+
+> 참고: 차이점 글러벌 필터는 어떤한 라우터 정보라도 공통적으로 다 시행될 수 있는 공통 필터 개념으로 
+> 이전 커스텀 필터랑 차이가 있다. 즉 커스텀 필터는 필터가 필요할 경우 개별적으로 등록 해야됨
+
+```
+server:
+  port: 8000
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka
+
+
+spring:
+  application:
+    name: apigateway-service
+  cloud:
+    gateway:
+      default-filters:
+        - name: GlobalFilter
+          args:
+            baseMessage: Spring Cloud Gateway Global Filter
+            preLogger: true
+            postLogger: true
+      routes:
+        - id: first-service
+          uri: http://localhost:8081/
+          predicates:
+            - Path=/first-service/**
+          filters:
+            - CustomFilter
+        - id: second-service
+          uri: http://localhost:8082/
+          predicates:
+            - Path=/second-service/**
+          filters:
+            - CustomFilter
+```
+
+```
+@Component
+@Slf4j
+public class GlobalFilter extends AbstractGatewayFilterFactory<GlobalFilter.Config> {
+
+    public GlobalFilter(){
+        super(Config.class);
+    }
+
+    @Override
+    public GatewayFilter apply(Config config) {
+        // Global Pre Filter
+        return (exchange, chain) -> {
+            ServerHttpRequest request = exchange.getRequest();
+            ServerHttpResponse response = exchange.getResponse();
+
+            log.info("Global Filter baseMessage : {}", config.getBaseMessage());
+
+            if(config.isPreLogger()){
+                log.info("Global Filter Start : request id -> {}", request.getId());
+            }
+
+            // Global Post Filter
+            return chain.filter(exchange).then(Mono.fromRunnable(() -> {
+                if(config.isPostLogger()) {
+                    log.info("Global Filter End : response code -> {}", response.getStatusCode());
+                }
+            }));
+        };
+    }
+
+    @Data
+    public static class Config {
+        private String baseMessage;
+        private boolean preLogger;
+        private boolean postLogger;
+    }
+}
+```
+
+## Spring Cloud Gateway - Logging Filter
+
+```
+server:
+  port: 8000
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka
+
+
+spring:
+  application:
+    name: apigateway-service
+  cloud:
+    gateway:
+      default-filters:
+        - name: GlobalFilter
+          args:
+            baseMessage: Spring Cloud Gateway Global Filter
+            preLogger: true
+            postLogger: true
+      routes:
+        - id: first-service
+          uri: http://localhost:8081/
+          predicates:
+            - Path=/first-service/**
+          filters:
+            - CustomFilter
+        - id: second-service
+          uri: http://localhost:8082/
+          predicates:
+            - Path=/second-service/**
+          filters:
+            - name: CustomFilter
+            - name: LoggingFilter
+              args:
+                baseMessage: Hi, there
+                preLogger: true
+                postLogger: true
+```
+
+```
+@Component
+@Slf4j
+public class LoggingFilter extends AbstractGatewayFilterFactory<LoggingFilter.Config> {
+
+    public LoggingFilter(){
+        super(Config.class);
+    }
+
+    @Override
+    public GatewayFilter apply(Config config) {
+
+        GatewayFilter filter = new OrderedGatewayFilter((exchange, chain) ->{
+            ServerHttpRequest request = exchange.getRequest();
+            ServerHttpResponse response = exchange.getResponse();
+
+            log.info("Logging Filter baseMessage : {}", config.getBaseMessage());
+
+            if(config.isPreLogger()){
+                log.info("Logging PRE Filter Start : request id -> {}", request.getId());
+            }
+
+            return chain.filter(exchange).then(Mono.fromRunnable(() -> {
+                if(config.isPostLogger()) {
+                    log.info("Logging POST Filter End : response code -> {}", response.getStatusCode());
+                }
+            }));
+        }, Ordered.HIGHEST_PRECEDENCE);
+
+        return filter;
+    }
+
+    @Data
+    public static class Config {
+        private String baseMessage;
+        private boolean preLogger;
+        private boolean postLogger;
+    }
+}
+```
