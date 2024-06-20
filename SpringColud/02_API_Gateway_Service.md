@@ -486,3 +486,33 @@ public class LoggingFilter extends AbstractGatewayFilterFactory<LoggingFilter.Co
     }
 }
 ```
+
+## Spring Cloud Gateway - Load Balancer
+
+![](https://github.com/dididiri1/TIL/blob/main/SpringColud/images/02_03.png?raw=true)
+
+- API Gateway Service 프로젝트 : eureka client, 8000포트
+- first Service 프로젝트 : eureka client, 8081포트
+- second Service 프로젝트 : eureka client, 8082포트
+- discovery Service 프로젝트 : eureka servcer, 8761포트 
+
+```
+@RestController
+@RequestMapping("/first-service")
+@Slf4j
+public class FirstServiceController {
+
+    Environment env;
+
+    public FirstServiceController(Environment env) {
+        this.env = env;
+    }
+    
+    @GetMapping("/check")
+    public String check(HttpServletRequest request) {
+        log.info("Server port={}", request.getServerPort());
+        return String.format("Hi, there. This is a message from Second Service. on PORT $s"
+                , env.getProperty("Local.server.port"));
+    }
+}
+```
