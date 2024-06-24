@@ -1,3 +1,9 @@
+# Spring Cloud로 개발하는 마이크로서비스 애플리케이션(MSA)
+
+![](https://github.com/dididiri1/TIL/blob/main/SpringColud/images/01_00.png?raw=true)
+
+# 섹션 1 Service Discovery
+
 ## Eureka Service Discover - 프로젝트 생성
 
 ![](https://github.com/dididiri1/TIL/blob/main/SpringColud/images/01_01.png?raw=true)
