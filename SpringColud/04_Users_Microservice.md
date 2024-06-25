@@ -93,3 +93,22 @@ public class UserController {
 }
 
 ```
+
+## Users Microservice - H2 데이터베이스 연동
+
+### application.yml
+- h2 설정
+```
+spring:
+  application:
+    name: user-service
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+      path: /h2-console
+```
+
+## Users Microservice - JPA
+
