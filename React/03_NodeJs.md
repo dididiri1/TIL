@@ -49,7 +49,6 @@ npm init
 - 일종의 매크로. 아래와 같은 간단한 실행이 가능함
 - 파일과 경로가 복잡해질 경우 script라는 패키지의 기능을 이용해서 한 방에 복잡한 경로에 있는 파일도 노드를 통해 쉽게 실행이 가능함
 
-![](https://github.com/dididiri1/TIL/blob/main/React/images/03_01.png?raw=true)
 
 ## 3.4) Node.js 모듈 시스템 이해하기
 
@@ -60,3 +59,95 @@ npm init
 - 이때 이렇게 각각의 js파일들을 모듈이라는 이름으로 부름
 - 모듈을 생성하고, 불러오고 사용하는 등의 모듈을 다루는 다양한 기능을 제공하는 시스템을 모듈 시스템이라고 함
 - JS에는 다양한 모듈 시스템이 존재하나, 강의에서는 가장 대표적인 두가지를 다룸
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/03_01.png?raw=true)
+
+### CommonJS
+- 모듈이라는 내장 객체에 export라는 프로퍼티의 값으로 객체를 저장
+- 내보내진 값은 다른 모듈에서 내장 함수인 require를 이용해서 모듈의 경로를 인수로 전달하면서 불러와 사용이 가능함
+- npm run start
+
+#### math.js
+```
+// math 모듈
+
+function add(a, b) {
+  return a + b;
+}
+
+function sub(a, b) {
+  return a - b;
+}
+
+module.exports = {
+  add,
+  sub,
+};
+
+```
+#### index.js
+```
+const moduleData = require("./math");
+
+console.log(moduleData.add(1, 2));
+console.log(moduleData.sub(1, 2));
+
+// 객체의 구조분해 할당 사용
+const { add, sub } = require("./math");
+
+console.log(add(1, 2));
+console.log(sub(1, 2));
+```
+
+### ES 모듈 시스템
+
+```
+{
+  "name": "section03",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module"
+}
+
+```
+- package.json에 "type": "module"이 추가
+- ES 모듈 시스템과 CommonJS와 함께 사용할 수 없음
+- 어떤 값을 내보낼 때 export 키워드 뒤에 객체를 리터럴로 생성해서 내보내고 싶은 값을 담아 주면 됨
+
+#### math.js
+```
+// math 모듈
+
+function add(a, b) {
+  return a + b;
+}
+
+export function sub(a, b) {
+  return a - b;
+}
+
+export { add };
+
+export default function multply(a, b) {
+  return a * b;
+}
+```
+
+#### index.js
+```
+import { add, sub } from "./math.js";
+
+import multply from "./math.js";
+
+console.log(add(1, 2));
+console.log(sub(1, 2));
+console.log(multply(1, 2));
+
+```
