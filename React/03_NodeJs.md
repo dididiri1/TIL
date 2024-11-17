@@ -151,3 +151,40 @@ console.log(sub(1, 2));
 console.log(multply(1, 2));
 
 ```
+
+## 3.5) Node.js 라이브러리 사용하기
+### 라이브러리란?
+- 프로그램을 개발할 때 필요한 다양한 기능들을 미리 만들어 모듈화 해 놓은 것
+
+### 라이브러리 사용하기
+- https://www.npmjs.com
+- randomcolor 검색
+
+#### Install
+```
+npm i randomcolor
+```
+
+- package.json에 다음 항목이 추가됨
+```
+"dependencies": {
+   "randomcolor": "^0.6.2"
+}
+```
+
+- node_modules 폴더와 package-lock.json 파일이 추가됨
+  - node_modules : 실제 설치된 라이브러리의 저장소
+  - package.json : 대략적인 버전이 명시됨, ^ : 버전 레인지
+  - package-lock.json : 실제로 설치된 버전의 정보가 명시가 된다.
+
+```
+import randomColor from "randomcolor";
+
+const color = randomColor();
+console.log(color);
+```
+
+- 만약에 node_modules나 package-lock.json 파일이 없어졌다면 
+- npm i로 새롭게 다시 다운로드 받을 수 있음 package.jsondp 기록된 라이브러리들을 다시 설치 해준다.
+npm i
+```
