@@ -60,4 +60,6 @@ c + enter : 콘솔 창 클리어
 q + enter : 현재 실행중인 Vite 서버 종료
 ```
 
+![](https://github.com/dididiri1/TIL/blob/main/React/images/05_02.png?raw=true)
+
 
