@@ -50,3 +50,48 @@ sudo systemctl restart sshd
 ```
 
 ![](https://github.com/dididiri1/TIL/blob/main/Server/images/01_02.png?raw=true)
+
+## SELinux 비활성화 방법
+### 1. getenforce 명령어
+- SELinux의 현재 상태 확인
+```
+getenforce
+```
+- Enforcing: SELinux가 활성화
+- Permissive: SELinux가 활성화되어 있지만, 정책 위반 시 경고만 발생하고 차단은 하지 않음.
+- Disabled: SELinux가 비활성화
+### 2. SELinux 설정 파일 수정:
+- /etc/selinux/config 파일에서 SELINUX 값을 disabled로 변경
+```
+
+# This file controls the state of SELinux on the system.
+# SELINUX= can take one of these three values:
+#     enforcing - SELinux security policy is enforced.
+#     permissive - SELinux prints warnings instead of enforcing.
+#     disabled - No SELinux policy is loaded.
+SELINUX=enforcing 
+# SELINUXTYPE= can take one of these three values:
+#     targeted - Targeted processes are protected,
+#     minimum - Modification of targeted policy. Only selected processes are protected.
+#     mls - Multi Level Security protection.
+SELINUXTYPE=targeted
+```
+
+### 3. 즉시 적용하기 위한 방법
+> setenforce 명령어를 사용하여 SELinux를 즉시 활성화할 수도 있다.   
+> 하지만, 이 방법은 시스템 재부팅 시 설정 파일에 지정된 값에 따라 다시 설정된다.
+
+- enforcing 모드로 설정:
+```
+sudo setenforce 1
+```
+- permissive 모드로 설정:
+```
+sudo setenforce 0
+```
+
+### 4. 시스템 재부팅
+- 설정을 적용하려면 시스템을 재부팅해야 합니다.
+```
+sudo reboot
+```
