@@ -46,7 +46,7 @@ sudo systemctl restart sshd
 ```
 ### 6) SSH 서비스 상태 확인
 ```
-sudo systemctl restart sshd
+sudo systemctl status sshd
 ```
 
 ![](https://github.com/dididiri1/TIL/blob/main/Server/images/01_02.png?raw=true)
