@@ -132,3 +132,48 @@ function App() {
 export default App;
 
 ``` 
+
+## 8.5) Read - 투두리스트 렌더링하기
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/09_01.png?raw=true)
+
+``` 
+const List = ({ todos }) => {
+  return (
+    <div className="List">
+      <h4>Todo List</h4>
+      <input type="text" placeholder="검색어를 입력하세요." />
+      <div className="todos_wrapper">
+        {todos.map((todo) => {
+          return <TodoItem {...todo} />; // Missing "key" prop for element in iterator
+        })}
+      </div>
+    </div>
+  );
+};
+```
+> 참고: 리엑트에서는 내부적으로 리스트 형태로 렌더링된 컴퍼런들이나 또는 어던 요소들을 서로 구분할 떄   
+> 각각의 요소를 **Key**라는 prop을 통해서 구분하게 되서 고유한 값을 전달 해줘야 된다.
+
+``` 
+import "./List.css";
+import TodoItem from "./TodoItem";
+
+const List = ({ todos }) => {
+  return (
+    <div className="List">
+      <h4>Todo List</h4>
+      <input type="text" placeholder="검색어를 입력하세요." />
+      <div className="todos_wrapper">
+        {todos.map((todo) => {
+          return <TodoItem key={todo.id} {...todo} />;
+        })}
+      </div>
+    </div>
+  );
+};
+
+
+export default List;
+
+``` 
