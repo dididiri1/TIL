@@ -3,7 +3,7 @@
 ## 섹션 1. Redis 알아보기
 
 ### Redis 소개
-&nbsp;&nbsp;&nbsp;&nbsp;Remote Dictionary Server  
+&nbsp;&nbsp;&nbsp;&nbsp;Remote Dictionary Linux  
 &nbsp;&nbsp;&nbsp;&nbsp;Open Source In-Memory Data Store written in ANSI-C
 
 ### Redis 특징

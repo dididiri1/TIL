@@ -7,7 +7,7 @@ vi /etc/ssh/sshd_config
 
 ### 2) sshd_config 파일에서 Port 22를 찾아 Port 2024로 변경
 
-![](https://github.com/dididiri1/TIL/blob/main/Server/images/01_01.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Linux/images/01_01.png?raw=true)
 
 ### 3) SSH 서비스 재시작
 ```
@@ -49,7 +49,7 @@ sudo systemctl restart sshd
 sudo systemctl status sshd
 ```
 
-![](https://github.com/dididiri1/TIL/blob/main/Server/images/01_02.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Linux/images/01_02.png?raw=true)
 
 ## SELinux 비활성화 방법
 ### 1. getenforce 명령어

@@ -418,7 +418,7 @@ WHERE ROWNUM <= 5;
 ### FETCH절 
 - 출력될 행의 수를 제한하는 절 
 - ORACLE 12C 이상부터 제공(이전버전에는 ROWNUM 주로 사용) 
-- SQL-Server 사용 가능 - ORDER BY절 뒤에 사용(내부 파싱 순서도 ORDER BY 뒤)
+- SQL-Linux 사용 가능 - ORDER BY절 뒤에 사용(내부 파싱 순서도 ORDER BY 뒤)
 
 ### 문법
 ```

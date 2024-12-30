@@ -27,7 +27,7 @@
 ![](https://github.com/dididiri1/TIL/blob/main/React/images/01_05.png?raw=true)
 
 
-### Live Server
+### Live Linux
 ![](https://github.com/dididiri1/TIL/blob/main/React/images/01_06.png?raw=true)
 
 ## 1.3) 자바스크립트 실습 환경 설정하기
