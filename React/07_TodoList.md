@@ -177,3 +177,75 @@ const List = ({ todos }) => {
 export default List;
 
 ``` 
+
+## 8.6) Update - 투두 수정하기
+
+## 8.7) Delete - 투두 삭제하기
+
+### 1) onDelete 함수 만들기
+- 함수를 만들고 매개 변수로 targetId 삭제할 아이템의 아이디를 받아온다.
+- 인수로는 todos 배열에서 targetId와 일치하는 Id를 갖는 요소만 삭제한 새로운 배열 한다.
+#### App.jsx
+``` 
+  const onDelete = (targetId) => {
+    setTodos(todos.filter((todo) => todo.id !== targetId));
+  };
+``` 
+- App 컴퍼넌트에 onDelete 함수를 List 컴퍼넌트에 props로 전달 해준다.
+``` 
+  return (
+    <div className="App">
+      <Header />
+      <Editor onCreate={onCreate} />
+      <List todos={todos} onUpdate={onUpdate} onDelete={onDelete} />
+    </div>
+  );
+```
+#### List.jsx 
+
+``` 
+const List = ({ todos, onUpdate, onDelete }) => {
+    ``` 
+
+      <div className="todos_wrapper">
+        {filteredTodos.map((todo) => {
+          return (
+            <TodoItem
+              key={todo.id}
+              {...todo}
+              onUpdate={onUpdate}
+              onDelete={onDelete}
+            />
+          );
+    
+    ```   
+          
+};
+
+export default List;
+``` 
+#### TodoItem.jsx
+``` 
+import "./TodoItem.css";
+
+const TodoItem = ({ id, isDone, content, date, onUpdate, onDelete }) => {
+  const onChageCheckBox = () => {
+    onUpdate(id);
+  };
+
+  const onClickDeleteButton = () => {
+    onDelete(id);
+  };
+
+  return (
+    <div className="TodoItem">
+      <input onChange={onChageCheckBox} checked={isDone} type="checkbox" />
+      <div className="content">{content}</div>
+      <div className="date">{new Date(date).toLocaleDateString()}</div>
+      <button onClick={onClickDeleteButton}>삭제</button>
+    </div>
+  );
+};
+
+export default TodoItem;
+``` 
