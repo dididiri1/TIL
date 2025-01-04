@@ -1,3 +1,5 @@
+
+
 # 섹션2 JavaScript 기본
 
 ## 1.2) VsCode 설치하기
