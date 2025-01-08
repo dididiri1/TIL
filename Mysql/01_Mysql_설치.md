@@ -1,3 +1,6 @@
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/01_00.png?raw=true)
+
+
 # [MYSQL] AWS EC2 Linux) - MySQL 설치 및 접속
 
 ## 1. MySQL 저장소 설치

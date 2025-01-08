@@ -5,6 +5,18 @@
 
 ## 분류
 
+### Kotlin
+* [섹션 2. 코틀린에서 변수와 타입, 연산자를 다루는 방법](https://github.com/dididiri1/java-to-kotlin-starter-guide/blob/main/study/02_Variable_type_and_operators.md)
+
+* [섹션 3 코틀린에서 코드를 제어하는 방법](https://github.com/dididiri1/java-to-kotlin-starter-guide/blob/main/study/03_Control_code.md)
+
+* [섹션 4. 코틀린에서의 OOP](https://github.com/dididiri1/java-to-kotlin-starter-guide/blob/main/study/04_OOP.md)
+
+* [섹션 5. 코틀린에서의 FP](https://github.com/dididiri1/java-to-kotlin-starter-guide/blob/main/study/05_FP.md)
+
+* [섹션 6. 추가적으로 알아두어야 할 코틀린 특성](https://github.com/dididiri1/java-to-kotlin-starter-guide/blob/main/study/06_Kotlin_features.md)
+
+
 ### JAVA
 * [Java 소개](https://github.com/dididiri1/TIL/blob/main/Java/01_java_intro.md)
 
@@ -137,6 +149,18 @@
 * [섹션 7. 나머지 기능들](https://github.com/dididiri1/data-jpa/tree/main/study/01_spring_data_jpa.md)
 
 
+### Spring Could MSA
+* [섹션 1. Service Discovery](https://github.com/dididiri1/TIL/blob/main/SpringColud/01_Service_Discovery.md)
+
+
+* [섹션 2. API Gateway Service](https://github.com/dididiri1/TIL/blob/main/SpringColud/02_API_Gateway_Service.md)
+
+
+* [섹션 3. E-commerce 애플리케이션](https://github.com/dididiri1/TIL/blob/main/SpringColud/03_Ecommerce.md)
+
+
+* [섹션 4. Users Microservice](https://github.com/dididiri1/TIL/blob/main/SpringColud/04_Users_Microservice.md)
+
 ### Spring Batch
 * [스프링 배치 시작](https://github.com/dididiri1/TIL/blob/main/Batch/03_spring_batch_start.md)
 
@@ -223,6 +247,10 @@
 
 * [Ubuntu - Nginx 설치](https://github.com/dididiri1/TIL/blob/main/Ubuntu/Nginx.md)
 
+### Linux
+* [SSH 포트 변경](https://github.com/dididiri1/TIL/blob/main/Linux/01_SSH_Port.md)
+
+
 ### Sqld
 * [ERD](https://github.com/dididiri1/TIL/blob/main/Sqld/01_ERD.md)
 
@@ -231,6 +259,11 @@
 * [Join](https://github.com/dididiri1/TIL/blob/main/Sqld/03_Join.md)
 
 * [DMC](https://github.com/dididiri1/TIL/blob/main/Sqld/04_DMC.md)
+
+### Mysql
+* [Mysql 설치](https://github.com/dididiri1/TIL/blob/main/Mysql/01_Mysql_설치.md)
+
+* [계정 권한 관리](https://github.com/dididiri1/TIL/blob/main/Mysql/02_계정_권한_관리.md)
 
 ### Tools
 
