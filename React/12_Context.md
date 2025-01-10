@@ -39,3 +39,60 @@
 > 컨텍스트는 여러개 만드는 것도 가능하며 왼쪽에 있는 자식 컴포넌트들을 A Context에 데이터만 공급받도록 
 > 설정해 줄 수 있고, 오른쪽에 있는 자식 컴포넌트들은 이렇게 B Context라는 새로운 컨텍스트를 통해서
 > 데이터를 공급받을 수 있도록 설정핼 줄 수도 있다.
+
+## 11.2) Context 사용하기
+
+- import context 추가
+``` 
+import {
+  useState,
+  useRef,
+  useReducer,
+  useCallback,
+  createContext,
+} from "react";
+``` 
+
+``` 
+const TodoContext = createContext();
+
+function App() {
+    ``` 
+    
+    return (
+    <div className="App">
+      <Header />
+      <TodoContext.Provider
+        value={{
+          todos,
+          onCreate,
+          onUpdate,
+          onDelete,
+        }}
+      >
+        <Editor onCreate={onCreate} />
+        <List todos={todos} onUpdate={onUpdate} onDelete={onDelete} />
+      </TodoContext.Provider>
+    </div>
+  );
+}
+``` 
+> 이렇캐 해주면 Provider 컴포넌트 아래에 있는 모든 컴포넌트들은 전부 다 TodoContext의  
+> 데이터를 공급받을 수 있게 된다. 이때 공급할 데이터는 어떻케 설정하냐면 이 Provider 컴포넌트에게   
+> value로 props로 전달해주면 된다. todo, onCreate, onUpdate 등.. 모두 다 컨텍스트로 하려고 하니까
+> 객체로 묶어서 전달해준다. 
+
+- Editor 컴포넌트 Context 사용
+### Editor.jsx
+``` 
+import { TodoContext } from "../App";
+
+onst Editor = () => {
+  const { onCreate } = useContext(TodoContext);
+
+  const [content, setContent] = useState("");
+  const contentRef = useRef();
+  
+  ...
+   
+``` 
