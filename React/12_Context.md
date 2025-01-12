@@ -96,3 +96,81 @@ onst Editor = () => {
   ...
    
 ``` 
+
+## 11.3) Context 분리하기
+
+### Context 2개로 분리하기
+- 변하는 값(todos)의 Context
+- 변하지 않는 값(onCreate, onUpdate, onDelete)의 Context
+- Context 분리하여 export로 내보낸다.
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/12_09.png?raw=true)
+
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/12_10.png?raw=true)
+
+``` 
+export const TodoStateContenxt = createContext();
+
+export const TodoDispatchContext = createContext();
+```
+
+### useMemo를 사용한 이유?
+- 컴포넌트가 리렌더링 되면 함수가 다시 생성 → 함수 안에서 객체, 변수, 함수들이 모두 다시 생성된다.  
+  -> value props로 객체를 생성해서 넣으면 컴포넌트가 리렌더링될 때마다 해당 객체가 계속 다시 생성된다
+- DispatchContext는 변하지 않는 값들만 공급하는 컨텍스트 → 해당 객체를 useMemo로 다시 생성하지 않도록 사용한다.
+- 3개의 함수를 묶어주는 객체를 다시는 생성하지 않도록 만들기 위해 사용한다.
+
+```
+const memoizedDispatch = useMemo(() => {
+    return { onCreate, onUpdate, onDelete };
+  }, []);
+
+  return (
+    <div className="App">
+      <Header />
+      <TodoStateContext.Provider value={todos}>
+        <TodoDispatchContext.Provider value={memoizedDispatch}>
+          <Editor />
+          <List />
+        </TodoDispatchContext.Provider>
+      </TodoStateContext.Provider>
+    </div>
+  );
+```
+
+- TodoDispatchContext로부터 값을 가져와서 onCreate를 받도록 설정한다.
+```
+const Editor = () => {
+  const { onCreate } = useContext(TodoDispatchContext);
+}
+```
+
+### 주의! List 함수에 구조 분해 할당 
+- todos라는 State를 value로 그대로(객체가 아닌 배열로) 전달했기 때문에 구조 분해 할당이 아닌 todos로 바로 받아오도록 만들어야 한다.
+- todos라는 변수로 꺼내서 사용한다.
+
+#### App.jsx
+```
+const memoizedDispatch = useMemo(()) =
+
+return (
+    <div className="App">
+      <Header />
+      <TodoStateContext.Provider value={todos}>
+        <TodoDispatchContext.Provider value={memoizedDispatch}>
+          <Editor />
+          <List />
+        </TodoDispatchContext.Provider>
+      </TodoStateContext.Provider>
+    </div>
+  );
+```
+#### List.jsx
+```
+const List = () => {
+  // const { todos } = useContext(TodoStateContenxt);
+  
+  const todos = useContext(TodoStateContenxt);
+}
+```
