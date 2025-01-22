@@ -11,15 +11,14 @@
 
 ### 3. 생성한 도메인의 레코드 생성
 
-![](https://github.com/dididiri1/TIL/blob/main/AWS/Route53/images/01_03.png?raw=true)
 - 생성한 호스팅 영역으로 이동하여 A 레코드를 추가 한다.
-  - 레코드 이름: @ (루트 도메인) 또는 www (서브도메인)
-  - 값: EC2의 Elastic IP
-  - TTL: 기본값 유지 (300초)
-![](https://github.com/dididiri1/TIL/blob/main/AWS/Route53/images/01_04.png?raw=true)
-``` 
+- 레코드 이름: @ (루트 도메인) 또는 www (서브도메인)
 
-``` 
+![](https://github.com/dididiri1/TIL/blob/main/AWS/Route53/images/01_03.png?raw=true)
+
+
+![](https://github.com/dididiri1/TIL/blob/main/AWS/Route53/images/01_04.png?raw=true)
+
 ### 4. 가비아 네임서버 등록하기
 ![](https://github.com/dididiri1/TIL/blob/main/AWS/Route53/images/01_05.png?raw=true)
 
