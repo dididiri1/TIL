@@ -230,6 +230,8 @@
 
 * [AWS - Secrets Manager](https://github.com/dididiri1/TIL/blob/main/AWS/Secrets/Secrets.md)
 
+* [AWS - EC2 도메인 연결(가비아)](https://github.com/dididiri1/TIL/blob/main/AWS/Route53/domain.md)
+
 
 ### Jenkins
 * [Jenkins - 설치](https://github.com/dididiri1/TIL/blob/main/Jenkins/01_설치.md)
