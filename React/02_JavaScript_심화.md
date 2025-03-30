@@ -172,3 +172,95 @@ function funcB(one, ...rest) {
 
 funcB(...arr1); 
 ```
+
+## 2.5) 원시타입 vs 객체 타입
+
+> 원시타입은 값 자체로서 변수에 저장이되고 복사가 되어 변수의 값을 수정하더라고 메모리에 저장된
+> 원본 데이터는 수정되지 않기 때문에 이러한 값들을 ***불변값***이라고 부른다. 반면 객체 타입의 경우에는
+> 값은 별도로 메모리 공간에 따로 보관해두고, 참조 값을 통해서 변수에 저장되고 또 복수가 되기 때문에
+> 특정 프로퍼티의 값을 수정하게 되면 메모리에 저장된 원본 데이터 자체가 수정되어서 이러한 객체 타입의
+> 값들을 ***가변값***이라고 부른다.
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_06.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_07.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_08.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_09.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_10.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_11.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_12.png?raw=true)
+
+## 2.6) 반복문으로 배열과 객체 순회하기
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_13.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_14.png?raw=true)
+
+
+### 1. 배열 순회
+```
+let arr = [1, 2, 3];
+```
+#### 1.1 배열 인덱스
+```
+for (let i = 0; i < arr.length; i++) {
+  console.log(arr[i]);
+}
+```
+
+#### 1.2 for of 반복문
+```
+for (let item of arr) {
+  console.log(item);
+}
+```
+
+
+### 2. 객체 순회
+```
+let person = {
+  name: "홍길동",
+  age: 27,
+  hobby: "헬스",
+};
+```
+
+#### 2.1 Object.key 사용
+- 객체에서 key 값들만 뽑아서 새로운 배열로 반환
+```
+let keys = Object.keys(person);
+
+for (let i = 0; i < keys.length; i++) {
+  console.log(keys[i]);
+}
+
+for (let key of keys) {
+  const value = person[key];
+  console.log(key, value);
+}
+```
+
+#### 2.2 Object.values
+- 객체에서 vaule 값들만 뽑아서 새로운 배열로 반환
+```
+for (let value of values) {
+  console.log(value);
+}
+```
+
+
+#### 2.3 for in
+```
+for (let key in person) {
+  const value = person[key];
+  console.log(key, value);
+}
+
+```기
+
+
