@@ -261,6 +261,158 @@ for (let key in person) {
   console.log(key, value);
 }
 
-```기
+```
 
+## 2.7) 배열 메서드1. 요소 조작
+
+### 1. push()
+- 배열의 맨 뒤에 새로운 요소를 추가
+- 기존 배열을 변경하며, 새로운 배열 길이를 반환
+```
+let arr = [1, 2, 3];
+arr.push(4, 5, 6);
+
+console.log(arr); // [1, 2, 3, 4, 5, 6]
+```
+
+### 2. pop()
+- 배열의 맨 뒤 요소를 제거하고 반환
+- 기존 배열이 변경됨
+```
+let arr = [1, 2, 3];
+const poppedItem = arr.pop();
+
+console.log(poppedItem); // 3
+console.log(arr); // [1, 2]
+```
+
+### 3. shift()
+- 배열의 맨 앞 요소를 제거하고 반환
+- 기존 배열이 변경됨
+```
+let arr = [1, 2, 3];
+const shiftedItem = arr.shift();
+
+console.log(shiftedItem); // 1
+console.log(arr); // [2, 3]
+```
+
+### 4. unshift()
+- 배열의 맨 앞에 새로운 요소를 추가
+- 기존 배열을 변경하며, 새로운 배열 길이를 반환
+```
+let arr = [1, 2, 3];
+const newLength = arr.unshift(0);
+
+console.log(newLength); // 4
+console.log(arr); // [0, 1, 2, 3]
+
+```
+
+### 5. slice()
+- 배열의 특정 범위를 잘라서 새로운 배열로 반환
+- 기존 배열은 변경되지 않음
+- slice(start, end) 형식으로 사용하며, end는 포함되지 않음
+```
+let arr = [1, 2, 3, 4, 5];
+
+console.log(arr.slice(2, 5)); // [3, 4, 5]
+console.log(arr.slice(2)); // [3, 4, 5]
+console.log(arr.slice(-3)); // [3, 4, 5]
+console.log(arr); // [1, 2, 3, 4, 5] (원본 유지)
+```
+
+### 6. concat()
+- 두 개 이상의 배열을 합쳐서 새로운 배열을 반환
+- 기존 배열은 변경되지 않음
+```
+let arr1 = [1, 2];
+let arr2 = [3, 4];
+
+let mergedArr = arr1.concat(arr2);
+
+console.log(mergedArr); // [1, 2, 3, 4]
+console.log(arr1, arr2); // 원본 배열 유지
+```
+
+## 2.8) 배열 메서드2. 순회와 탐색
+
+### 1. forEach
+- 모든 요소를 순회하면서, 각각의 요소에 특정 동작을 수행시키는 메서드
+```
+let arr1 = [1, 2, 3];
+
+arr1.forEach(function (item, idx, arr) {
+  console.log(idx, item * 2);
+});
+
+let doubleArr = [];
+
+arr1.forEach((item) => {
+  doubleArr.push(item * 2);
+});
+
+console.log(doubleArr); // [2, 4, 6]
+```
+
+### 2. includes()
+- 배열에 특정 요소가 포함되어 있는지 불리언 값(true/false) 반환
+```
+let arr2 = [1, 2, 3];
+let isInclude = arr2.includes(3);
+
+console.log(isInclude);
+```
+
+### 3. indexOf()
+- 특정 요소의 인덱스(위치)를 반환
+- 요소가 없으면 -1을 반환
+```
+let arr3 = [1, 2, 3];
+let index = arr3.indexOf(2);
+
+console.log(index); // 1
+```
+
+### 4. findIndex()
+- 모든 요소를 순회하면서 콜백 함수를 만족하는 첫 번째 요소의 인덱스 반환
+- 요소가 없으면 -1 반환
+```
+let arr4 = [1, 2, 3];
+
+const findIndex = arr4.findIndex((item) => {
+  if (item === 2) return true;
+});
+
+console.log(findIndex); // 1
+
+const findIndex2 = arr4.findIndex((item) => item % 2 !== 0);
+console.log(findIndex2); // 0 (첫 번째 홀수인 1의 인덱스)
+```
+
+### 5. indexOf vs findIndex
+- indexOf()는 단순 값 비교(얕은 비교) 로 요소를 찾음
+- findIndex()는 콜백 함수 조건을 통해 요소를 찾을 수 있음 (객체 탐색 가능)
+```
+let objectArr = [{ name: "춘식이" }, { name: "홍길동" }];
+
+console.log(objectArr.indexOf({ name: "홍길동" })); // -1 (객체 비교 실패)
+
+console.log(objectArr.findIndex((item) => item.name === "홍길동")); // 1 (홍길동의 인덱스)
+```
+
+> indexOf 메서드는 특정 값을 배열에서 찾을때 얕은 비교로만 진행하기 때문에 객체 값을 찾지 못하고
+> 반변 findIndex 메서드는 콜백함수를 이용해서 우리가 작접 프로퍼티의 값을 기준으로 비교시킬 수가
+> 있기 때문에 객체 값도 조건식만 잘 만들어 주면 쉽게 찾아낼 수 있다는 장점이 있다.
+
+### 6. find()
+- findIndex()와 유사하지만, 요소의 인덱스가 아닌 요소 자체를 반환
+- 만족하는 요소가 없으면 undefined 반환
+```
+let arr5 = [{ name: "춘식이" }, { name: "홍길동" }];
+
+const found = arr5.find((item) => item.name === "홍길동");
+
+console.log(found); // { name: "홍길동" }
+```
 
