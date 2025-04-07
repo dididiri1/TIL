@@ -416,3 +416,15 @@ const found = arr5.find((item) => item.name === "홍길동");
 console.log(found); // { name: "홍길동" }
 ```
 
+## 2.11) 동기와 비동기
+```
+console.log(1);
+
+setTimeout(() => {
+  console.log(2);
+}, 3000);
+
+console.log(3);
+```
+
+## 2.12) 비동기 작업 처리하기 1. 콜백함수
