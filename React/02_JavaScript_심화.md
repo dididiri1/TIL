@@ -461,3 +461,133 @@ orderFood((food) => {
   });
 });
 ```
+
+## 2.13) 비동기 작업 처리하기 2. Promise
+비동기 작업을 효율적으로 처리할 수 있도록 도와주는 자바스크립의 내장 객체
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_15.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_16.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_17.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_18.png?raw=true)
+
+```
+const promise = new Promise((resolve, reject) => {
+  // 비동기 작업 실행하는 함수
+  // executor
+
+  setTimeout(() => {
+    console.log("안녕");
+    resolve("안녕");
+  }, 2000);
+});
+
+setTimeout(() => {
+  console.log(promise);
+}, 3000);
+```
+
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_19.png?raw=true)
+
+```
+const promise = new Promise((resolve, reject) => {
+  // 비동기 작업 실행하는 함수
+  // executor
+
+  setTimeout(() => {
+    console.log("안녕");
+    reject("실해했는지 이유...");
+  }, 2000);
+});
+
+setTimeout(() => {
+  console.log(promise);
+}, 3000);
+```
+![](https://github.com/dididiri1/TIL/blob/main/React/images/02_20.png?raw=true)
+> Executor 함수에서 Reject를 호출하게 되면 Promise의 비동기 작업이 실패하게 되는 거고 반대로 Resolve를
+> 호출하게 되면 이 Promise의 비동기 작업이 성공하게 된다. 그리고 각각 Resolve와 Reject 함수 모두 인수로 
+> Promise의 결과 값을 전달 할 수 있다.
+
+
+### then 메소드 
+- then 메소드는 프로미스의 비동기 작업이 성공했을 때만 호출되는 메소드이다.
+```
+const promise = new Promise((resolve, reject) => {
+  // 비동기 작업 실행하는 함수
+  // executor
+
+  setTimeout(() => {
+    const num = 10;
+
+    if (typeof num === "number") {
+      resolve(num + 10);
+    } else {
+      reject("num이 숫자가 아닙니다.");
+    }
+  }, 2000);
+});
+
+// then 메소드
+// -> 그 후에
+promise.then((value) => {
+  console.log(value);
+});
+
+
+```
+
+### catch 메소드
+- catch 메소드는 반대로 비동기 작업이 실패 햇을 때만 호출되는 메소드이다.
+```
+promise.catch((error) => {
+  console.log(error);
+});
+```
+
+### Promise 체이닝
+```
+promise.then((value) => {
+  console.log(value);
+}).catch((error) => {
+  console.log(error);
+});
+```
+
+```
+function add10(num) {
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (typeof num === "number") {
+        resolve(num + 10);
+      } else {
+        reject("num이 숫자가 아닙니다.");
+      }
+    }, 2000);
+  });
+
+  return promise;
+}
+
+add10(0)
+  .then((result) => {
+    console.log(result);
+    return add10(result);
+  })
+  .then((result) => {
+    console.log(undefined);
+  })
+  .then((result) => {
+    console.log(result);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+```
+```
+10
+20
+num이 숫자가 아닙니다.
+```
