@@ -591,3 +591,64 @@ add10(0)
 20
 num이 숫자가 아닙니다.
 ```
+
+## 2.14) 비동기 작업 처리하기 3. Async Await
+### Async
+- 어떤 함수를 비동기 함수로 만들어주는 키워드
+- 함수가 프로미스를 반환하도록 변환해주는 그런 키워드
+```
+async function getData() {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve({
+        name: "홍길동",
+        id: "winterload",
+      });
+    }, 1500);
+  });
+}
+
+console.log(getData());
+```
+```
+Promise {<pending>}
+    [[Prototype]]: Promise
+    [[PromiseState]]: "fulfilled"
+    [[PromiseResult]]: Object
+```
+
+### Await
+- async 함수 내부에서만 사용이 가능 한 키워드
+
+```
+function printData() {
+  getData().then((result) => {
+    console.log(result);
+  });
+}
+
+printData();
+
+```
+> 호출 결과가 Promise를 반환하니깐 then 메소드를 붙여서 result 매개변수로 받아오면서 이런식으로 작성 해줬어야 한다.
+
+```
+async function printData() {
+  const data = await getData();
+  console.log(data); // 1.5후에 {name: '홍길동', id: 'winterload'}
+}
+
+printData();
+```
+> async와 await를 이용하면 then 메소드 복잡하게 쓸 필요가 없다. then 메소드를 쓰지 않아도 알아서 getDdate 함수가 반환
+> 하는 Promise가 종료 되기를 기다린다.
+
+```
+function printData() {
+  const data = await getData();   // ❌
+  console.log(data); // 1.5후에 {name: '홍길동', id: 'winterload'}
+}
+
+printData();
+```
+> 참고로 await 함수는 async가 붙지 않은 함수에서 사용하면 오류가 난다.
