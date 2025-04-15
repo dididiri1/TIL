@@ -1,9 +1,9 @@
-## WebMvcTest에서 AOP (@Aspect)가 안 걸리는 이유와 해결 방법
+# WebMvcTest에서 AOP (@Aspect)가 안 걸리는 이유와 해결 방법
 
-@WebMvcTest를 사용해서 컨트롤러 단위 테스트를 작성하는 중, AOP로 만든 유효성 검증 처리 로직이 전혀 동작하지 않는 문제를 겪었다.
-Postman으로 테스트할 땐 잘 되는데, MockMvc 테스트에서는 유효성 검증 실패가 400이 아닌 201으로 응답 했다
-
-그래서 이번 글에선 문제 원인과 해결 방법을 정리해보자!
+## 💡 상황 설명
+> @WebMvcTest를 사용해서 컨트롤러 단위 테스트를 작성하는 중, AOP로 만든 유효성 검증 처리 로직이 전혀 동작하지 않는 문제를 겪었다.  
+> Postman으로 테스트할 땐 잘 되는데, MockMvc 테스트에서는 유효성 검증 실패가 400이 아닌 201으로 응답 했다.   
+> 그래서 이번 글에선 문제 원인과 해결 방법을 정리해보자!
 
 ### Controller 코드
 ``` 
@@ -83,11 +83,11 @@ class DiaryApiControllerTest {
 ``` 
 
 ## 원인 분석
-> @WebMvcTest는 Controller와 MVC 관련 빈만 슬라이스 로딩하기 때문에,
-> @Component, @Aspect로 등록한 AOP 빈은 스프링 AOP 프록시로 엮이지 않음.
+> @WebMvcTest는 Controller와 MVC 관련 빈만 슬라이스 로딩하기 때문에,  
+> @Component, @Aspect로 등록한 AOP 빈은 스프링 AOP 프록시로 엮이지 않음.  
 > 그래서 AOP가 아예 동작하지 않게 된 것이었다.
 
-#### 📝 정리
+### 📝 정리
 | 항목               |        	@WebMvcTest         | @SpringBootTest                       |
 |:-----------------|:---------------------------:|:--------------------------------------|
 | 로딩 범위            | Controller + MVC 관련 Bean만   | 전체 ApplicationContext                 |
