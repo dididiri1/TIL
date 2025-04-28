@@ -10,7 +10,7 @@ Using CATALINA_BASE:    "C:\tomcat8"
 Using JAVA_HOME:        "C:\Program Files\java\jdk-16.0.2"
 Using JRE_HOME:         "C:\Program Files\java\jdk-16.0.2"
 Using JVM:              "C:\Program Files\java\jdk-16.0.2\bin\server\jvm.dll"
-The service 'Tomcat7' has been installed.
+The service 'Tomcat8' has been installed.
 ```
 
 ## 2.  서비스 등록 확인
