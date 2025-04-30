@@ -15,7 +15,7 @@ The service 'Tomcat8' has been installed.
 
 ## 2.  서비스 등록 확인
 - 설치가 완료되면, 윈도우 실행창에서 services.msc 를 실행하여 윈도우 서비스로 이동한다.
-![](https://github.com/dididiri1/TIL/blob/main/React/images/02_01.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Tomcat/images/02_01.png?raw=true)
 
 
 ## 3. 서비스 관리
