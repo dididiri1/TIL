@@ -652,3 +652,7 @@ function printData() {
 printData();
 ```
 > 참고로 await 함수는 async가 붙지 않은 함수에서 사용하면 오류가 난다.
+
+### Reference
+* [한 입 크기로 잘라 먹는 리액트(React.js) : 기초부터 실전까지](https://inf.run/FiFhg)
+

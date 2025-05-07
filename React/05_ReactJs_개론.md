@@ -62,3 +62,7 @@ q + enter : 현재 실행중인 Vite 서버 종료
 
 ![](https://github.com/dididiri1/TIL/blob/main/React/images/05_02.png?raw=true)
 
+
+### Reference
+* [한 입 크기로 잘라 먹는 리액트(React.js) : 기초부터 실전까지](https://inf.run/FiFhg)
+

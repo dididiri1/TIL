@@ -186,5 +186,8 @@ console.log(color);
 
 - 만약에 node_modules나 package-lock.json 파일이 없어졌다면 
 - npm i로 새롭게 다시 다운로드 받을 수 있음 package.jsondp 기록된 라이브러리들을 다시 설치 해준다.
-npm i
-```
+
+
+### Reference
+* [한 입 크기로 잘라 먹는 리액트(React.js) : 기초부터 실전까지](https://inf.run/FiFhg)
+
