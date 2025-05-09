@@ -1,5 +1,5 @@
 # [React] 리액트 Redux
-![](https://github.com/dididiri1/TIL/blob/main/React/images/16_01.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/React/images/16_02.webp?raw=true)
 
 ## @reduxjs/toolkit이란?
 Redux Toolkit(RTK)은 Redux 공식에서 권장하는 Redux 상태 관리를 간편하게 할 수 있게 도와주는 도구 모음이다.
