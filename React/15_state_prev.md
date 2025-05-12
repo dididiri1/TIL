@@ -30,7 +30,7 @@ const onDoubleDecreaseMonth = () => {
 - pivotDate는 상태값인데, setPivotDate는 비동기적으로 동작
 - 두 줄 모두 같은 pivotDate 값을 참조하게 됨
 - 그래서 결과적으로 한 번만 감소된 상태가 적용됨
-- 
+
 ## prev를 사용한 안전한 방식
 ```
 const onDoubleDecreaseMonth = () => {
@@ -51,7 +51,7 @@ const onDoubleDecreaseMonth = () => {
 | setState(prev => newValue) | 이전 상태 기준으로 업데이트 | 안전하고 권장되는 방식       |
 
 
-> 상태 업데이트가 이전 상태값을 기반으로 계산되어야 할 때는 무조건 prev를 사용하자.
-> 특히 상태를 연속으로 바꾸거나, 동시에 여러 상태를 변경할 때는 prev가 안정성을 보장해준다.
+> 💡 상태 업데이트가 이전 상태값을 기반으로 계산되어야 할 때는 무조건 prev를 사용하자.  
+> 특히 상태를 연속으로 바꾸거나, 동시에 여러 상태를 변경할 때는 prev가 안정성을 보장해준다.  
 > prev를 쓰는 방식은 리액트의 비동기 렌더링을 고려한 안전한 패턴이다.
 

@@ -33,6 +33,8 @@
 * [React Date 라이브러리](https://github.com/dididiri1/TIL/blob/main/React/14_dafe-fns.md)
 
 * [React prev](https://github.com/dididiri1/TIL/blob/main/React/15_state_prev.md)
+* 
+* [React Redux](https://github.com/dididiri1/TIL/blob/main/React/16_Redux.md)
 
 ### Kotlin
 * [섹션 2. 코틀린에서 변수와 타입, 연산자를 다루는 방법](https://github.com/dididiri1/java-to-kotlin-starter-guide/blob/main/study/02_Variable_type_and_operators.md)
