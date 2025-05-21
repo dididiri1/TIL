@@ -431,3 +431,221 @@ return (
 ![](https://github.com/dididiri1/TIL/blob/main/React_SpringBoot/images/04_02.png?raw=true)
 
 ![](https://github.com/dididiri1/TIL/blob/main/React_SpringBoot/images/04_03.png?raw=true)
+
+### 동일 페이지 클릭 시 문제
+- 컴포넌트의 상태를 변경하는 방식으로 작성
+- useCustomMove에 refresh 상태 추가
+#### global.d.ts
+```
+interface UseCustomMoveReturn {
+  moveToList: (PageParam?: PageParam) => void;
+  moveToModify: (tno: number) => void;
+  moveToRead: (tno: number) => void;
+  page: number;
+  size: number;
+  refresh: boolean; // 추가
+}
+```
+
+```
+import { useState } from "react";
+import { createSearchParams, useNavigate, useSearchParams } from "react-router";
+
+const useCustomMove = () => {
+  const nav = useNavigate();
+
+  const [queryParams] = useSearchParams();
+
+  const [refresh, setRefresh] = useState<boolean>(false); // ✅ 추가
+
+  ...
+
+  const moveToList = (pageParam?: PageParam) => {
+    let queryStr = "";
+    if (pageParam) {
+      const pageNum = Number(pageParam.page) || 1;
+      const sizeNum = Number(pageParam.size) || 10;
+
+      queryStr = createSearchParams({
+        page: String(pageNum),
+        size: String(sizeNum),
+      }).toString();
+
+      if (queryStr === queryDefault) {  // ✅ 추가
+        setRefresh(!refresh);
+      }
+    } else {
+      queryStr = queryDefault;
+    }
+    nav({ pathname: "../list", search: queryStr });
+  };
+
+  return { page, size, moveToList, refresh, moveToModify, moveToRead };
+};
+
+export default useCustomMove;
+
+```
+
+## 06 등록 컴포넌트와 모달 처리
+### 등록 컴포넌트와 모달 처리
+- components > todo > addComponent.tsx
+- pages > todo > addPage.tsx 에 import
+```
+import { lazy, Suspense } from "react";
+import { Navigate } from "react-router";
+
+const Loading = () => <div>Loading...</div>;
+const TodoIndex = lazy(() => import("../pages/todo/indexPage"));
+
+...
+
+const TodoAdd = lazy(() => import("../pages/todo/addPage"));
+
+const todoRouter = () => {
+  return {
+    path: "todo",
+    Component: TodoIndex,
+    children: [
+      ... 
+      
+      {
+        path: "add",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <TodoAdd />
+          </Suspense>
+        ),
+      },
+    ],
+  };
+};
+
+export default todoRouter;
+
+```
+
+```
+import { useState, type ChangeEvent } from "react";
+import { postAdd } from "../../api/todoApi";
+
+const initState: TodoAdd = {
+  title: "",
+  writer: "",
+  dueDate: "",
+};
+
+const AddComponent = () => {
+  const [todo, setTodo] = useState<TodoAdd>({ ...initState });
+
+  const handleChangeTodo = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setTodo((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleClickAdd = () => {
+    postAdd(todo)
+      .then((result) => {
+        console.log(result);
+        setTodo({ ...initState }); // 초기화
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+  };
+
+  return (
+    <div className="border-2 border-sky-200 mt-10 m-2 p-4">
+      {/* TITLE 입력 */}
+      <div className="flex justify-center">
+        <div className="relative mb-4 flex w-full flex-wrap items-stretch">
+          <div className="w-1/5 p-6 text-right font-bold">TITLE</div>
+          <input
+            className="w-4/5 p-6 rounded-r border border-solid border-neutral-500 shadow-md"
+            name="title"
+            type="text"
+            value={todo.title}
+            onChange={handleChangeTodo}
+          />
+        </div>
+      </div>
+
+      {/* WRITER 입력 */}
+      <div className="flex justify-center">
+        <div className="relative mb-4 flex w-full flex-wrap items-stretch">
+          <div className="w-1/5 p-6 text-right font-bold">WRITER</div>
+          <input
+            className="w-4/5 p-6 rounded-r border border-solid border-neutral-500 shadow-md"
+            name="writer"
+            type="text"
+            value={todo.writer}
+            onChange={handleChangeTodo}
+          />
+        </div>
+      </div>
+
+      {/* DUEDATE 입력 */}
+      <div className="flex justify-center">
+        <div className="relative mb-4 flex w-full flex-wrap items-stretch">
+          <div className="w-1/5 p-6 text-right font-bold">DUEDATE</div>
+          <input
+            className="w-4/5 p-6 rounded-r border border-solid border-neutral-500 shadow-md"
+            name="dueDate"
+            type="date"
+            value={todo.dueDate}
+            onChange={handleChangeTodo}
+          />
+        </div>
+      </div>
+
+      {/* ADD 버튼 */}
+      <div className="flex justify-end">
+        <div className="relative mb-4 flex p-4 flex-wrap items-stretch">
+          <button
+            type="button"
+            className="rounded p-4 w-36 bg-blue-500 text-xl text-white"
+            onClick={handleClickAdd}
+          >
+            ADD
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AddComponent;
+```
+```
+import AddComponent from "../../components/todo/addComponent";
+
+const AddPage = () => {
+  return (
+    <div className="bg-white w-full">
+      <div className="text-4xl">Todo Add Page</div>
+      <AddComponent />
+    </div>
+  );
+};
+
+export default AddPage;
+```
+
+```
+import axios from "axios";
+
+export const API_SERVER_HOST = "http://localhost:8080";
+
+const prefix = `${API_SERVER_HOST}/api/todo`;
+
+ ...
+
+export const postAdd = async (todoObj: TodoAdd) => {
+  const res = await axios.post(`${prefix}/`, todoObj);
+  return res.data;
+};
+
+```
