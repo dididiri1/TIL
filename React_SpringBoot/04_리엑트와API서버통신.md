@@ -489,8 +489,13 @@ export default useCustomMove;
 
 ## 06 등록 컴포넌트와 모달 처리
 ### 등록 컴포넌트와 모달 처리
+![](https://github.com/dididiri1/TIL/blob/main/React_SpringBoot/images/04_04.png?raw=true)
+
+
 - components > todo > addComponent.tsx
 - pages > todo > addPage.tsx 에 import
+
+
 ```
 import { lazy, Suspense } from "react";
 import { Navigate } from "react-router";
@@ -647,5 +652,181 @@ export const postAdd = async (todoObj: TodoAdd) => {
   const res = await axios.post(`${prefix}/`, todoObj);
   return res.data;
 };
+
+```
+
+### 등록 처리 Mutation 과 모달 처리
+- 등록이 처리된 후에 모달 화면을 보여주고 완료되면 이동 처리
+
+#### global.d.ts
+```
+interface ResultModal {
+  title: string;
+  content: string;
+  callbackFn?: () => void;
+}
+```
+
+#### components/common/resultModal.tsx
+```
+const ResultModal = ({ title, content, callbackFn }: ResultModal) => {
+  return (
+    <div
+      className="fixed top-0 left-0 z-[1055] flex h-full w-full justify-center"
+      style={{ backgroundColor: "rgba(169, 169, 169, 0.7)" }}
+      onClick={() => {
+        if (callbackFn) {
+          callbackFn();
+        }
+      }}
+    >
+      <div
+        className="absolute bg-white shadow dark:bg-gray-700 w-1/4 rounded mt-10 mb-10 px-6 min-w-[600px]"
+        onClick={(e) => e.stopPropagation()} // 클릭 전파 방지
+      >
+        <div className="justify-center bg-warning-400 mt-6 mb-6 text-2xl border-b-4 border-gray-500 text-center">
+          {title}
+        </div>
+        <div className="text-4xl border-orange-400 border-b-4 pt-4 pb-4 text-center">
+          {content}
+        </div>
+        <div className="justify-end flex">
+          <button
+            className="rounded bg-blue-500 mt-4 mb-4 px-6 pt-4 pb-4 text-lg text-white"
+            onClick={() => {
+              if (callbackFn) {
+                callbackFn();
+              }
+            }}
+          >
+            Close Modal
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ResultModal;
+
+```
+
+
+```
+import { useState, type ChangeEvent } from "react";
+import { postAdd } from "../../api/todoApi";
+import useCustomMove from "../../hooks/useCustomMove";
+import ResultModal from "../common/resultModal";
+
+const initState: TodoAdd = {
+  title: "",
+  writer: "",
+  dueDate: "",
+};
+
+const AddComponent = () => {
+  const [todo, setTodo] = useState<TodoAdd>({ ...initState });
+
+  const [result, setResult] = useState<number | null>(null);  // ✅ 추가
+
+  const { moveToList }: UseCustomMoveReturn = useCustomMove(); // ✅ 추가
+
+  const handleChangeTodo = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setTodo((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleClickAdd = () => {
+    postAdd(todo)
+      .then((result) => {
+        console.log(result);
+
+        setResult(result.TNO); // ✅ 추가
+
+        setTodo({ ...initState }); // 초기화
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+  };
+
+  const closeModal = () => { // ✅ 추가
+    setResult(null);
+    moveToList();
+  };
+
+  return (
+    <div className="border-2 border-sky-200 mt-10 m-2 p-4">
+      {/* 모달 처리 */} // ✅ 추가
+      {result && (
+        <ResultModal
+          title="등록 처리 완료"
+          content={`New ${result} Added`}
+          callbackFn={closeModal}
+        ></ResultModal>
+      )}
+
+      {/* TITLE 입력 */}
+      <div className="flex justify-center">
+        <div className="relative mb-4 flex w-full flex-wrap items-stretch">
+          <div className="w-1/5 p-6 text-right font-bold">TITLE</div>
+          <input
+            className="w-4/5 p-6 rounded-r border border-solid border-neutral-500 shadow-md"
+            name="title"
+            type="text"
+            value={todo.title}
+            onChange={handleChangeTodo}
+          />
+        </div>
+      </div>
+
+      {/* WRITER 입력 */}
+      <div className="flex justify-center">
+        <div className="relative mb-4 flex w-full flex-wrap items-stretch">
+          <div className="w-1/5 p-6 text-right font-bold">WRITER</div>
+          <input
+            className="w-4/5 p-6 rounded-r border border-solid border-neutral-500 shadow-md"
+            name="writer"
+            type="text"
+            value={todo.writer}
+            onChange={handleChangeTodo}
+          />
+        </div>
+      </div>
+
+      {/* DUEDATE 입력 */}
+      <div className="flex justify-center">
+        <div className="relative mb-4 flex w-full flex-wrap items-stretch">
+          <div className="w-1/5 p-6 text-right font-bold">DUEDATE</div>
+          <input
+            className="w-4/5 p-6 rounded-r border border-solid border-neutral-500 shadow-md"
+            name="dueDate"
+            type="date"
+            value={todo.dueDate}
+            onChange={handleChangeTodo}
+          />
+        </div>
+      </div>
+
+      {/* ADD 버튼 */}
+      <div className="flex justify-end">
+        <div className="relative mb-4 flex p-4 flex-wrap items-stretch">
+          <button
+            type="button"
+            className="rounded p-4 w-36 bg-blue-500 text-xl text-white"
+            onClick={handleClickAdd}
+          >
+            ADD
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AddComponent;
 
 ```
