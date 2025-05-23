@@ -830,3 +830,310 @@ const AddComponent = () => {
 export default AddComponent;
 
 ```
+
+## 07 수정/삭제 처리
+
+- 삭제(Delete 버튼) : 삭제 결과를 모달창으로 보여주고 '/todo/list'로 이동
+- 수정(Modify 버튼) : 수정 결과를 모달창으로 보여주고 '/todo/read/번호'로 이동
+- 결과의 출력은 공통적으로 모달 창을 이용 
+
+### 수정을 위한 타입 추가 및 API 호출 함수
+- todo.d.ts에 타입 추가 
+```
+interface TodoModify {
+  tno: number;
+  title: string;
+  dueDate: string | null;
+  complete: boolean;
+}
+```
+- todoApi.tsx에 수정/삭제 함수를 추가
+```
+export const deleteOne = async (tno: number) => {
+  const res = await axios.delete(`${prefix}/${tno}`);
+  return res.data;
+};
+
+export const putOne = async (todo: TodoModify) => {
+  const res = await axios.put(`${prefix}/${todo.tno}`, todo);
+  return res.data;
+};
+```
+
+### 수정/삭제를 위한 컴포넌트 
+#### ModifyComponent.tsx 추가
+```
+import { useEffect, useState } from "react";
+
+const initState = {
+  tno: 0,
+  title: "",
+  writer: "",
+  dueDate: null,
+  complete: false,
+};
+
+const ModifyComponent = ({ tno }: { tno: number }) => {
+  const [todo, setTodo] = useState({ ...initState });
+
+  useEffect(() => {}, [tno]);
+
+  return (
+    <div className="border-2 border-sky-200 mt-10 m-2 p-4">
+      <div className="flex justify-end p-4">
+        <button
+          type="button"
+          className="inline-block rounded p-4 m-2 text-xl w-32 text-white bg-red-500"
+        >
+          Delete
+        </button>
+        <button
+          type="button"
+          className="rounded p-4 m-2 text-xl w-32 text-white bg-blue-500"
+        >
+          Modify
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ModifyComponent;
+```
+
+### ModifyPage에 ModifyComponent를 추가
+```
+import { useParams } from "react-router";
+import ModifyComponent from "../../components/todo/modifyComponent";
+
+const ModifyPage = () => {
+  const { tno } = useParams();
+
+  return (
+    <div className="p-4 w-full bg-white">
+      <div className="text-3xl font-extrabold">Todo Modify Page</div>
+
+      <ModifyComponent tno={Number(tno)} />
+    </div>
+  );
+};
+
+export default ModifyPage;
+
+```
+
+
+### ModifyComponent에 handleClickModify( ), handleClickDelete( ) 함수 정의, 버튼에 이벤트 처리
+```
+  const handleClickModify = () => {
+    const todoModify: TodoModify = {
+      tno: todo.tno,
+      title: todo.title,
+      dueDate: todo.dueDate,
+      complete: todo.complete,
+    };
+
+    putOne(todoModify)
+      .then((data) => {
+        console.log("modify result: " + data);
+      })
+      .catch((err) => {
+        console.log("수정 실패 했습니다:", err);
+      });
+  };
+
+  const handleClickDelete = () => {
+    deleteOne(tno).then((data) => {
+      console.log("delete result: " + data);
+    });
+  };
+```
+```
+  <div className="flex justify-end p-4">
+        <button
+          type="button"
+          className="inline-block rounded p-4 m-2 text-xl w-32 text-white bg-red-500"
+          onClick={handleClickDelete}
+        >
+          Delete
+        </button>
+        <button
+          type="button"
+          className="rounded p-4 m-2 text-xl w-32 text-white bg-blue-500"
+          onClick={handleClickModify}
+        >
+          Modify
+        </button>
+  </div>
+```
+
+### 수정/삭제와 모달창
+- ModifyComponent에 화면 이동에 필요한 기능을 가져오고 모달창이 close될 때 호출하도록 변경
+```
+import { useEffect, useState, type ChangeEvent } from "react";
+import { deleteOne, getOne, putOne } from "../../api/todoApi";
+import useCustomMove from "../../hooks/useCustomMove";
+import ResultModal from "../common/resultModal";
+
+const initState = {
+  tno: 0,
+  title: "",
+  writer: "",
+  dueDate: null,
+  complete: false,
+};
+
+const ModifyComponent = ({ tno }: { tno: number }) => {
+  const [todo, setTodo] = useState({ ...initState });
+
+  const [result, setResult] = useState<string | null>(null);
+
+  const { moveToList, moveToRead } = useCustomMove();
+
+  useEffect(() => {
+    getOne(tno).then((data) => {
+      console.log(data);
+      setTodo(data);
+    });
+  }, [tno]);
+
+  const handleChangeTodo = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setTodo((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleChangeTodoComplete = (e: ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    todo.complete = value === "Y";
+    setTodo({ ...todo });
+  };
+
+  const handleClickModify = () => {
+    const todoModify: TodoModify = {
+      tno: todo.tno,
+      title: todo.title,
+      dueDate: todo.dueDate,
+      complete: todo.complete,
+    };
+
+    putOne(todoModify)
+      .then((data) => {
+        console.log("modify result: " + JSON.stringify(data));
+        setResult("Modify");
+      })
+      .catch((err) => {
+        console.log("수정 실패 했습니다:", err);
+      });
+  };
+
+  const handleClickDelete = () => {
+    deleteOne(tno).then((data) => {
+      console.log("delete result: " + data);
+      setResult("Delelte");
+    });
+  };
+
+  const closeModal = () => {
+    if (result === "Delete") {
+      moveToList();
+    } else {
+      moveToRead(tno);
+    }
+
+    setResult(null);
+  };
+
+  return (
+    <div className="border-2 border-sky-200 mt-10 m-2 p-4">
+      {result && (
+        <ResultModal
+          title={"처리결과"}
+          content={result}
+          callbackFn={closeModal}
+        ></ResultModal>
+      )}
+      <div className="flex justify-center mt-10">
+        <div className="relative mb-4 flex w-full flex-wrap items-stretch">
+          <div className="w-1/5 p-6 text-right font-bold">TNO</div>
+          <div className="w-4/5 p-6 rounded-r border border-solid shadow-md bg-gray-100">
+            {todo.tno}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-center">
+        <div className="relative mb-4 flex w-full flex-wrap items-stretch">
+          <div className="w-1/5 p-6 text-right font-bold">WRITER</div>
+          <div className="w-4/5 p-6 rounded-r border border-solid shadow-md bg-gray-100">
+            {todo.writer}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-center">
+        <div className="relative mb-4 flex w-full flex-wrap items-stretch">
+          <div className="w-1/5 p-6 text-right font-bold">TITLE</div>
+          <input
+            className="w-4/5 p-6 rounded-r border border-solid border-neutral-300 shadow-md"
+            name="title"
+            type="text"
+            value={todo.title}
+            onChange={handleChangeTodo}
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-center">
+        <div className="relative mb-4 flex w-full flex-wrap items-stretch">
+          <div className="w-1/5 p-6 text-right font-bold">DUEDATE</div>
+          <input
+            className="w-4/5 p-6 rounded-r border border-solid border-neutral-300 shadow-md"
+            name="dueDate"
+            type="date"
+            value={todo.dueDate || ""}
+            onChange={handleChangeTodo}
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-center">
+        <div className="relative mb-4 flex w-full flex-wrap items-stretch">
+          <div className="w-1/5 p-6 text-right font-bold">COMPLETE</div>
+          <select
+            name="complete"
+            className="border-solid border-2 rounded m-1 p-2"
+            onChange={handleChangeTodoComplete}
+            value={todo.complete ? "Y" : "N"}
+          >
+            <option value="Y">Completed</option>
+            <option value="N">Not Yet</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="flex justify-end p-4">
+        <button
+          type="button"
+          className="inline-block rounded p-4 m-2 text-xl w-32 text-white bg-red-500"
+          onClick={handleClickDelete}
+        >
+          Delete
+        </button>
+        <button
+          type="button"
+          className="rounded p-4 m-2 text-xl w-32 text-white bg-blue-500"
+          onClick={handleClickModify}
+        >
+          Modify
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ModifyComponent;
+```
+  
