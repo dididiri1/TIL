@@ -217,4 +217,196 @@ extraReducers: (builder) => {
 ### 쿠키를 이용한 어플리케이션 상태 저장
 - 새로고침으로 App이 초기화되었을때 쿠키에 저장된 사용자 정보를 로딩하도록 useCustomLogin 수정
 - useEffect( )를 이용해서 사용자 정보가 없는 경우 쿠키 로딩 시도
-- 로딩된 정보는 useDispatch( )를 이용해서 상태로 전환 
+- 로딩된 정보는 useDispatch( )를 이용해서 상태로 전환
+
+### Axios 인터셉터와 Refresh Token
+- API 호출 시 Access Token 필요
+- Axios의 인터셉터를 활용하여 쿠키의 Access Token 처리 및 자동 갱신 등의 작업을 효율적으로 수행 가능.
+
+
+- util 패키지에 jwtUtil.ts파일을 추가
+```
+import axios, {
+  AxiosError,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from "axios";
+import { getCookie } from "./cookieUtil";
+
+const jwtAxios = axios.create();
+
+// before request - 요청 보내기 전에 추가 작업
+const beforeReq = (config: InternalAxiosRequestConfig) => {
+  console.log("before request.............");
+
+  const memberIfo = getCookie("member");
+  if (!memberIfo) {
+    console.log("Member Not Found");
+    return Promise.reject(new Error("REQUIRE_LOGIN"));
+  }
+
+  const { accessToken } = memberIfo;
+
+  // Authorization 헤더 처리
+  config.headers.Authorization = `Bearer ${accessToken}`;
+
+  return config;
+};
+
+// fail request
+const requestFail = (err: AxiosError) => {
+  console.log("request error............");
+  return Promise.reject(err);
+};
+
+// before return response - 성공적인 응답이 왔을 때 추가 작업
+const beforeRes = async (res: AxiosResponse): Promise<AxiosResponse> => {
+  console.log("before return response...........");
+  return res;
+};
+
+// fail response
+const responseFail = async (err: AxiosError) => {
+  console.log("response fail error.............");
+  console.log(err);
+  return Promise.reject(err);
+};
+
+jwtAxios.interceptors.request.use(beforeReq, requestFail);
+jwtAxios.interceptors.response.use(beforeRes, responseFail);
+
+export default jwtAxios;
+
+```
+
+### jwtAxios로 변경
+```
+import jwtAxios from "../util/jwtUtil";
+
+export const API_SERVER_HOST = "http://localhost:8080";
+
+const prefix = `${API_SERVER_HOST}/api/todo`;
+
+export const getOne = async (tno: number) => {
+  const res = await jwtAxios.get(`${prefix}/${tno}`);
+  return res.data;
+};
+
+export const getList = async (pageParam: PageParam) => {
+  const res = await jwtAxios.get(`${prefix}/list`, { params: pageParam });
+  return res.data;
+};
+
+export const postAdd = async (todoObj: TodoAdd) => {
+  const res = await jwtAxios.post(`${prefix}/`, todoObj);
+  return res.data;
+};
+
+export const deleteOne = async (tno: number) => {
+  const res = await jwtAxios.delete(`${prefix}/${tno}`);
+  return res.data;
+};
+
+export const putOne = async (todo: TodoModify) => {
+  const res = await jwtAxios.put(`${prefix}/${todo.tno}`, todo);
+  return res.data;
+};
+
+```
+- Access Token이 만료시 Refresh Token 갱신
+```
+import axios, {
+  AxiosError,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from "axios";
+import { getCookie, setCookie } from "./cookieUtil";
+
+const jwtAxios = axios.create();
+
+// before request - 요청 보내기 전에 추가 작업
+const beforeReq = (config: InternalAxiosRequestConfig) => {
+  console.log("before request.............");
+
+  const memberIfo = getCookie("member");
+  if (!memberIfo) {
+    console.log("Member Not Found");
+    return Promise.reject(new Error("REQUIRE_LOGIN"));
+  }
+
+  const { accessToken } = memberIfo;
+
+  // Authorization 헤더 처리
+  config.headers.Authorization = `Bearer ${accessToken}`;
+
+  return config;
+};
+
+// fail request
+const requestFail = (err: AxiosError) => {
+  console.log("request error............");
+  return Promise.reject(err);
+};
+
+// before return response - 성공적인 응답이 왔을 때 추가 작업
+const beforeRes = async (res: AxiosResponse): Promise<AxiosResponse> => {
+  console.log("before return response...........");
+
+  // 응답 전 처리 (필요한 경우 데이터 수정)
+  const data = res.data;
+
+  // Access Token이 만료된 경우
+  if (data && data.error === "ERROR_ACCESS_TOKEN") {
+    const memberCookieValue = getCookie("member");
+
+    const result = await refreshJWT(
+      memberCookieValue.accessToken,
+      memberCookieValue.refreshToken
+    );
+    console.log("refreshJWT RESULT", result);
+
+    memberCookieValue.accessToken = result.accessToken;
+    memberCookieValue.refreshToken = result.refreshToken;
+
+    setCookie("member", JSON.stringify(memberCookieValue), 1);
+
+    // 원래의 호출
+    const originalRequest = res.config;
+    originalRequest.headers.Authorization = `Bearer ${result.accessToken}`;
+
+    return await axios(originalRequest);
+  }
+
+  return res;
+};
+
+// fail response
+const responseFail = async (err: AxiosError) => {
+  console.log("response fail error.............");
+  console.log(err);
+  return Promise.reject(err);
+};
+
+const refreshJWT = async (accessToken: string, refreshToken: string) => {
+  const header = {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  };
+
+  const res = await axios.get(
+    `http://localhost:8080/api/member/refresh?refreshToken=${refreshToken}`,
+    header
+  );
+
+  console.log("----------------------");
+  console.log(res.data);
+
+  return res.data;
+};
+
+jwtAxios.interceptors.request.use(beforeReq, requestFail);
+jwtAxios.interceptors.response.use(beforeRes, responseFail);
+
+export default jwtAxios;
+```
