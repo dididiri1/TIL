@@ -616,5 +616,146 @@ LIMIT 10;
 
 ![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_16.png?raw=true)
 
+- 인덱스가 없다면 특정 값을 일일이 다 뒤져야 한다. 그래서 1건의 데이터를 바로 찾을 수 없다.
+- 인덱스가 있는데 고유하지 않다면(NOT UNIQUE) 원하는 1건의 데이터를 찾았다고 하더라도, 나머지 데이터에 같은 값이 있을 지도 모르므로 다른 데이터들도 체크해봐야 한다.
+- 고유하다면(UNIQUE) 1건의 데이터를 찾는 순간, 나머지 데이터는 아예 볼 필요가 없어진다. 왜냐하면 찾고자 하는 데이터가 유일한 데이터이기 때문이다.  
+  → UNIQUE 제약조건이 있는 컬럼과 기본 키는 전부 UNIQUE한 특성을 가지고 있다.
+
+```
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    account VARCHAR(100) UNIQUE
+);
+
+INSERT INTO users(account) VALUE 
+('user1@example.com'),
+('user2@example.com'),
+('user3@example.com')
+```
+
+```
+EXPLAIN SELECT * FROM users WHERE id = 3;
+EXPLAIN SELECT * FROM users WHERE account = 'user3@example.com';
+```
+
+UNIQUE 속성을 가진 컬럼은 인덱스가 자동으로 생성된다.
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_17.png?raw=true)
+
+## Range(Index Range Scan)
+
+### ✅ range: 인덱스 레인지 스캔(index Range Scan) 
+인덱스 레인지 스캔(Index Range Scan)은 인덱스를 활용해 범위 형태의 데이터를 조회한 경우를 의미한다.
+범위 형태란 **BETWEEN, 부등호(<, >, ≤, ≥), IN, LIKE**를 활용한 데이터 조회를 뜻한다.
+이 방식은 인덱스를 활용하기 때문에 **효율적인 방식이다.**
+하지만 인덱스를 사용하더라도 데이터를 조회하는 범위가 클 경우 성능 저하의 원인이 되기도 한다.
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_18.png?raw=true)
+
+```
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    account INT
+);
+```
+```
+SET SESSION cte_max_recursion_depth = 1000000;
+
+-- 더미 데이터 삽입 쿼리
+INSERT INTO users (age)
+WITH RECURSIVE cte (n) AS (
+    SELECT 1
+    UNION ALL
+    SELECT n + 1 FROM cte WHERE n < 1000000
+)
+SELECT 
+    FLOOR(1 + RAND() * 1000) AS age 
+FROM cte;
+``` 
+``` 
+CREATE INDEX idx_age ON users(age);
+``` 
+
+``` 
+EXPLAIN SELECT * FROM users
+WHERE age BETWEEN 10 and 20;
+
+EXPLAIN SELECT * FROM users
+WHERE age IN (10, 20, 30);
+
+EXPLAIN SELECT * FROM users
+WHERE age < 20;
+``` 
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_19.png?raw=true)
+
+## Ref
+### ✅ ref : 비고유 인덱스를 활용하는 경우
+비고유 인덱스를 사용한 경우(=UNIQUE가 아닌 컬럼의 인덱스를 사용한 경우) type 에 ref가 출력된다.
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_20.png?raw=true)
+
+``` 
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100)
+);
+```
+``` 
+CREATE INDEX idx_name ON users(name);
+```
+``` 
+EXPLAIN SELECT * FROM users WHERE name = '홍길동';
+``` 
+
+### ✅이 외의 type들
+eq_ref, index_merge, ref_or_null 등 다양한 타입들이 존재한다. 하지만 모든 타입들을 다 미리 공부할 필요는 없다.
+자주는 나오는 type에 먼저 익숙해진 다음에 더 딮이 공부하고 싶을 떄 다른 type들도 찾아서 공부 하면 된다.
+
+## [실습] 한 번에 너무 많은 데이터를 조회하는 SQL문 튜닝하기
+- 데이터를 조회할 때 한 번에 너무 많은 데이터를 조회하는 건 아닌지 체크
+- LIMIT, WHERE문 등을 활용해서 한 번에 조회하는 데이터의 수를 줄이는 방법을 고려
+
+```
+DROP TABLE IF EXISTS users; # 기존 테이블 삭제
+ 
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    age INT
+);
+``` 
+``` 
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000;
+
+-- 더미 데이터 삽입 쿼리
+INSERT INTO users (name, age)
+WITH RECURSIVE cte (n) AS (
+    SELECT 1
+    UNION ALL
+    SELECT n + 1 FROM cte WHERE n < 1000000
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')) AS name,
+    FLOOR(1 + RAND() * 1000) AS age 
+FROM cte;
+``` 
+#### 데이터 조회
+``` 
+SELECT * FROM users LIMIT 10000; -- 200ms 
+
+SELECT * FROM users LIMIT 10; -- 20ms
+``` 
+### ✅ 조회 결과 데이터의 개수 줄이기
+실제 페이스북, 인스타그램의 서비스를 보더라도 한 번에 모든 게시글의 데이터를 불러오지 않는다.
+스크롤을 내리면서 필요한 데이터를 그때그때 로딩하는 방식이다. 다른 커뮤니티 서비스의 게시판을 보면 페이지네이션을 적용시켜서 일부 데이터만 조회하려고 한다.
+그 이유가 **조회하는 데이터의 개수가 성능에 많은 영향을 끼치기 때문이다.**
+
+직관적으로 생각해보면 100만개의 데이터에서 1개의 데이터를 찾는 것보다 10,000개의 데이터를 찾는 게 오래 걸릴 수 밖에 없다.
 
 
+> 💡[이것만은 기억해두자!]
+> 데이터를 조회할 때 한 번에 너무 많은 데이터를 조죄하는 건 아닌 지 체크해봐라.
+> LIMIT, WHERE문 등을 활용해서 한 번에 조회하는 데이터의 수를 줄이는 방법을 고혀해봐라.
