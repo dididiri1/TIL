@@ -759,3 +759,613 @@ SELECT * FROM users LIMIT 10; -- 20ms
 > 💡[이것만은 기억해두자!]
 > 데이터를 조회할 때 한 번에 너무 많은 데이터를 조죄하는 건 아닌 지 체크해봐라.
 > LIMIT, WHERE문 등을 활용해서 한 번에 조회하는 데이터의 수를 줄이는 방법을 고혀해봐라.
+
+
+## [실습] WHERE문이 사용된 SQL문 튜닝하기 - 1
+### ✅ 최근 3일 이내에 가입한 유저 조회하기
+
+### WHERE문 튜닝
+#### 테이블 생성
+``` 
+DROP TABLE IF EXISTS users; 
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    department VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+``` 
+
+#### 100만건의 랜덤 데이터 삽입
+``` 
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- 더미 데이터 삽입 쿼리
+INSERT INTO users (name, department, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    CASE 
+        WHEN n % 10 = 1 THEN 'Engineering'
+        WHEN n % 10 = 2 THEN 'Marketing'
+        WHEN n % 10 = 3 THEN 'Sales'
+        WHEN n % 10 = 4 THEN 'Finance'
+        WHEN n % 10 = 5 THEN 'HR'
+        WHEN n % 10 = 6 THEN 'Operations'
+        WHEN n % 10 = 7 THEN 'IT'
+        WHEN n % 10 = 8 THEN 'Customer Service'
+        WHEN n % 10 = 9 THEN 'Research and Development'
+        ELSE 'Product Management'
+    END AS department,  -- 의미 있는 단어 조합으로 부서 이름 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+
+``` 
+
+#### 성능 측정
+``` 
+EXPLAIN SELECT * FROM users
+WHERE created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY);
+```
+- 풀 테이블 스캔은 성능상으로 비효율적이다. 
+
+```
+CREATE INDEX idx_created_at ON users(create_at);
+```
+
+``` 
+EXPLAIN SELECT * FROM users
+WHERE created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY);
+```
+### 다시 실행 계획을 조회하면 인덱스 레인지 스캔을 한 것을 확인할 수 있다.
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_21.png?raw=true)
+
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_22.png?raw=true)
+
+
+> 💡[이것만은 기억해두자!]
+> WHERE문의 부등호(>, <, ≤, ≥, =), IN, BETWEEN, LIKE와 같은 곳에서 사용되는 컬럼은 인덱스를 사용했을 때 성능이 향상될 가능성이 높다.
+> 데이터 액세스(rows)를 크게 줄일 수 있는 컬럼은 중복 정도가 낮은 컬럼이다. 따라서 중복 정도가 낮은 컬럼을 골라서 인덱스를 생성
+> **단일 컬럼에 설정하는 일반 인덱스**를 설정했을 때와 "멀티 컬럼 인덱스"를 설정했을 때의 성능 차이가 별로 나지 않는다면, 멀티 컬럼 인덱스를 사용하지 말고 일반 인덱스를 활용하자.
+
+
+## [실습] WHERE문이 사용된 SQL문 튜닝하기 - 2
+### ✅ Sales 부서이면서 최근 3일 이내에 가입한 유저 조회하기
+
+#### 테이블 생성
+``` 
+DROP TABLE IF EXISTS users; 
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    department VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+``` 
+#### 100만건의 랜덤 데이터 삽입
+``` 
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- 더미 데이터 삽입 쿼리
+INSERT INTO users (name, department, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    CASE 
+        WHEN n % 10 = 1 THEN 'Engineering'
+        WHEN n % 10 = 2 THEN 'Marketing'
+        WHEN n % 10 = 3 THEN 'Sales'
+        WHEN n % 10 = 4 THEN 'Finance'
+        WHEN n % 10 = 5 THEN 'HR'
+        WHEN n % 10 = 6 THEN 'Operations'
+        WHEN n % 10 = 7 THEN 'IT'
+        WHEN n % 10 = 8 THEN 'Customer Service'
+        WHEN n % 10 = 9 THEN 'Research and Development'
+        ELSE 'Product Management'
+    END AS department,  -- 의미 있는 단어 조합으로 부서 이름 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+``` 
+
+#### 성능 측정
+
+``` 
+EXPLAIN ANALYZE SELECT * FROM users
+WHERE department = 'Sales'
+AND created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY);
+``` 
+
+``` 
+-> Filter: ((users.department = 'Sales') and (users.created_at >= <cache>((now() - interval 3 day))))  (cost=93877 rows=33224) (actual time=0.813..234 rows=121 loops=1)
+    -> Table scan on users  (cost=93877 rows=996810) (actual time=0.206..192 rows=1e+6 loops=1)
+```
+- 액세스한 데이터의 개수는 1e+6(= 10의 6제곱 = 1,000,000)개 이다.
+- 액세스한 1,000,000개의 데이터 중 department = Sales와 created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)을 만족하는 데이터를 필터링해온다.  
+  → 조건을 만족한 데이터의 개수는 rows는 121개이다.
+
+### 성능 개선을 위한 인덱스 추가
+
+#### 인덱스를 추가하는 방법이 3가지가 있다.
+- created_at 컬럼을 기준으로 인덱스 생성
+- department 컬럼을 기준으로 인덱스 생성
+- department, created_at 둘 다 인덱스 생성
+
+### **department** 컬럼보다 **created_at** 컬럼에 인덱스를 설정하는 것이 더 효율적이다. 이유는 다음과 같다.
+
+## ✅ department 컬럼
+- 고정된 값(Sales, Engineering 등)이 반복된다.
+- 특정 값을 조회하면 많은 행이 중복 선택된다.
+- 인덱스를 사용해도 선택되는 데이터가 많아 성능 이점이 줄어든다.
+
+## ✅ created_at 컬럼
+- 시간 순으로 연속된 값이 저장된다.
+- "최근 3일", "최근 1주일"과 같은 범위 조건으로 조회 시, 적은 데이터만 선택된다.
+- 인덱스를 설정하면 범위 내에서만 데이터를 읽어와 성능이 향상된다.
+
+## ⚠️ 인덱스는 최소한으로
+- 인덱스가 많을수록 쓰기(INSERT/UPDATE) 성능은 저하된다.
+- **created_at**에 인덱스를 설정하면 대부분의 조회 성능을 커버할 수 있다.
+- 불필요한 인덱스를 줄이기 위해 **department**에는 인덱스를 설정하지 않아도 된다.
+
+> 💡[이것만은 기억해두자!]
+> 데이터 엑세스(rows)를 크게 줄일 수 있는 컬ㄹ머은 중복 정도가 낮은 컬럼이다. 따라서 중복 정도가 낮은 컬럼을 골라서 인덱스를 생성해라.
+
+## [실습] 인덱스를 걸었는데도 인덱스가 작동하지 않는 경우 - 1
+
+### ✅ 조회 범위가 너무 넓은 경우
+
+#### 테이블 생성
+``` 
+DROP TABLE IF EXISTS users; # 기존 테이블 삭제
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    age INT
+);
+```
+#### 데이터 삽입
+``` 
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- 더미 데이터 삽입 쿼리
+INSERT INTO users (name, age)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')),   -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    FLOOR(1 + RAND() * 1000) AS age    -- 1부터 1000 사이의 난수로 나이 생성
+FROM cte;
+``` 
+
+#### 인덱스 설정
+``` 
+CREATE INDEX idx_name ON users (name);
+``` 
+#### 실행 계획 조회
+``` 
+EXPLAIN SELECT * FROM users
+ORDER BY name DESC;
+``` 
+
+- 분명 인덱스를 걸었음에도 왜 풀 테이블 스캔으로 데이터를 조회된다.
+- 그 이유는 옵티마이저가 넓은 범위의 데이터를 조회할 때는 인덱스를 활용하는 것이 비효율적이라고 판단한다. 
+  인덱스를 활용하지 않고 풀 테이블 스캔으로 데이터를 찾을 때 훨씬 효율적이라고 판단한다.
+- 즉, 굳이 인덱스를 거쳤다가 각 원래 테이블의 데이터를 일일이 하나씩 찾아내는 것보다, 바로 원래 테이블에 접근해서 
+  모든 데이터를 통째로 가져와서 정렬하는 게 효율적이라고 판단한 것이다. 실제 성능상으로도 풀 테이블 스캔을 통해 데이터를 가져오는 게 효율적이다.
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_23.png?raw=true)
+
+> 💡[이것만은 기억해두자!]
+> 넓은 범위의 데이터를 조회하는 경우, MySQL은 인덱스를 사용해서 조회하는 것보다 풀 테이블 스캔이 효과적이라고 판단한다.    
+> 인덱스 컬럼을 가공(함수 적용, 산술 연산, 문자역 조작 등)하면, MySQL은 해당 인덱스를 사용하지 못하는 경우가 많다.     
+> 따라서 인덱스를 적극 활용하기 위해서는 인덱스 컬럼 자체를 최대한 가공하지 않아야 한다.
+
+## 인덱스를 걸었는데도 인덱스가 작동하지 않는 경우 - 2
+
+### ✅ 인덱스 컬럼을 가공한 경우
+#### 테이블 생성
+``` 
+DROP TABLE IF EXISTS users; 
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    salary INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+``` 
+#### 데이터 삽입
+``` 
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- users 테이블에 더미 데이터 삽입
+INSERT INTO users (name, salary, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    FLOOR(1 + RAND() * 1000000) AS salary,    -- 1부터 1000000 사이의 난수로 급여 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+``` 
+#### 인덱스 설정
+``` 
+CREATE INDEX idx_name ON users (name);
+
+CREATE INDEX idx_salary ON users (salary);
+``` 
+
+#### 실행 계획 조회
+``` 
+# User000000으로 시작하는 이름을 가진 유저 조회
+EXPLAIN SELECT * FROM users
+WHERE SUBSTRING(name, 1, 10) = 'User000000';
+
+# 2달치 급여(salary)가 1000 이하인 유저 조회
+EXPLAIN SELECT * FROM users
+WHERE salary * 2 < 1000
+ORDER BY salary;
+``` 
+
+- 위의 실행 계획들을 실행시켜보면 인덱스를 활용하지 않고 풀 테이블 스캔으로 탐색하는 걸 확인할 수 있다. 인덱스를 활용하지 않기 때문에 비효율적으로 데이터를 조회한다.
+- SQL문을 작성할 인덱스 컬럼을 가공(함수 적용, 산술 연산, 문자역 조작 등)하면, MySQL은 해당 인덱스를 활용하지 못하는 경우가 많다.
+- 따라서 인덱스를 적극 활용하기 위해서는 인덱스 컬럼 자체를 최대한 가공하지 않아야 한다. 
+
+### 인덱스 컬럼을 가공하지 않은 SQL 문
+``` 
+# User000000으로 시작하는 이름을 가진 유저 조회
+EXPLAIN SELECT * FROM users
+WHERE name LIKE 'User000000%';
+
+# 2달치 급여(salary)가 1000 이하인 유저 조회
+EXPLAIN SELECT * FROM users
+WHERE salary < 1000 / 2
+ORDER BY salary;
+``` 
+- 인덱스 컬럼을 가공하지 않아야 인덱스를 제대로 활용할 수 있게 된다.
+
+## [실습] ORDER BY문이 사용된 SQL문 튜닝하기
+
+- ORDER BY는 시간이 오래걸리는 작업이므로 최대한 피해주는 것이 좋다. 인덱스를 사용하면 미리 정렬을 해둔 상태이기 때문에,   
+  ORDER BY를 사용해서 정렬해야 하는 번거로운 작업을 피할 수 있다.
+- LIMIT 없이 큰 범위의 데이터를 조회해오는 경우 옵티마이저가 인덱스를 활용하지 않고 풀 테이블 스캔을 해버릴 수도 있다.  
+  따라서 성능 효율을 위해 LIMIT을 통해 작은 데이터의 범위를 조회해오도록 항상 신경쓰자. 
+
+#### 테이블 생성
+``` 
+DROP TABLE IF EXISTS users; 
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    department VARCHAR(100),
+    salary INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+``` 
+#### 데이터 삽입
+``` 
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- 더미 데이터 삽입 쿼리
+INSERT INTO users (name, department, salary, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    CASE 
+        WHEN n % 10 = 1 THEN 'Engineering'
+        WHEN n % 10 = 2 THEN 'Marketing'
+        WHEN n % 10 = 3 THEN 'Sales'
+        WHEN n % 10 = 4 THEN 'Finance'
+        WHEN n % 10 = 5 THEN 'HR'
+        WHEN n % 10 = 6 THEN 'Operations'
+        WHEN n % 10 = 7 THEN 'IT'
+        WHEN n % 10 = 8 THEN 'Customer Service'
+        WHEN n % 10 = 9 THEN 'Research and Development'
+        ELSE 'Product Management'
+    END AS department,  -- 의미 있는 단어 조합으로 부서 이름 생성
+    FLOOR(1 + RAND() * 1000000) AS salary,    -- 1부터 1000000 사이의 난수로 나이 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+``` 
+
+#### 성능 측정
+``` 
+EXPLAIN SELECT * FROM users
+ORDER BY salary
+LIMIT 100;
+``` 
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_24.png?raw=true)
+
+- type이 ALL이다. 풀 테이블 스캔을 했음을 뜻한다.
+- ORDER BY는 시간이 오래걸리는 작업이므로 최대한 피해주는 것이 좋다. 왜냐하면 정렬이라는 작업 자체가 
+  다른 작업에 비해서 부담스러운 작업이며 성능에 안 좋은 영향을 끼치는 요소 중 하나이기 때문이다.
+
+#### 성능 개선을 위한 인덱스 추가
+``` 
+CREATE INDEX idx_salary ON users (salary);
+``` 
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_25.png?raw=true)
+
+- 풀 테이블 스캔(type: ALL)이 아닌 인덱스 풀 스캔(type: index)을 활용해서 빠르게 데이터를 정렬해서 조회해왔다.
+- LIMIT 없이 큰 범위의 데이터를 조회해오는 경우 옵티마이저가 인덱스를 활용하지 않고 테이블 풀 스캔을 해버릴 수도 있다.    
+  따라서 성능 효율을 위해 LIMIT을 통해 작은 데이터의 범위를 조회해오도록 항상 신경써야 한다.
+
+#### 실행 계획 세부 내용 조회
+``` 
+EXPLAIN ANALYZE SELECT * FROM users
+ORDER BY salary
+LIMIT 100;
+``` 
+
+``` 
+-> Limit: 100 row(s)  (cost=0.0918 rows=100) (actual time=0.916..1.81 rows=100 loops=1)
+    -> Index scan on users using idx_salary  (cost=0.0918 rows=100) (actual time=0.914..1.79 rows=100 loops=1)
+``` 
+
+- 인덱스 스캔으로 100개의 데이터에 대해서만 액세스 했다.  
+  (정렬 작업을 따로 하지 않았다. 왜냐하면 인덱스라서 이미 정렬이 되어 있기 때문이다.)
+- Limit에 의해 100개의 데이터만 조회했다.
+
+## [실습] WHERE문에 인덱스를 걸기 vs ORDER BY문에 인덱스를 걸기
+
+- ORDER BY의 특징상 모든 데이터를 바탕으로 정렬을 해야 하기 때문에, 인덱스 풀 스캔 또는 테이블 풀 스캔을 활용할 수 밖에 없다.
+- 이 때문에 ORDER BY문보다 WHERE문에 있는 컬럼에 인덱스를 걸었을 때 성능이 향상되는 경우가 많다.  
+  (항상 그런 것은 아니니까 성능 측정과 실행 계획을 살펴야한다.)
+``` 
+DROP TABLE IF EXISTS users; 
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    department VARCHAR(100),
+    salary INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+``` 
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- 더미 데이터 삽입 쿼리
+INSERT INTO users (name, department, salary, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    CASE 
+        WHEN n % 10 = 1 THEN 'Engineering'
+        WHEN n % 10 = 2 THEN 'Marketing'
+        WHEN n % 10 = 3 THEN 'Sales'
+        WHEN n % 10 = 4 THEN 'Finance'
+        WHEN n % 10 = 5 THEN 'HR'
+        WHEN n % 10 = 6 THEN 'Operations'
+        WHEN n % 10 = 7 THEN 'IT'
+        WHEN n % 10 = 8 THEN 'Customer Service'
+        WHEN n % 10 = 9 THEN 'Research and Development'
+        ELSE 'Product Management'
+    END AS department,  -- 의미 있는 단어 조합으로 부서 이름 생성
+    FLOOR(1 + RAND() * 1000000) AS salary,    -- 1부터 1000000 사이의 난수로 나이 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+``` 
+#### 데이터 조회 성능 확인
+```
+EXPLAIN SELECT * FROM users
+WHERE created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)
+AND department = 'Sales'
+ORDER BY salary
+LIMIT 100;
+```
+- 풀 테이블 스캔을 했다. 비효율적이다.
+
+### ✅ 성능 개선을 위한 인덱스 추가
+
+- SQL문만 봤을 때는 created_at, department, salary 컬럼에 인덱스를 걸 수 있는 선택지가 있다는 걸 알 수 있다.
+- 어떤 컬럼에 거는 게 효율적인지는 하나씩 걸어보고 SQL문의 성능을 측정해서 판단해도 된다.
+
+# 성능 개선을 위한 인덱스 선택 전략
+
+SQL문을 보면 `created_at`, `department`, `salary` 컬럼에 인덱스를 설정할 수 있는 후보가 존재한다.  
+어떤 컬럼에 인덱스를 거는 것이 효율적인지는 하나씩 적용해 보고, 성능을 비교하며 판단할 수 있다.
+
+## ✅ created_at vs department
+
+먼저 `created_at`과 `department` 중 어떤 컬럼에 인덱스를 거는 것이 더 효율적인지 예상해보자.
+
+- `department = 'Sales'` 조건은 해당 값이 자주 등장할 수 있어, 데이터 액세스 건수가 많아질 가능성이 크다.
+- 반면, `created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)` 조건은 **최근 며칠의 데이터만 조회**하므로 액세스 건수가 적다.
+
+**데이터 액세스 수를 줄이는 것이 성능 향상의 핵심**이기 때문에,  
+`department`보다 `created_at`에 인덱스를 설정하는 것이 더 유리하다고 볼 수 있다.
+
+## ✅ created_at vs salary
+
+이번엔 `WHERE`절의 `created_at`과 `ORDER BY`절의 `salary` 중 어떤 컬럼에 인덱스를 걸어야 할지 비교해보자.
+
+결론적으로는, **`salary`보다 `created_at`에 인덱스를 거는 것이 더 효율적**이다.  
+왜냐하면 `WHERE`절에서 조건을 통해 데이터를 **필터링하는 단계에서 인덱스가 가장 큰 효과**를 발휘하기 때문이다.
+
+
+## 🧠 정리
+- **`WHERE`절의 조건 필터링**이 가장 우선순위가 높다.
+- **선택도 높은(created_at처럼)** 컬럼에 인덱스를 걸면 성능 향상이 크다.
+- `ORDER BY`절도 인덱스를 사용할 수 있지만, **우선순위는 낮다**.
+
+### salary에 인덱스
+```
+CREATE INDEX idx_salary ON users (salary);
+```
+```
+-- 실행 계획
+EXPLAIN SELECT * FROM users
+WHERE created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)
+AND department = 'Sales'
+ORDER BY salary
+LIMIT 100;
+```
+- 인덱스를 걸기 전보다 약 5배정도 느려진 것을 확인할 수 있다.
+- 위의 실행 계획에서 type이 index이면서 salary 인덱스를 사용한 걸로 봐서 인덱스 풀 스캔을 했음을 알 수 있다.
+
+### created_at에 인덱스
+```
+ALTER TABLE users DROP INDEX idx_salary; -- 기존 인덱스 삭제
+CREATE INDEX idx_created_at ON users (created_at);
+```
+```
+-- 실행 계획
+EXPLAIN SELECT * FROM users
+WHERE created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)
+AND department = 'Sales'
+ORDER BY salary
+LIMIT 100;
+```
+- 인덱스를 걸지 않은 200ms보다 약 6~7배 정도 빨라졌음을 알 수 있다. 
+- type이 range인걸 보니 인덱스 레인지 스캔을 활용했음을 알 수 있다. 
+
+
+## [실습] HAVING문이 사용된 SQL문 튜닝하기
+
+```
+DROP TABLE IF EXISTS users; 
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    age INT,
+    department VARCHAR(100),
+    salary INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+```
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- 더미 데이터 삽입 쿼리
+INSERT INTO users (name, age, department, salary, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    FLOOR(1 + RAND() * 100) AS age, -- 1부터 100 사이의 난수로 생성
+    CASE 
+        WHEN n % 10 = 1 THEN 'Engineering'
+        WHEN n % 10 = 2 THEN 'Marketing'
+        WHEN n % 10 = 3 THEN 'Sales'
+        WHEN n % 10 = 4 THEN 'Finance'
+        WHEN n % 10 = 5 THEN 'HR'
+        WHEN n % 10 = 6 THEN 'Operations'
+        WHEN n % 10 = 7 THEN 'IT'
+        WHEN n % 10 = 8 THEN 'Customer Service'
+        WHEN n % 10 = 9 THEN 'Research and Development'
+        ELSE 'Product Management'
+    END AS department,  -- 의미 있는 단어 조합으로 부서 이름 생성
+    FLOOR(1 + RAND() * 1000000) AS salary,    -- 1부터 1000000 사이의 난수로 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+```
+
+#### 인덱스 생성
+```
+CREATE INDEX idx_age ON users (age);
+```
+
+#### 조회 성능 확인
+```
+SELECT age, MAX(salary) FROM users
+GROUP BY age
+HAVING age >= 20 AND age < 30;
+```
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_26.png?raw=true)
+
+- 약 800ms 정도의 시간이 소요
+
+#### 실행 계획 조회
+```
+EXPLAIN SELECT age, MAX(salary) FROM users
+GROUP BY age
+HAVING age >= 20 AND age < 30;
+```
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_27.png?raw=true)
+
+- type이 index인걸로 봐서 인덱스 풀 스캔을 하고 있다. 
+
+#### 성능 개선
+```
+SELECT age, MAX(salary) FROM users
+WHERE age >= 20 AND age < 30
+GROUP BY age;
+```
+- HAVING 문 대신에 WHERE 문에 조건을 넣으니 약 150ms 정도 시간이 걸린다.
+
+```
+EXPLAIN SELECT age, MAX(salary) FROM users
+WHERE age >= 20 AND age < 30
+GROUP BY age;
+```
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_28.png?raw=true)
+
+
+```
+EXPLAIN ANALYZE SELECT age, MAX(salary) FROM users
+WHERE age >= 20 AND age < 30
+GROUP BY age;
+```
+```
+-> Group aggregate: max(users.salary)  (cost=133919 rows=94.7) (actual time=32.6..139 rows=10 loops=1)
+    -> Index range scan on users using idx_age over (20 <= age < 30), with index condition: ((users.age >= 20) and (users.age < 30))  (cost=88569 rows=196820) (actual time=1.09..136 rows=99665 loops=1)
+```
+- HAVING 대신에 WHERE문을 사용함으로써 GROUP BY를 처리하기 전에 데이터를 필터링했다.
+- 그런 뒤에 필터링 된 데이터를 기반으로 GROUP BY를 진행했다. 
