@@ -1369,3 +1369,276 @@ GROUP BY age;
 ```
 - HAVING 대신에 WHERE문을 사용함으로써 GROUP BY를 처리하기 전에 데이터를 필터링했다.
 - 그런 뒤에 필터링 된 데이터를 기반으로 GROUP BY를 진행했다. 
+
+## [실습] 유저 이름으로 특정 기간에 작성된 글 검색하는 SQL문 튜닝하기
+
+#### 기본 테이블 생성
+```
+DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE posts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+```
+
+#### 더미 데이터 추가
+```
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- users 테이블에 더미 데이터 삽입
+INSERT INTO users (name, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+
+-- posts 테이블에 더미 데이터 삽입
+INSERT INTO posts (title, created_at, user_id)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('Post', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at, -- 최근 10년 내의 임의의 날짜와 시간 생성
+    FLOOR(1 + RAND() * 50000) AS user_id -- 1부터 50000 사이의 난수로 급여 생성
+FROM cte;
+```
+
+#### 기존 SQL문 성능 측정
+```
+SELECT p.id, p.title, p.created_at
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE u.name = 'User0000046'
+AND p.created_at BETWEEN '2022-01-01' AND '2024-03-07';
+```
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_29.png?raw=true)
+
+- 약 0.70초 소요 (데이터가 많을수록 더 증가)
+
+#### 실행 계획 조회
+```
+EXPLAIN SELECT p.id, p.title, p.created_at
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE u.name = 'User0000046'
+AND p.created_at BETWEEN '2021-01-01' AND '2025-03-07';
+```
+
+- 풀 테이블 스캔을 하기 때문에 인덱스를 추가해야 한다.
+- 인덱스를 추가할 수 있는 컬럼이 users.name과 posts.created_at이 있다.
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_30.png?raw=true)
+
+#### 성능 개선을 위한 인덱스 생성
+```
+CREATE INDEX idx_name ON users (name);
+CREATE INDEX idx_created_at ON posts (created_at);
+```
+- 실행 계획에서 users.name 인덱스는 사용되었지만,
+- posts.created_at 인덱스는 사용되지 않음
+MySQL 옵티마이저는 조인 후 필터링이 더 효율적이라 판단해서 created_at 인덱스를 사용하지 않음.
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_31.png?raw=true)
+
+- 인덱스를 추가한다고 무조건 성능이 좋아지는 건 아님
+- 옵티마이저가 사용하지 않을 인덱스는 오히려 관리 오버헤드만 증가
+```
+ALTER TABLE posts DROP INDEX idx_created_at;
+```
+
+- 성능이 많이 개선되었다.
+- 이유는 created_at 인덱스를 통해 데이터를 가져오는 것이 탐색량이 더 적기 때문이다.
+  결론: 인덱스 튜닝 요약
+  where/join 조건에 사용되는 컬럼에 인덱스를 고려하되,
+
+> 💡[이것만은 기억해두자!]
+> where/join 조건에 사용되는 컬럼에 인덱스를 고려하되,
+> 실제로 사용되는지 EXPLAIN으로 꼭 확인
+> 불필요한 인덱스는 제거해서 성능과 디스크 비용을 줄이자
+
+## [실습] 특정 부서에서 최대 연봉을 가진 사용자들 조회하는 SQL문 튜닝하기
+
+#### 테이블 생성
+```
+DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS users; 
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    department VARCHAR(100),
+    salary INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### 더미 데이터 삽입
+```
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- 더미 데이터 삽입 쿼리
+INSERT INTO users (name, department, salary, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    CASE 
+        WHEN n % 10 = 1 THEN 'Engineering'
+        WHEN n % 10 = 2 THEN 'Marketing'
+        WHEN n % 10 = 3 THEN 'Sales'
+        WHEN n % 10 = 4 THEN 'Finance'
+        WHEN n % 10 = 5 THEN 'HR'
+        WHEN n % 10 = 6 THEN 'Operations'
+        WHEN n % 10 = 7 THEN 'IT'
+        WHEN n % 10 = 8 THEN 'Customer Service'
+        WHEN n % 10 = 9 THEN 'Research and Development'
+        ELSE 'Product Management'
+    END AS department,  -- 의미 있는 단어 조합으로 부서 이름 생성
+    FLOOR(1 + RAND() * 100000) AS salary,    -- 1부터 100000 사이의 난수로 나이 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+```
+
+#### 기존 SQL문 성능 측정
+```
+SELECT *
+FROM users
+WHERE salary = (SELECT MAX(salary) FROM users)
+AND department IN ('Sales', 'Marketing', 'IT');
+```
+- 약 0.30초 소요 (데이터가 많을수록 더 증가)
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_32.png?raw=true)
+
+- type이 ALL -> 풀 테이블 스캔
+- 인덱스를 활용해서 풀 테이블 스캔을 하지 않도록 바꿔보자.
+
+#### 인덱스 생성
+- 데이터 액세스 수를 크게 줄일 수 있는 컬럼은 중복 정도가 낮은 컬럼이다.
+- 따라서 salary로 인덱스를 생성
+```
+CREATE INDEX idx_salary ON users (salary);
+```
+
+#### 성능 측정
+```
+EXPLAIN SELECT *
+FROM users
+WHERE salary = (SELECT MAX(salary) FROM users)
+AND department IN ('Sales', 'Marketing', 'IT');
+```
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_33.png?raw=true)
+
+- 인덱스를 활용해서 데이터를 액세스 했고, 액세스 수도 11개로 확 줄었다. 
+
+## [실습] 부서별 최대 연봉을 가진 사용자들 조회하는 SQL문 튜닝하기
+
+#### 테이블 생성
+```
+DROP TABLE IF EXISTS users; 
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    department VARCHAR(100),
+    salary INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+#### 더미 데이터 생성
+```
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- 더미 데이터 삽입 쿼리
+INSERT INTO users (name, department, salary, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    CASE 
+        WHEN n % 10 = 1 THEN 'Engineering'
+        WHEN n % 10 = 2 THEN 'Marketing'
+        WHEN n % 10 = 3 THEN 'Sales'
+        WHEN n % 10 = 4 THEN 'Finance'
+        WHEN n % 10 = 5 THEN 'HR'
+        WHEN n % 10 = 6 THEN 'Operations'
+        WHEN n % 10 = 7 THEN 'IT'
+        WHEN n % 10 = 8 THEN 'Customer Service'
+        WHEN n % 10 = 9 THEN 'Research and Development'
+        ELSE 'Product Management'
+    END AS department,  -- 의미 있는 단어 조합으로 부서 이름 생성
+    FLOOR(1 + RAND() * 100000) AS salary,    -- 1부터 100000 사이의 난수로 나이 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+```
+
+#### 성능 측정
+```
+SELECT u.id, u.name, u.department, u.salary, u.created_at
+FROM users u
+JOIN (
+    SELECT department, MAX(salary) AS max_salary
+    FROM users
+    GROUP BY department
+) d ON u.department = d.department AND u.salary = d.max_salary;
+```
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_34.png?raw=true)
+
+- 약 0.7초 정도 걸린다. 
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_35.png?raw=true)
+
+- JOIN 문 내부에 있는 서브쿼리를 실행시킬 때 풀 테이블 스캔이 이뤄어졌음을 알 수 있다.
+
+#### 성능 개선
+- GROUP BY department는 department를 기준으로 정렬을 시킨 뒤에 MAX(salary) 값을 구하게 된다.  
+  이 때, MAX(salary)를 구하기 위해 이리저리 찾아다닐 수 밖에 없다.
+- 이를 해결하기 위해 (department, salary)의 멀티 컬럼 인덱스가 있으면 department를 기준으로 정렬을   
+  시키는 작업을 하지 않아도 되고, 심지어 MAX(salary)도 빠르게 찾을 수 있다. 멀티 컬럼 인덱스를 생성해보자.
+```
+CREATE INDEX idx_department_salary ON users (department, salary);
+```
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_36.png?raw=true)
+
+- 약 0.7초에서 0.0017초 성능이 향상 되었다.
+
+#### 실행 계획을 조회
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_37.png?raw=true)
+- 실행 계획을 조회해봐도 인덱스를 잘 활용해서 데이터를 찾고 있고, 접근한 rows 자체도 훨씬 적어졌다. 
