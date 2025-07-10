@@ -1642,3 +1642,105 @@ CREATE INDEX idx_department_salary ON users (department, salary);
 #### 실행 계획을 조회
 ![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_37.png?raw=true)
 - 실행 계획을 조회해봐도 인덱스를 잘 활용해서 데이터를 찾고 있고, 접근한 rows 자체도 훨씬 적어졌다. 
+
+## [실습] 2023년 주문 데이터 조회하는 SQL문 튜닝하기
+
+#### 테이블 생성
+```
+DROP TABLE IF EXISTS users; 
+DROP TABLE IF EXISTS orders; 
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ordered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+```
+
+
+#### 더미 데이터 생성
+```
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- users 테이블에 더미 데이터 삽입
+INSERT INTO users (name, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+
+-- orders 테이블에 더미 데이터 삽입
+INSERT INTO orders (ordered_at, user_id)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS ordered_at, -- 최근 10년 내의 임의의 날짜와 시간 생성
+    FLOOR(1 + RAND() * 1000000) AS user_id    -- 1부터 1000000 사이의 난수로 급여 생성
+FROM cte;
+```
+#### 기존 SQL문 성능 조회
+```
+EXPLAIN SELECT *
+FROM orders
+WHERE YEAR(ordered_at) = 2023
+ORDER BY ordered_at
+LIMIT 30;
+```
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_39.png?raw=true)
+
+#### 성능 개선
+
+- ordered_at에 인덱스를 추가하면 풀 테이블 스캔을 막을 수 있을 것 같다.
+```
+CREATE INDEX idx_ordered_at ON orders (ordered_at);
+```
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_40.png?raw=true)
+
+- 0.7초로 더 느려졌다.
+
+#### 실행계획을 살펴보면
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_41.png?raw=true)
+
+- 인덱스 풀 스캔을 했다. 풀 테이블 스캔 대신에 인덱스 풀 스캔을 하면 더 빨라져야 한다.
+- 또한 WHERE문으로 특정 범위의 데이터만 접근하면 인덱스 풀 스캔이 아니라 인덱스 레인지 스캔이 나와야한다.
+
+> 문제는 인덱스의 컬럼을 가공해서 사용했기 때문이다.
+> 그래서 인덱스를 제대로 활용 하지 못한 것이다. 인덱스의 컬럼을 가공하지 않게 SQL문을 다시 수정해보자. 
+
+```
+SELECT *
+FROM orders
+WHERE ordered_at >= '2023-01-01 00:00:00' 
+  AND ordered_at < '2024-01-01 00:00:00'
+ORDER BY ordered_at
+LIMIT 30;
+```
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_42.png?raw=true)
+
+- 0.7초에서 0.04초로 성능이 향상되었다. 
+
+#### 실행 계획도 인덱스 레인지 스캔으로 바뀌었다.
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_44.png?raw=true)
+
