@@ -1,4 +1,5 @@
-
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_00.png?raw=true)
+# [DB 성능 최적화] 기본 SQL 튜닝
 
 ## ✅ DBeaver
 
