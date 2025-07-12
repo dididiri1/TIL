@@ -1,4 +1,4 @@
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_00.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_00.png?raw=true)
 # [DB 성능 최적화] 기본 SQL 튜닝
 
 ## ✅ DBeaver
@@ -9,7 +9,7 @@ JDBC 기반이기에 거의 웬만한 주요 DB는 다 지원한다.
 
 https://dbeaver.io/download/
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_01.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_01.png?raw=true)
 
 
 ## ✅ DB 성능을 개선하는 방법
@@ -21,7 +21,7 @@ https://dbeaver.io/download/
 - 스케일업
 
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_02.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_02.png?raw=true)
 
 
 ## ✅ MySQL SQL 실행 과정 및 SQL 튜닝 핵심
@@ -71,7 +71,7 @@ https://dbeaver.io/download/
 ### 위의 정의보다는 아래의 읨미로 인덱스를 기억하자. 그애야 훨씬 직관적으로 이해하기가 쉽다.
 > 인덱스(index) : 데이터를 빨리 찾기 위해 특정 컬럼을 기준으로 미리 정렬해놓는 표
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_03.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_03.png?raw=true)
 
 나이가 23살인 사용자를 뽑아내려면 위의 표에서 23살로 시작하는 지점과 24살로 시작되는 지점만 찾은 뒤
 그 사이에 있는 모든 값을 가져오면 된다. 정렬을 해놓으니 모든 데이터를 일일이 다 확인할 필요가 없어서
@@ -134,7 +134,7 @@ CREATE INDEX idx_age ON users(age);
 ```
 SHOW INDEX FROM users;
 ```
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_04.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_04.png?raw=true)
 
 ```
 SELECT * from users
@@ -186,7 +186,7 @@ CREAtE TABLE users  (
 ```
 SHOW INDEX FROM users
 ```
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_05.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_05.png?raw=true)
 - 이런 특징 떄문에 UNIQUE 특징으로 인해 생성되는 인덱스를 보고 **고유 인덱스(Unique index)**라고 부른다.
 - Unique 제약 조건이 걸린 컬럼은 일반적으로 보조 인덱스로 사용된다.
 
@@ -355,16 +355,16 @@ SELECT
 FROM cte;
 
 ```
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_06.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_06.png?raw=true)
 
 이 때, 부서와 이름의 컬럼을 활용해 멀티 컬럼 인덱스를 만들면 아래와 같은 표가 시스템 내부에 생성된다.  
 부서를 기준으로 먼저 오름차순으로 정렬한 뒤, 같은 부서의 값을 가진 데이터들 사이에서 이름을 기준으로 오름차순 정렬을 한다.
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_07.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_07.png?raw=true)
 위의 예시에서는 컬럼 2개를 가지고 인덱스를 생성했지만, 2개 이상의 컬럼을 가지고 인덱스를 생성할 수도 있다.
 
 ### 멀티 컬럼 인덱스 주의점
 #### 일반 인덱스처럼 활용 가능
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_08.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_08.png?raw=true)
 
 **부서를 기준으로 먼저 정렬이 되어 있고, 그 다음 같은 부서 내에서 이름을 기준으로 정렬**되어 있다.
 이런 구조로 되어 있기 때문에 부서 컬럼만 놓고 봤을 때는 부서 인덱스와 동일한 정렬 상태를 갖고 있다.
@@ -402,7 +402,7 @@ WHERE name = '홍길동';
 ## 커버링 인덱스(Covering Index)
 ### SQL문을 실행시킬 때 필요한 모든 컬럼을 갖고 있는 인덱스를 커버링 인덱스(Covering Index)라고 한다.
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_09.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_09.png?raw=true)
 
 위와 같은 users 테이블이 있고, name 인덱스가 있다고 가정하자. 그리고 아래 2개의 SQL문을 실행해야 한다고 가정하자.
 ```
@@ -424,7 +424,7 @@ CREATE INDEX idx_user_query ON users (dept, name, age);
 EXPLAIN SELECT name, age FROM users WHERE dept = '운영';
 ```
 - Extra 컬럼에 Using index 가 나오면 → 커버링 인덱스 사용 중
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_10.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_10.png?raw=true)
 
 
 | 항목             | 일반 인덱스  | 커버링 인덱스 |
@@ -448,7 +448,7 @@ EXPLAIN SELECT name, age FROM users WHERE dept = '운영';
 옵티마이저가 SQL문을 어떤 방식으로 어떻게 처리할 지를 계획한 걸 의미한다.
 이 실행 계획을 보고 비효율적으로 처리하는 방식이 있는 지 점검하고, 비효율적인 부분이 있다면 
 더 효율적인 방법으로 SQL문을 실행하게끔 튜닝을 하는 게 목표다. 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_11.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_11.png?raw=true)
 
 쉽게 설명하자면
 
@@ -483,7 +483,7 @@ EXPLAIN SELECT * FROM users
 WHERE age = 23;
 ```
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_12.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_12.png?raw=true)
 
 ## EXPLAIN 주요 항목 요약
 
@@ -543,7 +543,7 @@ WHERE age = 23;
    -> 의미 : 테이블 스캔 이후 필터 작업에 추가로 소요된 시간
 
 ## 실행 계획에서 Type 의미 분석
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_13.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_13.png?raw=true)
 실행 계획(EXPLAIN)을 조회했을 때 나오는 결과값 중 하나인 type은 성능 최적화에 있어서 이 값의 의미를 
 파악하는 게 굉장히 중요하다.
 
@@ -551,7 +551,7 @@ WHERE age = 23;
 풀 테이블 스캔(Full Table Scan)이란 인덱스를 활용하지 않고 테이블을 처음부터 끝까지 전부 다 뒤져서 데이터를
 찾는 방식이다. 처음부터 끝까지 전부 다 뒤져서 필요한 데이터를 찾는 방식이다보니 **비효율적이다.**
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_14.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_14.png?raw=true)
 
 ```
 CREATE TABLE users (
@@ -577,7 +577,7 @@ EXPLAIN SELECT * FROM users WHERE age = 23; # type : ALL
 인덱스의 테이블은 실제 테이블보다 크기가 작기 때문에, **폴 테이블 스캔(Full Table Scan)** 보다 효율적이다.
 하지만 인덱스 테이블 전체를 읽어야 하기 때문에 **아주 효율적이라고는 볼 수는 없다.**
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_15.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_15.png?raw=true)
 
 ```
 SET SESSION cte_max_recursion_depth = 1000000;
@@ -615,7 +615,7 @@ LIMIT 10;
 그러다보니 고유 인덱스 또는 기본 키를 사용해서 1건의 데이터만 조회한 경우에 const가 출력된다.
 이 방식은 아주 효율적인 방식이다.
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_16.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_16.png?raw=true)
 
 - 인덱스가 없다면 특정 값을 일일이 다 뒤져야 한다. 그래서 1건의 데이터를 바로 찾을 수 없다.
 - 인덱스가 있는데 고유하지 않다면(NOT UNIQUE) 원하는 1건의 데이터를 찾았다고 하더라도, 나머지 데이터에 같은 값이 있을 지도 모르므로 다른 데이터들도 체크해봐야 한다.
@@ -641,7 +641,7 @@ EXPLAIN SELECT * FROM users WHERE account = 'user3@example.com';
 
 UNIQUE 속성을 가진 컬럼은 인덱스가 자동으로 생성된다.
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_17.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_17.png?raw=true)
 
 ## Range(Index Range Scan)
 
@@ -651,7 +651,7 @@ UNIQUE 속성을 가진 컬럼은 인덱스가 자동으로 생성된다.
 이 방식은 인덱스를 활용하기 때문에 **효율적인 방식이다.**
 하지만 인덱스를 사용하더라도 데이터를 조회하는 범위가 클 경우 성능 저하의 원인이 되기도 한다.
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_18.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_18.png?raw=true)
 
 ```
 DROP TABLE IF EXISTS users;
@@ -689,12 +689,12 @@ WHERE age IN (10, 20, 30);
 EXPLAIN SELECT * FROM users
 WHERE age < 20;
 ``` 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_19.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_19.png?raw=true)
 
 ## Ref
 ### ✅ ref : 비고유 인덱스를 활용하는 경우
 비고유 인덱스를 사용한 경우(=UNIQUE가 아닌 컬럼의 인덱스를 사용한 경우) type 에 ref가 출력된다.
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_20.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_20.png?raw=true)
 
 ``` 
 CREATE TABLE users (
@@ -827,10 +827,10 @@ EXPLAIN SELECT * FROM users
 WHERE created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY);
 ```
 ### 다시 실행 계획을 조회하면 인덱스 레인지 스캔을 한 것을 확인할 수 있다.
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_21.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_21.png?raw=true)
 
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_22.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_22.png?raw=true)
 
 
 > 💡[이것만은 기억해두자!]
@@ -978,7 +978,7 @@ ORDER BY name DESC;
 - 즉, 굳이 인덱스를 거쳤다가 각 원래 테이블의 데이터를 일일이 하나씩 찾아내는 것보다, 바로 원래 테이블에 접근해서 
   모든 데이터를 통째로 가져와서 정렬하는 게 효율적이라고 판단한 것이다. 실제 성능상으로도 풀 테이블 스캔을 통해 데이터를 가져오는 게 효율적이다.
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_23.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_23.png?raw=true)
 
 > 💡[이것만은 기억해두자!]
 > 넓은 범위의 데이터를 조회하는 경우, MySQL은 인덱스를 사용해서 조회하는 것보다 풀 테이블 스캔이 효과적이라고 판단한다.    
@@ -1114,7 +1114,7 @@ ORDER BY salary
 LIMIT 100;
 ``` 
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_24.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_24.png?raw=true)
 
 - type이 ALL이다. 풀 테이블 스캔을 했음을 뜻한다.
 - ORDER BY는 시간이 오래걸리는 작업이므로 최대한 피해주는 것이 좋다. 왜냐하면 정렬이라는 작업 자체가 
@@ -1125,7 +1125,7 @@ LIMIT 100;
 CREATE INDEX idx_salary ON users (salary);
 ``` 
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_25.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_25.png?raw=true)
 
 - 풀 테이블 스캔(type: ALL)이 아닌 인덱스 풀 스캔(type: index)을 활용해서 빠르게 데이터를 정렬해서 조회해왔다.
 - LIMIT 없이 큰 범위의 데이터를 조회해오는 경우 옵티마이저가 인덱스를 활용하지 않고 테이블 풀 스캔을 해버릴 수도 있다.    
@@ -1328,7 +1328,7 @@ GROUP BY age
 HAVING age >= 20 AND age < 30;
 ```
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_26.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_26.png?raw=true)
 
 - 약 800ms 정도의 시간이 소요
 
@@ -1339,7 +1339,7 @@ GROUP BY age
 HAVING age >= 20 AND age < 30;
 ```
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_27.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_27.png?raw=true)
 
 - type이 index인걸로 봐서 인덱스 풀 스캔을 하고 있다. 
 
@@ -1356,7 +1356,7 @@ EXPLAIN SELECT age, MAX(salary) FROM users
 WHERE age >= 20 AND age < 30
 GROUP BY age;
 ```
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_28.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_28.png?raw=true)
 
 
 ```
@@ -1435,7 +1435,7 @@ JOIN users u ON p.user_id = u.id
 WHERE u.name = 'User0000046'
 AND p.created_at BETWEEN '2022-01-01' AND '2024-03-07';
 ```
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_29.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_29.png?raw=true)
 
 - 약 0.70초 소요 (데이터가 많을수록 더 증가)
 
@@ -1451,7 +1451,7 @@ AND p.created_at BETWEEN '2021-01-01' AND '2025-03-07';
 - 풀 테이블 스캔을 하기 때문에 인덱스를 추가해야 한다.
 - 인덱스를 추가할 수 있는 컬럼이 users.name과 posts.created_at이 있다.
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_30.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_30.png?raw=true)
 
 #### 성능 개선을 위한 인덱스 생성
 ```
@@ -1462,7 +1462,7 @@ CREATE INDEX idx_created_at ON posts (created_at);
 - posts.created_at 인덱스는 사용되지 않음
 MySQL 옵티마이저는 조인 후 필터링이 더 효율적이라 판단해서 created_at 인덱스를 사용하지 않음.
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_31.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_31.png?raw=true)
 
 - 인덱스를 추가한다고 무조건 성능이 좋아지는 건 아님
 - 옵티마이저가 사용하지 않을 인덱스는 오히려 관리 오버헤드만 증가
@@ -1538,7 +1538,7 @@ AND department IN ('Sales', 'Marketing', 'IT');
 ```
 - 약 0.30초 소요 (데이터가 많을수록 더 증가)
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_32.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_32.png?raw=true)
 
 - type이 ALL -> 풀 테이블 스캔
 - 인덱스를 활용해서 풀 테이블 스캔을 하지 않도록 바꿔보자.
@@ -1558,7 +1558,7 @@ WHERE salary = (SELECT MAX(salary) FROM users)
 AND department IN ('Sales', 'Marketing', 'IT');
 ```
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_33.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_33.png?raw=true)
 
 - 인덱스를 활용해서 데이터를 액세스 했고, 액세스 수도 11개로 확 줄었다. 
 
@@ -1620,11 +1620,11 @@ JOIN (
 ) d ON u.department = d.department AND u.salary = d.max_salary;
 ```
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_34.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_34.png?raw=true)
 
 - 약 0.7초 정도 걸린다. 
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_35.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_35.png?raw=true)
 
 - JOIN 문 내부에 있는 서브쿼리를 실행시킬 때 풀 테이블 스캔이 이뤄어졌음을 알 수 있다.
 
@@ -1636,12 +1636,12 @@ JOIN (
 ```
 CREATE INDEX idx_department_salary ON users (department, salary);
 ```
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_36.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_36.png?raw=true)
 
 - 약 0.7초에서 0.0017초 성능이 향상 되었다.
 
 #### 실행 계획을 조회
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_37.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_37.png?raw=true)
 - 실행 계획을 조회해봐도 인덱스를 잘 활용해서 데이터를 찾고 있고, 접근한 rows 자체도 훨씬 적어졌다. 
 
 ## [실습] 2023년 주문 데이터 조회하는 SQL문 튜닝하기
@@ -1707,7 +1707,7 @@ ORDER BY ordered_at
 LIMIT 30;
 ```
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_39.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_39.png?raw=true)
 
 #### 성능 개선
 
@@ -1715,12 +1715,12 @@ LIMIT 30;
 ```
 CREATE INDEX idx_ordered_at ON orders (ordered_at);
 ```
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_40.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_40.png?raw=true)
 
 - 0.7초로 더 느려졌다.
 
 #### 실행계획을 살펴보면
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_41.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_41.png?raw=true)
 
 - 인덱스 풀 스캔을 했다. 풀 테이블 스캔 대신에 인덱스 풀 스캔을 하면 더 빨라져야 한다.
 - 또한 WHERE문으로 특정 범위의 데이터만 접근하면 인덱스 풀 스캔이 아니라 인덱스 레인지 스캔이 나와야한다.
@@ -1737,13 +1737,13 @@ ORDER BY ordered_at
 LIMIT 30;
 ```
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_42.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_42.png?raw=true)
 
 - 0.7초에서 0.04초로 성능이 향상되었다. 
 
 #### 실행 계획도 인덱스 레인지 스캔으로 바뀌었다.
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_44.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_44.png?raw=true)
 
 ## [실습] 2024년 1학기 평균 성적이 100점인 학생 조회하는 SQL문 튜닝하기
 ```
@@ -1804,7 +1804,7 @@ ORDER BY ordered_at
 LIMIT 30;
 ```
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_46.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_46.png?raw=true)
 
 - 0.4초 정두 걸린다.
 #### 실행계획 조회
@@ -1822,11 +1822,11 @@ LIMIT 30;
 CREATE INDEX idx_ordered_at ON orders (ordered_at);
 ```
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_45.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_45.png?raw=true)
 - 1.6초로 더 느려졌다.
 
 #### 실행계획을 살펴보면
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_47.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_47.png?raw=true)
 - 인덱스 풀 스캔을 했다. 풀 테이블 스캔 대신에 인덱스 풀 스캔을 하면 더 빨라져야 한다.
 - 또한 WHERE문으로 특정 범위의 데이터만 접근하면 인덱스 풀 스캔이 아니라 인덱스 레인지 스캔이 나와야한다.
 
@@ -1844,7 +1844,7 @@ LIMIT 30;
 - 1.6초에서 0.01초로 성능을 향상시켰다. 
 - 실행 계획도 인덱스 레인지 스캔으로 바뀌었다.
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_48.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_48.png?raw=true)
 
 
 ## [실습] 좋아요 많은 순으로 게시글 조회하는 SQL문 튜닝하기
@@ -1953,7 +1953,7 @@ HAVING
     AND sc.year = 2024
     AND sc.semester = 1;
 ```
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_49.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_49.png?raw=true)
 
 - 약 4초 정도의 시간이 걸린다.
 
@@ -2075,7 +2075,7 @@ ORDER BY
 LIMIT 30;
 ```
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_50.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_50.png?raw=true)
 - 대략 3.4초 정도 걸린다.
 
 #### 실행 계획 세부 내용 조회
@@ -2141,7 +2141,7 @@ INNER JOIN
 ON p.id = l.post_id;
 ```
 
-![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_51.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Mysql/images/03_51.png?raw=true)
 
 - 풀 테이블 스캔으로 액세스한 데이터의 수가 30으로 줄었다. 그리고 l이라는 테이블에서 인덱스 풀 스캔을 했음을 알 수 있다.
 - 즉, 대부분의 데이터를 원래 풀 테이블 스캔을 하던 걸 풀 인덱스 스캔으로 고친 것이다. 
