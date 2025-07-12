@@ -572,7 +572,7 @@ EXPLAIN SELECT * FROM users WHERE age = 23; # type : ALL
 ```
 
 ### ✅ INDEX : 풀 인덱스 스캔
-**풀 인덱스 스캔(Full Index Scan)**이란 인덱스 테이블을 처음부터 끝까지 다 뒤져서 데이터를 찾는 방식이다.
+**풀 인덱스 스캔(Full Index Scan)** 이란 인덱스 테이블을 처음부터 끝까지 다 뒤져서 데이터를 찾는 방식이다.
 인덱스의 테이블은 실제 테이블보다 크기가 작기 때문에, **폴 테이블 스캔(Full Table Scan)** 보다 효율적이다.
 하지만 인덱스 테이블 전체를 읽어야 하기 때문에 **아주 효율적이라고는 볼 수는 없다.**
 
@@ -1744,3 +1744,430 @@ LIMIT 30;
 
 ![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_44.png?raw=true)
 
+## [실습] 2024년 1학기 평균 성적이 100점인 학생 조회하는 SQL문 튜닝하기
+```
+DROP TABLE IF EXISTS users; 
+DROP TABLE IF EXISTS orders; 
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ordered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+```
+#### 더미데이터 삽입
+```
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- users 테이블에 더미 데이터 삽입
+INSERT INTO users (name, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+
+-- orders 테이블에 더미 데이터 삽입
+INSERT INTO orders (ordered_at, user_id)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS ordered_at, -- 최근 10년 내의 임의의 날짜와 시간 생성
+    FLOOR(1 + RAND() * 1000000) AS user_id    -- 1부터 1000000 사이의 난수로 급여 생성
+FROM cte;
+```
+
+```
+SELECT *
+FROM orders
+WHERE YEAR(ordered_at) = 2023
+ORDER BY ordered_at
+LIMIT 30;
+```
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_46.png?raw=true)
+
+- 0.4초 정두 걸린다.
+#### 실행계획 조회
+```
+EXPLAIN SELECT *
+FROM orders
+WHERE YEAR(ordered_at) = 2023
+ORDER BY ordered_at
+LIMIT 30;
+```
+
+#### 성능 개선
+- ordered_at에 인덱스를 추가하면 풀 테이블 스캔을 막을 수 있을 것 같다.
+```
+CREATE INDEX idx_ordered_at ON orders (ordered_at);
+```
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_45.png?raw=true)
+- 1.6초로 더 느려졌다.
+
+#### 실행계획을 살펴보면
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_47.png?raw=true)
+- 인덱스 풀 스캔을 했다. 풀 테이블 스캔 대신에 인덱스 풀 스캔을 하면 더 빨라져야 한다.
+- 또한 WHERE문으로 특정 범위의 데이터만 접근하면 인덱스 풀 스캔이 아니라 인덱스 레인지 스캔이 나와야한다.
+
+문제는 인덱스의 컬럼을 가공해서 사용했기 때문이다.  
+그래서 인덱스를 제대로 활용 하지 못한 것이다. 인덱스의 컬럼을 가공하지 않게 SQL문을 다시 수정해보자. 
+```
+SELECT *
+FROM orders
+WHERE ordered_at >= '2023-01-01 00:00:00' 
+  AND ordered_at < '2024-01-01 00:00:00'
+ORDER BY ordered_at
+LIMIT 30;
+```
+
+- 1.6초에서 0.01초로 성능을 향상시켰다. 
+- 실행 계획도 인덱스 레인지 스캔으로 바뀌었다.
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_48.png?raw=true)
+
+
+## [실습] 좋아요 많은 순으로 게시글 조회하는 SQL문 튜닝하기
+#### 테이블 생성
+```
+DROP TABLE IF EXISTS scores;
+DROP TABLE IF EXISTS subjects;
+DROP TABLE IF EXISTS students;
+
+CREATE TABLE students (
+    student_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    age INT
+);
+
+CREATE TABLE subjects (
+    subject_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100)
+);
+
+CREATE TABLE scores (
+    score_id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT,
+    subject_id INT,
+    year INT,
+    semester INT,
+    score INT,
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id)
+);
+```
+
+#### 더미 데이터 생성
+```
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- students 테이블에 더미 데이터 삽입
+INSERT INTO students (name, age)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('Student', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    FLOOR(1 + RAND() * 100) AS age -- 1부터 100 사이의 랜덤한 점수 생성
+FROM cte;
+
+-- subjects 테이블에 과목 데이터 삽입
+INSERT INTO subjects (name)
+VALUES
+    ('Mathematics'),
+    ('English'),
+    ('History'),
+    ('Biology'),
+    ('Chemistry'),
+    ('Physics'),
+    ('Computer Science'),
+    ('Art'),
+    ('Music'),
+    ('Physical Education'),
+    ('Geography'),
+    ('Economics'),
+    ('Psychology'),
+    ('Philosophy'),
+    ('Languages'),
+    ('Engineering');
+
+-- scores 테이블에 더미 데이터 삽입
+INSERT INTO scores (student_id, subject_id, year, semester, score)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    FLOOR(1 + RAND() * 1000000) AS student_id,  -- 1부터 1000000 사이의 난수로 학생 ID 생성
+    FLOOR(1 + RAND() * 16) AS subject_id,             -- 1부터 16 사이의 난수로 과목 ID 생성
+    YEAR(NOW()) - FLOOR(RAND() * 5) AS year,   -- 최근 5년 내의 임의의 연도 생성
+    FLOOR(1 + RAND() * 2) AS semester,                -- 1 또는 2 중에서 랜덤하게 학기 생성
+    FLOOR(1 + RAND() * 100) AS score -- 1부터 100 사이의 랜덤한 점수 생성
+FROM cte;
+```
+
+#### SQL문 성능 측정
+```
+SELECT 
+    st.student_id,
+    st.name,
+    AVG(sc.score) AS average_score
+FROM 
+    students st
+JOIN 
+    scores sc ON st.student_id = sc.student_id
+GROUP BY 
+    st.student_id,
+    st.name,
+    sc.year,
+    sc.semester
+HAVING 
+    AVG(sc.score) = 100
+    AND sc.year = 2024
+    AND sc.semester = 1;
+```
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_49.png?raw=true)
+
+- 약 4초 정도의 시간이 걸린다.
+
+#### 성능 개선
+- HAVING절에 굳이 있지 않아도 될 조건이 HAVING 절에 포함되어 있다.
+- WHERE 문으로 옮길 수 있는 조건을 옮긴 뒤 성능을 다시 테스트
+
+```
+SELECT 
+    st.student_id,
+    st.name,
+    AVG(sc.score) AS average_score
+FROM 
+    students st
+JOIN 
+    scores sc ON st.student_id = sc.student_id
+WHERE 
+    sc.year = 2024
+    AND sc.semester = 1
+GROUP BY 
+    st.student_id,
+    st.name
+HAVING 
+    AVG(sc.score) = 100;
+```
+- WHERE문으로 옮길 수 있는 조건을 옮기면서, 불필요한 GROUP BY 컬럼을 삭제했다.
+- 0.5초 정도로 성능이 향상됐다.
+
+#### 테이블 생성
+```
+DROP TABLE IF EXISTS likes;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS posts;
+
+CREATE TABLE posts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE likes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    post_id INT,
+    user_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES posts(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+```
+
+#### 더미 데이터 추가
+```
+-- 높은 재귀(반복) 횟수를 허용하도록 설정
+-- (아래에서 생성할 더미 데이터의 개수와 맞춰서 작성하면 된다.)
+SET SESSION cte_max_recursion_depth = 1000000; 
+
+-- posts 테이블에 더미 데이터 삽입
+INSERT INTO posts (title, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('Post', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+
+-- users 테이블에 더미 데이터 삽입
+INSERT INTO users (name, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    CONCAT('User', LPAD(n, 7, '0')) AS name,  -- 'User' 다음에 7자리 숫자로 구성된 이름 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+
+-- likes 테이블에 더미 데이터 삽입
+INSERT INTO likes (post_id, user_id, created_at)
+WITH RECURSIVE cte (n) AS
+(
+  SELECT 1
+  UNION ALL
+  SELECT n + 1 FROM cte WHERE n < 1000000 -- 생성하고 싶은 더미 데이터의 개수
+)
+SELECT 
+    FLOOR(1 + RAND() * 1000000) AS post_id,    -- 1부터 1000000 사이의 난수로 급여 생성
+    FLOOR(1 + RAND() * 1000000) AS user_id,    -- 1부터 1000000 사이의 난수로 급여 생성
+    TIMESTAMP(DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 3650) DAY) + INTERVAL FLOOR(RAND() * 86400) SECOND) AS created_at -- 최근 10년 내의 임의의 날짜와 시간 생성
+FROM cte;
+```
+#### SQL 성능 측정
+```
+SELECT
+    p.id,
+    p.title,
+    p.created_at,
+    COUNT(l.id) AS like_count
+FROM
+    posts p
+INNER JOIN
+    likes l ON p.id = l.post_id
+GROUP BY
+    p.id, p.title, p.created_at
+ORDER BY
+    like_count DESC
+LIMIT 30;
+```
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_50.png?raw=true)
+- 대략 3.4초 정도 걸린다.
+
+#### 실행 계획 세부 내용 조회
+```
+EXPLAIN ANALYZE SELECT
+    p.id,
+    p.title,
+    p.created_at,
+    COUNT(l.id) AS like_count
+FROM
+    posts p
+INNER JOIN
+    likes l ON p.id = l.post_id
+GROUP BY
+    p.id, p.title, p.created_at
+ORDER BY
+    like_count DESC
+LIMIT 30;
+```
+```
+ -> Limit: 30 row(s)  (actual time=3695..3695 rows=30 loops=1)  
+   -> Sort: like_count DESC, limit input to 30 row(s) per chunk  (actual time=3695..3695 rows=30 loops=1)       
+     -> Table scan on <temporary>  (actual time=3592..3669 rows=585092 loops=1)\n            
+       -> Aggregate using temporary table  (actual time=3592..3592 rows=585091 loops=1)             
+          -> Nested loop inner join  (cost=449599 rows=997632) (actual time=0.239..1064 rows=1e+6 loops=1)                   
+           -> Table scan on p  (cost=100428 rows=997632) (actual time=0.189..149 rows=1e+6 loops=1)                
+            -> Covering index lookup on l using post_id (post_id = p.id)  (cost=0.25 rows=1) (actual time=695e-6..826e-6 rows=1 loops=1e+6)
+```
+- 세부 실행 계획을 보니 INNER JOIN과 GROUP BY(Aggreagte using temporary table)에 시간을 많이 사용했다.
+- 이 이유를 추측하면 INNER JOIN, GROUP BY를 수행할 때 풀 테이블 스캔으로 조회한 데이터 100만개를 가지고 처리를 해서 오래 걸렸다고 추측할 수 있다.
+#### 성능 개선
+```
+SELECT p.*, l.like_count
+FROM posts p
+INNER JOIN
+	(SELECT post_id, count(post_id) AS like_count FROM likes l
+	GROUP BY l.post_id
+	ORDER BY like_count DESC
+	LIMIT 30) l
+ON p.id = l.post_id;
+```
+
+- 먼저 likes 테이블에서 post_id를 기준으로 GROUP BY를 수행하여 각 게시물에 대한 좋아요 수를 집계한다.   
+  이때 GROUP BY는 post_id만을 사용하므로, 인덱스를 활용하여 효율적으로 조회할 수 있다.즉, 테이블의 
+  모든 데이터를 읽지 않고, 인덱스만으로도 필요한 정보를 얻을 수 있기 때문에 성능이 더 빠르다. 이것을 커버링 인덱스라고 한다.
+- 그런 다음, 좋아요 수가 많은 30개의 post_id를 찾은 후, 이를 posts 테이블과 INNER JOIN을 통해 결합한다. 이 과정에서 
+  미리 필터링된 30개의 행만을 사용하여 INNER JOIN을 수행하므로 데이터 액세스가 훨씬 줄어들어 성능이 최적화된다.
+
+> 💡[이것만은 기억해두자!]
+> MySQL에서 FK는 자동으로 인덱스가 생성된다.
+
+- 성능도 0.1초로 개선되었다. 
+
+#### 성능 개선 후 실행 계획
+```
+EXPLAIN SELECT p.*, l.like_count
+FROM posts p
+INNER JOIN
+	(SELECT post_id, count(post_id) AS like_count FROM likes l
+	GROUP BY l.post_id
+	ORDER BY like_count DESC
+	LIMIT 30) l
+ON p.id = l.post_id;
+```
+
+![](https://github.com/dididiri1/TIL/blob/main/Mysql2/images/03_51.png?raw=true)
+
+- 풀 테이블 스캔으로 액세스한 데이터의 수가 30으로 줄었다. 그리고 l이라는 테이블에서 인덱스 풀 스캔을 했음을 알 수 있다.
+- 즉, 대부분의 데이터를 원래 풀 테이블 스캔을 하던 걸 풀 인덱스 스캔으로 고친 것이다. 
+
+### 실행 계획 세부 내용 조회
+```
+EXPLAIN ANALYZE SELECT p.*, l.like_count
+FROM posts p
+INNER JOIN
+	(SELECT post_id, count(post_id) AS like_count FROM likes l
+	GROUP BY l.post_id
+	ORDER BY like_count DESC
+	LIMIT 30) l
+ON p.id = l.post_id;
+```
+```
+-> Nested loop inner join  (cost=16.4 rows=30) (actual time=217..217 rows=30 loops=1)
+    -> Filter: (l.post_id is not null)  (cost=5.88 rows=30) (actual time=217..217 rows=30 loops=1)
+        -> Table scan on l  (cost=2.5..2.5 rows=0) (actual time=217..217 rows=30 loops=1)
+            -> Materialize  (cost=0..0 rows=0) (actual time=217..217 rows=30 loops=1)
+                -> Limit: 30 row(s)  (actual time=217..217 rows=30 loops=1)
+                    -> Sort: like_count DESC, limit input to 30 row(s) per chunk  (actual time=217..217 rows=30 loops=1)
+                        -> Stream results  (cost=332124 rows=997899) (actual time=2.39..189 rows=585092 loops=1)
+                            -> Group aggregate: count(l.post_id)  (cost=332124 rows=997899) (actual time=2.38..155 rows=585092 loops=1)
+                                -> Covering index scan on l using post_id  (cost=102193 rows=997899) (actual time=2.38..110 rows=1e+6 loops=1)
+    -> Single-row index lookup on p using PRIMARY (id = l.post_id)  (cost=0.253 rows=1) (actual time=0.00224..0.00226 rows=1 loops=30)
+```
+> 💡[이것만은 기억해두자!]
+> 실제 커버링 인덱스를 활용했음을 알 수 있다.
+> 그리고 풀 테이블 스캔의 데이터보다 훨씬 크기가 작은 커버링 인덱스만을 활용해서 GROUP BY를 실행하니 훨씬 속도가 빠른 걸 알 수 있다.
