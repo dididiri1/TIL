@@ -2,8 +2,6 @@
 
 ## Users Microservice 개요
 
-![](https://github.com/dididiri1/TIL/blob/main/SpringColud/images/04_01.png?raw=true)
-
 ### APIs
 | 기능               |       URI(API Gateway 사용 시)       | URI(API Gateway 미사용 시) |
 |:-----------------|:---------------------------------:|:----------------------:|
@@ -23,6 +21,11 @@
 - ModelMapper
 - Spting Boot Starter Data JPA
 - H2 Database
+
+![](https://github.com/dididiri1/TIL/blob/main/SpringColud/images/04_01.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/SpringColud/images/04_02.png?raw=true)
+
 
 ### application.yml
 - 포트 번호를 0으로 지정하여 랜덤 포트로 지정하였고, instance-id 값을 지정해줌
