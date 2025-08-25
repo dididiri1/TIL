@@ -441,3 +441,425 @@ optValue.stream() -> Hello
 Optional 의 다양한 메서드를 활용하면, 값이 존재할 때와 존재하지 않을 때의 로직을 명확하고 간결하게 구현할 수 있다.
 이러한 기능 덕분에 null 체크로 인한 복잡한 코드와 예외 처리를 줄이고, 더 읽기 쉽고 안전한 코드를 작성할 수 있다.
 
+## 즉시 평가와 지연 평가1
+앞서 설명한 orElse() 와 orElseGet() 의 차이가 잘 느껴지지 않을 수 있다. 둘의 차이를 제대로 이해하려면 즉시 평가와 지연 평가를 먼저 이해해야 한다.
+- 즉시 평가(eager evaluation):
+  - 값(혹은 객체)을 바로 생성하거나 계산해 버리는 것
+- 지연 평가(lazy evaluation):
+  - 값이 실제로 필요할 때(즉, 사용될 때)까지 계산을 미루는 것
+
+여기서 평가라고 하는 것은 쉽게 이야기해서 계산이라고 생각하면 된다.
+둘의 차이를 이해하기 위해 간단한 로거 예제를 만들어보자.
+
+#### 로거
+```
+package optional.logger;
+
+import java.util.function.Supplier;
+
+public class Logger {
+    private boolean isDebug = false;
+
+    public boolean isDebug() {
+        return isDebug;
+    }
+
+    public void setDebug(boolean debug) {
+        isDebug = debug;
+    }
+
+    // DEBUG로 설정한 경우만 출력 - 데이터를 받음
+    public void debug(Object message) {
+        if (isDebug) {
+            System.out.println("[DEBUG] " + message);
+        }
+    }
+}
+```
+- 이 로거의 사용 목적은 일반적인 상황에서는 로그를 남기지 않다가, 디버깅이 필요한 경우에만 디버깅용 로그를 추가로 출력하는 것이다.
+- debug() 에 전달한 메시지는 isDebug 값을 true 로 설정한 경우에만 메시지를 출력한다.
+```
+package optional.logger;
+
+public class LogMain1 {
+    public static void main(String[] args) {
+        Logger logger = new Logger();
+
+        logger.setDebug(true);
+        logger.debug(10 + 20);
+
+        System.out.println("=== 디버그 모드 끄기 ===");
+        logger.setDebug(false);
+        logger.debug(100 + 200);
+    }
+}
+```
+#### 실행 결과
+```
+[DEBUG] 30
+=== 디버그 모드 끄기 ===
+```
+- debug(10 + 20) 은 디버그 모드가 켜져있기 때문에 출력된다.
+- debug(100 + 200) 은 디버그 모드가 꺼져있기 때문에 출력되지 않는다.
+
+### 자바 언어의 연산 순서와 즉시 평가
+자바는 연산식을 보면 기본적으로 즉시 평가한다. 이 말을 이해하기 위해
+**debug(10 + 20)** 연산부터 알아보자.
+```
+// 자바 언어의 연산자 우선순위상 메서드를 호출하기 전에 괄호 안의 내용이 먼저 계산된다.
+logger.debug(10 + 20); // 1. 여기서는 10 + 20이 즉시 평가된다.
+logger.debug(30); // 2. 10 + 20 연산의 평가 결과는 30이 된다.
+debug(30) // 3. 메서드를 호출한다. 이때 계산된 30의 값이 인자로 전달된다.
+```
+자바는 10 + 20 이라는 연산을 처리할 순서가 되면 그때 바로 즉시 평가(계산) 한다.
+우리에게는 너무 자연스러운 방식이기 때문에 아무런 문제가 될 것이 없어 보인다.
+그런데 이런 방식이 때로는 문제가 되는 경우가 있다.
+
+#### debug(100 + 200) 연산을 통해 어떤 문제가 있는지 알아보자.
+```
+System.out.println("=== 디버그 모드 끄기 ===");
+logger.setDebug(false);
+logger.debug(100 + 200);
+```
+이 연산은 debug 모드가 꺼져있기 때문에 출력되지 않는다. 따라서 100 + 200 연산은 어디에도 사용되지 않는다.
+하지만 이 연산은 계산된 후에 버려진다. 다음 코드를 보자.
+```
+// 자바 언어의 연산자 우선순위상 메서드를 호출하기 전에 괄호 안의 내용이 먼저 계산된다.
+logger.debug(100 + 200); // 1. 여기서는 100 + 200이 즉시 평가된다.
+logger.debug(300);       // 2. 100 + 200 연산의 평가 결과는 300이 된다.
+debug(300)               // 3. 메서드를 호출한다. 이때 계산된 300의 값이 인자로 전달된다.
+```
+```
+public void debug(Object message = 300) { // 4. message에 계산된 300이 할당된다.
+    if (isDebug) { // 5. debug 모드가 꺼져있으므로 false이다.
+        System.out.println("[DEBUG] " + message); // 6. 실행되지 않는다.
+    }
+}
+```
+이  연산의 결과 300 은 debug 모드가 꺼져있기 때문에 출력되지 않는다. 따라서 앞서 계산한 100 + 200 연산은 어디에도 사용되지 않는다.   
+결과적으로 연산은 계산된 후에 버려진다.
+
+결과적으로 100 + 200 연산은 미래에 전혀 사용하지 않을 값을 계산해서 아까운 CPU 전기만 낭비한 것이다.
+그런데 정말 사용하지도 않을 100 + 200 연산을 처리한 것일까? 눈으로 확인할 수 없으니 믿을 수가 없다.
+
+## 즉시 평가와 지연 평가2
+100 + 200 연산을 메서드 호출로 변경해서, 실제 호출된 것인지 확인해보자.
+```
+package optional.logger;
+
+public class LogMain2 {
+    public static void main(String[] args) {
+        Logger logger = new Logger();
+
+        logger.setDebug(true);
+        logger.debug(value100() + value200());
+
+        System.out.println("=== 디버그 모드 끄기 ===");
+        logger.setDebug(false);
+        logger.debug(value100() + value200());
+    }
+
+    static int value100() {
+        System.out.println("value100 호출");
+        return 100;
+    }
+
+    static int value200() {
+        System.out.println("value200 호출");
+        return 200;
+    }
+}
+```
+#### 실행 결과
+```
+value100 호출
+value200 호출
+[DEBUG] 300
+=== 디버그 모드 끄기 ===
+value100 호출
+value200 호출
+```
+로그를 보면 디버그 모드를 끈 경우에도 value100() , value200() 이 실행된 것을 확인할 수 있다. 
+따라서 메서드를 호출하기 전에 괄호 안의 내용이 먼저 평가(계산)되는 것을 확인할 수 있다.
+```
+// 자바 언어의 연산자 우선순위상 메서드를 호출하기 전에 괄호 안의 내용이 먼저 계산된다.
+logger.debug(value100() + value200()); // 1. 여기서는 value100() + value200()이 즉시 평가된다.
+
+logger.debug(100 + value200()); // 2. 왼쪽에 있는 value100()이 먼저 평가되고, 반환된다.
+// 출력: value1 호출
+
+logger.debug(100 + 200); // 3. 오른쪽에 있는 value200()이 평가되고, 반환된다.
+// 출력: value2 호출
+
+debug(300); // 4. 100 + 200을 평가하고 메서드를 호출한다. 300의 값이 인자로 전달된다.
+```
+결과적으로 여기서도 value100() + value200() 연산은 미래에 전혀 사용하지 않을 값을 계산해서 아까운 CPU 전기만 낭비한 것이다.
+
+그렇다면 debug 모드가 켜져있을 때는 해당 연산을 처리하고, debug 모드가 꺼져있을 때는 해당 연산을 처리하지 않으려면 어떻게 해야 할까?
+가장 간단한 방법은 디버그 모드를 출력할 때 마다 매번 if 문을 사용해서 체크하는 방법이 있다.
+
+#### 기존 코드
+```
+logger.debug(value100() + value200());
+```
+
+#### if문으로 debug 메서드 실행 여부를 체크하는 코드
+```
+if (logger.isDebug()) {
+    logger.debug(value100() + value200());
+}
+```
+확인을 위해 코드 마지막에 다음 코드를 추가해보자.
+
+#### 디버그 모드 체크시 추가 코드
+```
+//코드 마지막에 추가
+System.out.println("=== 디버그 모드 체크 ===");
+if (logger.isDebug()) {
+    logger.debug(value100() + value200());
+}
+```
+#### 실행 결과
+```
+value100 호출
+value200 호출
+[DEBUG] 300
+=== 디버그 모드 끄기 ===
+value100 호출
+value200 호출
+=== 디버그 모드 체크 ===
+```
+실행 결과를 보면 디버그 모드 체크 이후에 아무런 로그가 남지 않았다. 따라서 debug() 메서드가 실행되지 않은 것을 확인할 수 있다.
+
+이렇게 하면 코드는 지저분해지겠지만, if문 덕분에 디버그 모드가 꺼져있을 때 필요없는 연산을 계산하지 않아도 된다.
+하지만 이렇게 하려면 디버그를 출력할 때 마다 계속 if 문을 사용해야 한다. 코드 한 줄을 작성하는데 코드 2줄이 더 필요하다! (if 문을 닫는 괄호 포함)
+```
+// 1. if 문을 통한 확실한 체크, 코드는 지저분해지지만, 필요 없는 연산 수행X
+if (logger.isDebug()) {
+    logger.debug(value100() + value200());
+}
+
+// 2. 필요없는 연산이 추가되지만 코드는 깔끔
+logger.debug(value100() + value200());
+```
+2번과 같은 방식으로 깔끔하지만 미래에 사용하지 않을 연산이 미리 수행되지 않도록 하는 방법은 없을까?
+2번의 코드의 깔끔함과 1번의 필요 없는 연산은 수행하지 않는 둘의 장점만 가져오는 방법은 없을까?
+
+이렇게 하려면 100 + 200 , value100() + value200() 같은 **연산을 정의하는 시점과 해당 연산을 실행하는 시점을 분리**해야 한다. 
+그래서 연산의 실행을 최대한 **지연해서 평가**(계산)해야 한다.
+
+## 즉시 평가와 지연 평가3
+자바 언어에서 연산을 정의하는 시점과 해당 연산을 실행하는 시점을 분리하는 방법은 여러 가지가 있다.
+- 익명 클래스를 만들고, 메서드를 나중에 호출
+- 람다를 만들고, 해당 람다를 나중에 호출
+
+람다를 사용해서 연산을 정의하는 시점과 실행하는 시점을 분리해서 문제를 해결해보자.
+**Logger에 람다**(Supplier)를 받는 **debug 메서드를 하나 추가하자**
+```
+package optional.logger;
+
+import java.util.function.Supplier;
+
+public class Logger {
+    // ...
+
+    // 추가
+    // DEBUG로 설정한 경우만 출력 - 람다를 받아서 실행
+    public void debug(Supplier<?> supplier) {
+        if (isDebug) {
+            System.out.println("[DEBUG] " + supplier.get());
+        }
+    }
+}
+```
+- Supplier 를 통해서 람다를 받도록 했다.
+- Supplier 는 get() 을 실행할 때 해당 람다를 평가(연산)한다. 그리고 그 결과를 반환한다.
+```
+package optional.logger;
+
+public class LogMain3 {
+
+    public static void main(String[] args) {
+        Logger logger = new Logger();
+        logger.setDebug(true);
+        logger.debug(() -> value100() + value200());
+
+        System.out.println("=== 디버그 모드 끄기 ===");
+
+        logger.setDebug(false);
+        logger.debug(() -> value100() + value200());
+    }
+
+    static int value100() {
+        System.out.println("value100 호출");
+        return 100;
+    }
+
+    static int value200() {
+        System.out.println("value200 호출");
+        return 200;
+    }
+}
+```
+#### 실행 결과
+```
+value100 호출
+value200 호출
+[DEBUG] 300
+=== 디버그 모드 끄기 ===
+```
+실행 결과를 보면 디버그 모드가 꺼져있을 때 value100() , value200() 이 실행되지 않은 것을 확인할 수 있다.
+디버그 모드가 켜져있을 때, 꺼져있을 때 실행 순서를 알아보자.
+
+#### 디버그 모드가 켜져있을 때
+```
+logger.debug(() -> value100() + value200()) // 1. 람다를 생성한다. 이때 람다가 실행되지는 않는다.
+
+logger.debug(() -> value100() + value200()) // 2. debug()를 호출하면서 인자로 람다를 전달한다.
+```
+```
+// 3. supplier에 람다가 전달된다. (람다는 아직 실행되지 않았다.)
+public void debug(Supplier<?> supplier = () -> value100() + value200()) {
+    if (isDebug) { 
+        // 4. 디버그 모드이므로 if 문이 수행된다.
+        // 5. supplier.get()을 실행하는 시점에 람다에 있는 value100() + value200()이 평가(계산)된다.
+        // 6. 평가 결과인 300을 반환하고 출력한다.
+        System.out.println("[DEBUG] " + supplier.get());
+    }
+}
+```
+
+#### 디버그 모드가 꺼져있을 때
+```
+logger.debug(() -> value100() + value200()) // 1. 람다를 생성한다. 이때 람다가 실행되지는 않는다.
+
+logger.debug(() -> value100() + value200()) // 2. debug()를 호출하면서 인자로 람다를 전달한다.
+```
+```
+// 3. supplier에 람다가 전달된다. (람다는 아직 실행되지 않았다.)
+public void debug(Supplier<?> supplier = () -> value100() + value200()) {
+    if (isDebug) { 
+        // 4. 디버그 모드가 아니므로 if 문이 수행되지 않는다.
+        // 5. 다음 코드는 수행되지 않고, 람다도 실행되지 않는다.
+        System.out.println("[DEBUG] " + supplier.get());
+    }
+}
+```
+#### 정리
+람다를 사용해서 **연산을 정의하는 시점과 실행(평가)하는 시점을 분리**했다. 따라서 값이 실제로 필요할 때 까지 계산을 미룰 수 있었다. 
+람다를 활용한 지연 평가 덕분에 꼭 필요한 계산만 처리할 수 있었다.
+
+- 즉시 평가(eager evaluation):
+  - 값(혹은 객체)을 바로 생성하거나 계산해 버리는 것
+- 지연 평가(lazy evaluation):
+  - 값이 실제로 필요할 때(즉, 사용될 때)까지 계산을 미루는 것
+
+## orElse() vs orElseGet()
+우리는 앞서 즉시 평가와 지연 평가에 대해서 알아보았다.
+람다를 사용하면 연산을 정의하는 시점과 실행하는 시점을 분리해서, 값이 실제로 필요할 때 까지 계산을 미룰 수 있다.
+이제 orElse() 와 orElseGet() 의 차이를 이해할 수 있을 것이다.
+orElse() 는 보통 데이터를 받아서 인자가 즉시 평가되고, orElseGet() 은 람다를 받아서 인자가 지연 평가된다.
+
+다음 코드를 통해 둘의 차이를 자세히 알아보자.
+```
+package optional;
+
+import java.util.Optional;
+import java.util.Random;
+
+public class OrElseGetMain {
+
+    public static void main(String[] args) {
+        Optional<Integer> optValue = Optional.of(100);
+        Optional<Integer> optEmpty = Optional.empty();
+
+        System.out.println("단순 계산");
+        Integer i1 = optValue.orElse(10 + 20); // 10 + 20 계산 후 버림
+        Integer i2 = optEmpty.orElse(10 + 20); // 10 + 20 계산 후 사용
+        System.out.println("i1 = " + i1);
+        System.out.println("i2 = " + i2);
+
+        // 값이 있으면 그 값, 없으면 지정된 기본값 사용
+        System.out.println("=== orElse ===");
+        System.out.println("값이 있는 경우");
+        Integer value1 = optValue.orElse(createData());
+        System.out.println("value1 = " + value1);
+
+        System.out.println("값이 없는 경우");
+        Integer empty1 = optEmpty.orElse(createData());
+        System.out.println("empty1 = " + empty1);
+
+        // 값이 있으면 그 값, 없으면 지정된 람다 사용
+        System.out.println("=== orElseGet ===");
+        System.out.println("값이 있는 경우");
+        Integer value2 = optValue.orElseGet(() -> createData());
+        System.out.println("value2 = " + value2);
+
+        System.out.println("값이 없는 경우");
+        Integer empty2 = optEmpty.orElseGet(() -> createData());
+        System.out.println("empty2 = " + empty2);
+    }
+
+    public static int createData() {
+        System.out.println("데이터를 생성합니다...");
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        int createValue = new Random().nextInt(100);
+        System.out.println("데이터 생성이 완료되었습니다. 생성 값: " + createValue);
+        return createValue;
+    }
+}
+```
+
+### 실행 결과
+```
+단순 계산
+i1 = 100
+i2 = 30
+=== orElse ===
+값이 있는 경우
+데이터를 생성합니다...
+데이터 생성이 완료되었습니다. 생성 값: 14
+value1 = 100
+값이 없는 경우
+데이터를 생성합니다...
+데이터 생성이 완료되었습니다. 생성 값: 18
+empty1 = 18
+
+=== orElseGet ===
+값이 있는 경우
+value2 = 100
+값이 없는 경우
+데이터를 생성합니다...
+데이터 생성이 완료되었습니다. 생성 값: 11
+empty2 = 11
+```
+- orElse(createData())
+  - Optional 에 값이 있어도 createData() 가 즉시 호출된다. 호출된 값은 버려진다.
+  - 자바 연산 순서상 createData() 를 호출해야 그 결과를 orElse() 에 인자로 전달할 수 있다.
+- orElseGet(() -> createData())
+  - Optional 값이 있으면 createData() 가 호출되지 않는다.
+  - orElseGet() 에 람다를 전달한다. 해당 람다는 이후에 orElseGet() 안에서 실행될 수 있다.
+  - Optional 내부에 값이 있다면, 인자로 전달한 람다를 내부에서 실행하지 않는다.
+  - Optional 내부에 값이 없다면, 인자로 전달한 람다를 내부에서 실행하고, 그 결과를 반환한다.
+
+#### 두 메서드의 차이
+- orElse(T other) 는 "빈 값이면 other 를 반환"하는데, other 를 "항상" 미리 계산한다.
+  - 따라서 other 를 생성하는 비용이 큰 경우, 실제로 값이 있을 때도 쓸데없이 생성 로직이 실행될 수 있다.
+  - orElse() 에 넘기는 표현식은 **호출 즉시 평가**하므로 **즉시 평가(eager evaluation)가** 적용된다.
+- orElseGet(Supplier supplier) 은 빈 값이면 supplier 를 통해 값을 생성하기 때문에, **값이 있을 때는** supplier 가 **호출되지 않는다.**
+  - 생성 비용이 높은 객체를 다룰 때는 orElseGet() 이 더 효율적이다.
+  - orElseGet() 에 넘기는 표현식은 **필요할 때만 평가**하므로 **지연 평가(lazy evaluation)가** 적용된다.
+
+#### 사용 용도
+orElse(T other)
+- 값이 ~~이미 존재할~~ **존재하지 않을 가능성이 높거나**, 혹은 **orElse()에 넘기는 객체(또는 메서드)가 생성 비용이 크지 않은 경우** 사용해도 괜찮다.
+- 연산이 없는 상수나 변수의 경우 사용해도 괜찮다.
+orElseGet(Supplier supplier)
+- 주로 **orElse()에 넘길 값의 생성 비용이 큰 경우**, 혹은 **값이 들어있을 확률이 높아 굳이 매번 대체 값을 계산할 필요가 없는 경우**에 사용한다.
+
+정리하면, **단순한 대체 값**을 전달하거나 코드가 매우 간단하다면 orElse() 를 사용하고, **객체 생성 비용이 큰 로직**이 들어있고, 
+**Optional에 값이 이미 존재할 가능성이 높다면** orElseGet() 을 고려해볼 수 있다.
