@@ -863,3 +863,141 @@ orElseGet(Supplier supplier)
 
 정리하면, **단순한 대체 값**을 전달하거나 코드가 매우 간단하다면 orElse() 를 사용하고, **객체 생성 비용이 큰 로직**이 들어있고, 
 **Optional에 값이 이미 존재할 가능성이 높다면** orElseGet() 을 고려해볼 수 있다.
+
+## 실전 활용1 - 주소 찾기
+### 실전 활용1 - User와 Address
+#### 시나리오
+- User 라는 클래스가 있고, 그 안에 Address 라는 주소 정보가 있을 수 있다.
+- 주소가 없을 수도 있으므로, 우리가 클래스를 설계할 때 address 필드는 null 일 수도 있다고 가정한다.
+
+먼저, User 와 Address 클래스를 살펴보자.
+```
+package optional.model;
+
+public class User {
+    private String name;
+    private Address address;
+
+    public User(String name, Address address) {
+        this.name = name;
+        this.address = address;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+}
+```
+```
+package optional.model;
+
+public class Address {
+    private String street;
+
+    public Address(String street) {
+        this.street = street;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+}
+```
+
+### 1. null 체크 방식으로 구현
+다음 코드는 전통적인 방식으로 null 을 체크해서 처리하는 방법이다. 주소가 없으면 "Unknown" 을 출력한다.
+```
+package optional;
+
+import optional.model.Address;
+import optional.model.User;
+
+public class AddressMain1 {
+
+    public static void main(String[] args) {
+        User user1 = new User("user1", null);
+        User user2 = new User("user2", new Address("hello street"));
+
+        printStreet(user1);
+        printStreet(user2);
+    }
+
+    static void printStreet(User user) {
+        String userStreet = getUserStreet(user);
+        if (userStreet != null) {
+            System.out.println(userStreet);
+        } else {
+            System.out.println("Unknown");
+        }
+    }
+
+    static String getUserStreet(User user) {
+        if (user == null) {
+            return null;
+        }
+        Address address = user.getAddress();
+        if (address == null) {
+            return null;
+        }
+        return address.getStreet();
+    }
+}
+```
+#### 실행 결과
+```
+Unknown
+hello street
+```
+- null 체크가 여러 번 등장하고, getUserStreet() 메서드도 언제든 null 을 반환할 수 있음을 고려해야 한다.
+- 따라서 getUserStreet() 를 호출하는 printStreet() 메서드도 null 체크 로직이 필요하다.
+- 작은 예제에서는 괜찮아 보이지만, 점점 User 내부 구조가 복잡해지면 null 체크 구문도 늘어난다.
+
+### 2. Optional로 개선
+이번에는 Optional 을 활용해 동일한 로직을 구현해보자.
+```
+package optional;
+
+import optional.model.Address;
+import optional.model.User;
+import java.util.Optional;
+
+public class AddressMain2 {
+
+    public static void main(String[] args) {
+        User user1 = new User("user1", null);
+        User user2 = new User("user2", new Address("hello street"));
+
+        printStreet(user1);
+        printStreet(user2);
+    }
+
+    private static void printStreet(User user) {
+        getUserStreet(user).ifPresentOrElse(
+            System.out::println,          // 값이 있을 때
+            () -> System.out.println("Unknown") // 값이 없을 때
+        );
+    }
+
+    static Optional<String> getUserStreet(User user) {
+        return Optional.ofNullable(user)      // user가 null일 수 있으므로 ofNullable 사용
+                     .map(User::getAddress)   // user.getAddress() 처리
+                     .map(Address::getStreet); // address.getStreet() 처리
+        // 여기서 map 체이닝 중간에 null이면 Optional.empty()를 반환
+    }
+}
+```
+
+#### 실행 결과
+```
+Unknown
+hello street
+```
+- getUserStreet() 메서드는 이제 Optional<String> 을 반환하므로, 호출 측에서 ifPresentOrElse() , orElse() , orElseGet() 등을   
+  통해 안전하게 처리할 수 있다.
+- 여러 map() 체이닝을 통해 내부에서 null 이 발생하면 자동으로 Optional.empty() 로 전환된다.
+- null 체크 구문이 사라지고, 의도가 더욱 명확해진다.
+- Optional.ofNullable(user) 를 사용한 이유는 user 의 값이 null 일 수도 있기 때문이다.
