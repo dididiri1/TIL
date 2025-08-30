@@ -1001,3 +1001,382 @@ hello street
 - 여러 map() 체이닝을 통해 내부에서 null 이 발생하면 자동으로 Optional.empty() 로 전환된다.
 - null 체크 구문이 사라지고, 의도가 더욱 명확해진다.
 - Optional.ofNullable(user) 를 사용한 이유는 user 의 값이 null 일 수도 있기 때문이다.
+
+## 실전 활용2 - 배송
+### 실전 활용2 - Order와 Delivery
+#### 시나리오
+- Order 라는 주문 클래스가 있고, 내부에 Delivery (배송) 정보가 있을 수 있다.
+- 각 주문의 배송 상태를 출력한다.
+- 배송 정보가 없거나, 배송이 취소된 경우에는 "배송X" 라고 표시해야 한다.
+
+먼저 Order 와 Delivery 클래스를 살펴보자.
+```
+package optional.model;
+
+public class Order {
+    private Long id;
+    private Delivery delivery;
+
+    public Order(Long id, Delivery delivery) {
+        this.id = id;
+        this.delivery = delivery;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Delivery getDelivery() {
+        return delivery;
+    }
+}
+```
+
+```
+package optional.model;
+
+public class Delivery {
+    private String status;
+    private boolean canceled;
+
+    public Delivery(String status, boolean canceled) {
+        this.status = status;
+        this.canceled = canceled;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public boolean isCanceled() {
+        return canceled;
+    }
+}
+```
+
+다음 예제는 orderRepository 라는 맵에서 주문 정보를 찾은 다음, 배송 정보를 조회하여 출력하는 코드이다.
+- 배송 정보가 null 이거나, canceled == true 인 경우에는 "배송X" 를 출력한다.
+```
+package optional;
+
+import optional.model.Delivery;
+import optional.model.Order;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+// Delivery가 없거나, 배송이 취소된 경우 배송X
+public class DeliveryMain {
+    static Map<Long, Order> orderRepository = new HashMap<>();
+
+    static {
+        orderRepository.put(1L, new Order(1L, new Delivery("배송완료", false)));
+        orderRepository.put(2L, new Order(2L, new Delivery("배송중", false)));
+        orderRepository.put(3L, new Order(3L, new Delivery("배송중", true)));
+        orderRepository.put(4L, new Order(4L, null));
+    }
+
+    public static void main(String[] args) {
+        System.out.println("1 = " + getDeliveryStatus(1L));
+        System.out.println("2 = " + getDeliveryStatus(2L));
+        System.out.println("3 = " + getDeliveryStatus(3L));
+        System.out.println("4 = " + getDeliveryStatus(4L));
+    }
+
+    static String getDeliveryStatus(Long orderId) {
+        return findOrder(orderId)
+                .map(Order::getDelivery)              // Order -> Delivery
+                .filter(delivery -> !delivery.isCanceled())
+                .map(Delivery::getStatus)             // Delivery -> String
+                .orElse("배송X");                     // 값이 없으면 "배송X"
+    }
+
+    static Optional<Order> findOrder(Long orderId) {
+        return Optional.ofNullable(orderRepository.get(orderId));
+    }
+}
+```
+
+#### 실행 결과
+```
+1 = 배송완료
+2 = 배송중
+3 = 배송X
+4 = 배송X
+```
+- 주문 정보가 null 이면 Optional.empty()
+- 배송이 없거나 취소된 경우에도 Optional.empty() 체이닝
+- 최종적으로 .orElse("배송X") 처리
+
+이렇게 Optional 을 활용하면, 중첩된 null 체크 없이도 의미 있는 로직을 간결하게 작성할 수 있다.
+
+## 옵셔널 - 베스트 프랙티스
+- Optional 이 좋아보여도 무분별하게 사용하면 오히려 코드 가독성과 유지보수에 도움이 되지 않을 수 있다.
+- Optional 은 주로 **메서드의 반환값**에 대해 값이 없을 수도 있음을 표현하기 위해 도입되었다.
+  - 여기서 핵심은 메서드의 반환값에 Optional 을 사용하라는 것이다.
+
+### 1. 반환 타입으로만 사용하고, 필드에는 가급적 쓰지 말기
+#### 원칙
+- Optional 은 주로 **메서드의 반환값**에 대해 "값이 없을 수도 있음"을 표현하기 위해 도입되었다.
+- 클래스의 필드(멤버 변수)에 Optional 을 직접 두는 것은 권장하지 않는다.
+
+#### 잘못된 예시
+```
+public class Product {
+    // 안티 패턴: 필드를 Optional로 선언
+    private Optional<String> name;
+     
+    // ... constructor, getter, etc.
+}
+```
+- 이렇게 되면 다음과 같은 3가지 상황이 발생한다.
+ 1. name = null
+ 2. name = Optional.empty()
+ 3. name = Optional.of(value)
+ - Optional 자체도 참조 타입이기 때문에, 혹시라도 개발자가 부주의로 Optional 필드에 null 을 할당하면, 그 자체가 NullPointerException을   
+   발생시킬 여지를 남긴다.
+ - 값이 없음을 명시하기 위해 사용하는 것이 Optional 인데, 정작 필드 자체가 null 이면 혼란이 가중된다.
+
+#### 권장 예시
+```
+public class Product {
+    // 필드는 원시 타입(혹은 일반 참조 타입) 그대로 둔다.
+    private String name;
+    
+    // ... constructor, getter, etc.
+}
+
+// name 값을 가져올 때, "필드가 null일 수도 있음"을 고려해야 한다면
+// 다음 메서드에서 Optional로 변환해서 반환할 수 있다.
+public Optional<String> getNameAsOptional() {
+    return Optional.ofNullable(name);
+}
+```
+- 만약 Optional 로 name 값을 받고 싶다면, 필드는 Optional 을 사용하지 않고, **반환하는 시점**에 Optional 로 감싸주는 것이  
+  일반적으로 더 나은 방법이다.
+
+### 2. 메서드 매개변수로 Optional 을 사용하지 말기
+#### 원칙
+- 자바 공식 문서에 Optional 은 메서드의 **반환값**으로 사용하기를 권장하며, **매개변수**로 사용하지 말라고 명시되어 있다.
+- 호출하는 측에서는 단순히 null 전달 대신 Optional.empty() 를 전달해야 하는 부담이 생기며, 결국 null 을 사용하든 Optional.empty() 를   
+  사용하든 큰 차이가 없어 가독성만 떨어진다.
+
+#### 잘못된 예시
+```
+public void processOrder(Optional<Long> orderId) {
+    if (orderId.isPresent()) {
+        System.out.println("Order ID: " + orderId.get());
+    } else {
+        System.out.println("Order ID is empty!");
+    }
+}
+```
+- 호출하는 입장에서는 processOrder(Optional.empty()) 처럼 호출해야 하는데, 사실 processOrder(null) 과 큰 차이가 없고,   
+  오히려 Optional.empty() 를 만드는 비용이 추가된다.
+
+#### 권장 예시
+- **오버로드**된 메서드를 만들거나,
+- **명시적으로** null **허용 여부**를 문서화하는 방식을 택합니다.
+```
+// 오버로드 예시
+public void processOrder(long orderId) {
+    // 이 메서드는 orderId가 항상 있어야 하는 경우
+    System.out.println("Order ID: " + orderId);
+}
+
+public void processOrder() {
+    // 이 메서드는 orderId가 없을 때 호출할 경우
+    System.out.println("Order ID is empty!");
+}
+```
+```
+// 방어적 코드(여기서는 null 허용, 내부에서 처리)
+public void processOrder(Long orderId) {
+    if (orderId == null) {
+        System.out.println("Order ID is empty!");
+        return;
+    }
+    System.out.println("Order ID: " + orderId);
+}
+```
+어떤 방식이든 Optional 을 매개변수로 받는 것은 지양하고, **오히려 반환 타입**을 Optional 로 두는 것이 더 자연스러운 활용 방법이다.
+
+### 3. 컬렉션(Collection)이나 배열 타입을 Optional 로 감싸지 말기
+#### 원칙
+- List<T> , Set<T> , Map<K,V> 등 **컬렉션(Collection)** 자체는 **비어있는 상태(empty)를 표현**할 수 있다.
+- 따라서 Optional<List<T>> 처럼 다시 감싸면 Optional.empty() 와 "빈 리스트"( Collections.emptyList() )가 이중 표현이 되고,   
+  혼란을 야기한다.
+
+#### 잘못된 예시
+```
+public Optional<List<String>> getUserRoles(String userId) {
+    List<String> userRolesList ...;
+    if (foundUser) {
+        return Optional.of(userRolesList);
+    } else {
+       return Optional.empty();
+    }
+}
+```
+
+반환 받은 쪽에서는 다음 코드와 같이 사용해야 한다.
+```
+Optional<List<String>> optList = getUserRoles("someUser");
+if (optList.isPresent()) {
+    // ...
+}
+```
+하지만 정작 내부의 리스트가 empty 일 수도 있으므로, 한 번 더 체크해야 하는 모호함이 생긴다.
+- Optional 이 비어있는지 체크해야 하고, userRolesList 가 비어있는지 추가로 체크해야 한다.
+
+#### 권장 예시
+```
+public List<String> getUserRoles(String userId) {
+    // ...
+    if (!foundUser) {
+        // 권장: 빈 리스트 반환
+        return Collections.emptyList();
+    }
+    return userRolesList;
+}
+```
+- 빈 컬렉션을 반환하면, 호출 측에서는 단순히 optList.isEmpty() 로 처리하면 된다.
+
+### 4. isPresent() 와 get() 조합을 직접 사용하지 않기
+#### 원칙
+- Optional 의 get() 메서드는 가급적 사용하지 않아야 한다.
+- if (opt.isPresent()) { ... opt.get() ... } else { ... } 는 사실상 null 체크와 다를 바 없으며, 깜빡하면 NoSuchElementException   
+  같은 예외가 발생할 위험이 있다.
+- 대신 orElse , orElseGet , orElseThrow , ifPresentOrElse , map , filter 등의 메서드를 활용하면 간결하고 안전하게 처리할 수 있다.
+
+#### 잘못된 예시
+```
+public static void main(String[] args) {
+    Optional<String> optStr = Optional.ofNullable("Hello");
+
+    if (optStr.isPresent()) {
+        System.out.println(optStr.get());
+    } else {
+        System.out.println("Nothing");
+    }
+}
+```
+
+```
+public static void main(String[] args) {
+    Optional<String> optStr = Optional.ofNullable("Hello");
+
+    // 1) orElse
+    System.out.println(optStr.orElse("Nothing"));
+
+    // 2) ifPresentOrElse
+    optStr.ifPresentOrElse(
+        System.out::println,
+        () -> System.out.println("Nothing")
+    );
+
+    // 3) map
+    int length = optStr.map(String::length).orElse(0);
+    System.out.println("Length: " + length);
+}
+```
+- 각 메서드( map , filter , ifPresentOrElse , orElse , orElseThrow , orElseGet 등)를 잘 조합하면, get() 없이도 대부분의   
+  로직을 처리할 수 있다.
+- get() 메서드는 가급적 사용하지 말고, 예제 코드나, 간단한 테스트에서만 사용하는 것을 권장한다.
+- 그럼에도 불구하고 get() 메서드를 사용해야 하는 상황이라면, 이럴 때는 반드시 isPresent() 와 함께 사용하는 것을 권장한다.
+
+### 5. orElseGet() vs orElse() 차이를 분명히 이해하기
+#### 원칙
+- orElse(T other)는 **항상** other 를 즉시 생성하거나 계산한다.
+  - 즉, Optional 값이 존재해도 불필요한 연산/객체 생성이 일어날 수 있다. (**즉시 평가**)
+- orElseGet(Supplier<? extends T>) 는 **필요할 때만**(빈 Optional 일 때만) Supplier 를 호출한다.
+  - 값이 이미 존재하는 경우에는 Supplier 가 실행되지 않으므로, 비용이 큰 연산을 뒤로 미룰 수 있다(**지연 평가**).
+
+예제 코드는 앞서 알아보았으므로 생략한다.
+
+#### 정리
+- **비용이 크지 않은(또는 간단한 상수 정도) 대체값**이라면 간단하게 orElse() 를 사용하자.
+- 복잡하고 비용이 큰 객체 생성이 필요한 경우, 그리고 **Optional 값이 이미 존재할 가능성이 높다면** orElseGet() 를 사용하자.
+
+### 6. 무조건 Optional 이 좋은 것은 아니다
+#### 원칙
+- Optional 은 분명히 편의성과 안전성을 높여주지만, 모든 곳에서 "무조건" 사용하는 것은 오히려 코드 복잡성을 증가시킬 수 있다.
+- 다음과 같은 경우 Optional **사용이 오히려 불필요**할 수 있다.
+1. "항상 값이 있는" 상황
+  - 비즈니스 로직상 null 이 될 수 없는 경우, 그냥 일반 타입을 사용하거나, 방어적 코드로 예외를 던지는 편이 낫다.
+2. "값이 없으면 예외를 던지는 것"이 더 자연스러운 상황
+  - 예를 들어, ID 기반으로 무조건 존재하는 DB 엔티티를 찾아야 하는 경우, Optional 대신 예외를 던지는 게 API 설계상 명확할 수 있다.  
+    물론 이런 부분은 비즈니스 상황에 따라 다를 수 있다.
+3. "흔히 비는 경우"가 아니라 "흔히 채워져 있는" 경우
+  - Optional 을 쓰면 매번 .get() , orElse() , orElseThrow() 등 처리가 강제되므로 오히려 코드가 장황해질 수 있다.
+4. "성능이 극도로 중요한" 로우레벨 코드
+  - Optional 은 래퍼 객체를 생성하므로, 수많은 객체가 단기간에 생겨나는 영역(예: 루프 내부)에서는 성능 영향을 줄 수 있다. (
+    일반적인 비즈니스 로직에서는 문제가 되지 않는다. 극한 최적화가 필요한 코드라면 고려 대상)
+
+#### 예제 코드
+```
+// 1. 항상 값이 있는 경우: 차라리 Optional 사용 X
+public String findConfigValue() {
+    // 이 로직은 무조건 "NotNull" 반환
+    // null이 나오면 프로그래밍적 오류
+    return "ConfigValue";
+}
+
+// 2. 값이 없으면 예외가 맞는 경우
+public String findRequiredEntity(Long id) {
+    // DB나 Repository에서 무조건 존재해야 하는 엔티티
+    Entity entity = repository.find(id);
+    if (entity == null) {
+        throw new IllegalStateException("Required Entity not found!");
+    }
+    return entity.getName();
+}
+
+// 3. null이 날 가능성이 희박하고, 주요 흐름에서 필수로 존재해야 하는 경우
+public String getValue(Data data) {
+    // 비즈니스상 data.getValue()가 null이면 안 되는 상황이라면?
+    // Optional보다 null 체크 후 예외가 더 직관적일 수 있음
+    if (data.getValue() == null) {
+        throw new IllegalArgumentException("Value is missing, cannot proceed!");
+    }
+    return data.getValue();
+}
+```
+#### 정리
+1. **필드는 지양**, 메서드 **반환값**에 Optional 사용
+2. **메서드 파라미터**로 Optional 받지 말 것
+3. **컬렉션**은 굳이 Optional 로 감싸지 말고, **빈 컬렉션**을 반환
+4. isPresent() + get() 대신 **다양한 메서드**(orElse, orElseGet, ifPresentOrElse, map, filter, flatMap, ...) 활용
+5. orElseGet() vs orElse() : 즉시 평가 vs 지연 평가
+6. **무조건** Optional **이 정답은 아니다**: 값이 항상 있어야 하거나, 예외가 더 적절한 곳에는 굳이 쓰지 않는다
+
+Optional 은 **반환 타입**, 그리고 **지역 변수** 정도에 사용하는 것은 괜찮다.
+이처럼 Optional 을 적극적으로 사용하면 null 을 직접 다루는 코드보다 가독성이 좋아지고, 런타임 오류
+(NullPointerException)를 줄이는 데 도움이 된다. 그러나 **"모든 상황에 마구 적용하면 오히려 복잡도를 높일 수 있다"**는 점을 고려하자
+
+#### 클라이언트 메서드 vs 서버 메서드
+사실 Optional 을 고려할 때 가장 중요한 핵심은 Optional 을 생성하고 반환하는 서버쪽 메서드가 아니라, Optional 을 반환하는 코드를 호출하는 
+클라이언트 메서드에 있다. 결과적으로 Optional 을 반환받는 클라이언트의 입장을 고려해서 하는 선택이, Optional 을 가장 잘 사용하는 방법이다.
+
+- "이 로직은 null 을 반환할 수 있는가?"
+- "null 이 가능하다면, 호출하는 사람 입장에서 '값이 없을 수도 있다'는 사실을 명시적으로 인지할 필요가 있는 가?"
+- "null 이 적절하지 않고, 예외를 던지는 게 더 맞진 않은가?"
+
+위와 같이 서버 메서드를 작성할 때, 클라이언트 코드를 고려하면서 Optional 을 적용하면, 더욱 깔끔하고 안전한 코드를 작성할 수 있다.
+
+### Optional 기본형 타입 지원
+OptionalInt , OptionalLong , OptionalDouble 과 같은 기본형 타입의 Optional 도 있지만 다음과 같은 이유로 잘 사용되지는 않는다.
+- Optional<T> 와 달리 map() , flatMap() 등의 다양한 연산 메서드를 제공하지 않는다. 그래서 범용적으로 활용하기보다는   
+  특정 메서드(isPresent(), getAsInt() 등)만 사용하게 되어, 일반 Optional<T> 처럼 메서드 체인을 이어 가며 코드를 간결하게 작성하기 어렵다.
+- 기존에 이미 Optional<T> 를 많이 사용하고 있는 코드베이스에서, 특정 상황만을 위해 OptionalInt 등을 섞어 쓰면 오히려 가독성을 떨어뜨린다.
+
+#### 원시 타입 Optional을 고려해볼 만한 경우
+- **일반적인 상황**에서는 Optional<T> 하나로 통일하는 편이 가독성과 유지보수 면에서 유리하고, 충분히 빠른 성능을 제공한다.
+- **예외적으로** 미세한 성능을 극도로 추구하거나, 기본형 타입 스트림을 직접 다루면서 중간에 OptionalInt , OptionalLong, OptionalDouble 을 
+  자연스럽게 얻는 상황이라면 이를 사용하는 것도 괜찮다.
+
+기본형 Optional 의 존재는 박싱/언박싱을 없애고 성능을 조금 더 높일 수 있다라는 선택지를 제공하지만, 실제로는 별도로 쓰는 게 좋을 정도로   
+성능 문제가 크게 나타나느냐?를 고민해야 한다. 대부분의 경우에는 그렇지 않기 때문에 잘 사용되지는 않는다.
+
+
+## 정리
