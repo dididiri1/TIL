@@ -1380,3 +1380,45 @@ OptionalInt , OptionalLong , OptionalDouble 과 같은 기본형 타입의 Optio
 
 
 ## 정리
+자바에서 Optional 은 null 로 인해 발생하는 혼동과 예외( NullPointerException )를 줄이고, "값이 있을 수 도 없을 수도 있음"을 
+명시적으로 표현하기 위해 도입된 클래스이다. 주요 포인트는 다음과 같다.
+
+1. 왜 Optional이 필요한가?
+- null 을 잘못 다루면 NullPointerException 으로 이어질 수 있고, 여러 곳에서 null 체크가 필요해 코드 가독성이 떨이진다.
+- Optional 은 "값이 비어있을 수도 있음을 명시적으로 표현"해주어, 호출 측에서 쉽게 확인하고 안전하게 처리할 수 있다.
+
+2. Optional 생성과 값 획득
+- Optional.of(value) , Optional.ofNullable(value) , Optional.empty() 세 가지로 생성할 수 있으며, 내부 값을 꺼낼 때는  
+  get() 보다는 orElse() , orElseGet() , orElseThrow() 등 의 메서드를 사용하는 것을 권장한다.
+- orElse() 는 인자를 즉시 평가(**즉시 평가**), orElseGet() 은 필요할 때만(**지연 평가**) 람다를 실행해 비용을 절약할 수 있다.
+
+3. Optional 값 처리
+- ifPresent() , ifPresentOrElse() , map() , flatMap() , filter() 등 다양한 메서드를 제공해, 존재하는 값만 편리하게 연산하거나 
+  조건을 걸 수 있다.
+- 이 메서드들을 적절히 조합하면, 복잡한 null 체크 없이도 직관적이고 안전한 코드를 작성할 수 있다.
+
+4. 즉시 평가와 지연 평가
+- 자바는 메서드 호출 전 괄호 안의 표현식을 먼저 계산하는(즉시 평가) 특징이 있어, orElse() 에 전달된 값이 필요하지 않아도 미리 생성될 수 있다.
+- orElseGet() 에 람다( Supplier )를 넘기면, 실제로 대체 값이 필요할 때만(지연 평가) 람다가 실행되어 불필요한 연산을 방지할 수 있다.
+
+5. 실전 활용 예
+- **주소 조회**나 **배송 상태**처럼, 중첩된 객체에서 필드가 없거나( null ), 원하는 값을 찾지 못하는 상황에서
+   Optional.map() , filter() , orElse() 등을 연쇄적으로 사용하면, null 체크 없이도 안전하고 간결하게 코드를 작성할 수 있다.
+
+6. 베스트 프랙티스
+- **반환값으로 사용**하되, 클래스 **필드**에는 Optional 을 쓰지 말기: 필드에 Optional 을 두면 null 과 empty() 가 중복 표기되어 
+  혼란을 야기할 수 있다.
+- **메서드 파라미터로 Optional 을 받지 말기**: 호출부에서 Optional.empty() 를 만들어 넘기는 것은 null 과 큰 차이가 없어 오히려 복잡해진다.
+- **컬렉션을** Optional **로 감싸지 말기**: 이미 리스트, 세트 등의 컬렉션은 빈 상태로 반환할 수 있으므로 Optional.empty() 와 겹치는 
+  중복 표현이 생긴다.
+- isPresent() 와 get() 을 **직접 조합하지 않기**: null 체크와 크게 다를 바 없으며, 예외 발생 위험이 커진다. 
+  ifPresentOrElse() , orElse() , orElseThrow() 등 다양한 메서드를 활용하자.
+- orElse() vs orElseGet() 단순 상수나 작은 비용일 때는 orElse(), 객체 생성 비용이 클 때는 orElseGet() 으로 지연 평가를 활용하는 편이 낫다.
+- **무조건 Optional 이 정답은 아님**: 비즈니스상 항상 값이 있어야 하는 경우나 예외가 더 자연스러운 상황
+  ("존재해야 하는 엔티티" 등)에서는 Optional 대신 바로 예외 처리가 더 나은 선택일 수 있다.
+
+정리하면, Optional 은 "값이 없을 수 있음"을 명확히 표현하고 null 체크를 간결히 해주는 좋은 도구이지만, **반환 타입** 외에 과도하게 사용하면
+오히려 복잡도를 높일 수 있다. 비용이 큰 객체를 대체 값으로 생성해야 할 때는 orElseGet() 로 최적화하는 등 상황에 맞게 적절히 활용하는 것이 중요하다.
+
+
+
