@@ -107,7 +107,7 @@ public class FinalFieldMain {
 ConstructInit 과 같이 생성자를 사용해서 final 필드를 초기화 하는 경우, 각 인스턴스마다 final 필드에 다른 값을 할당할 수 있다. 
 물론 final 을 사용했기 때문에 생성 이후에 이 값을 변경하는 것은 불가능하다.
 
-![](https://github.com/dididiri1/TIL/blob/main/Java/basicimages/09_01.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Java/basic/images/09_01.png?raw=true)
 
 - FieldInit 과 같이 final 필드를 필드에서 초기화 하는 경우, 모든 인스턴스가 다음 오른쪽 그림과 같이 같은 값을 가진다.
 - 여기서는 FieldInit 인스턴스의 모든 value 값은 10 이 된다.
@@ -278,7 +278,7 @@ data.value = 20
   뜻이다. 이 변수 이외에 다른 곳에 영향을 주는 것이 아니다.
 - Data.value 는 final 이 아니다. 따라서 값을 변경할 수 있다.
 
-![](https://github.com/dididiri1/TIL/blob/main/Java/basicimages/09_02.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Java/basic/images/09_02.png?raw=true)
 
 정리하면 참조형 변수에 final 이 붙으면 참조 대상을 자체를 다른 대상으로 변경하지 못하는 것이지, 참조하는 대상의 값은 변경할 수 있다.
 

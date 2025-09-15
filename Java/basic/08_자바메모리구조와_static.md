@@ -316,7 +316,7 @@ instanceValue=1
 staticValue=3
 ```
 
-![](https://github.com/dididiri1/TIL/blob/main/Java/basicimages/08_10.png?raw=true)
+![](https://github.com/dididiri1/TIL/blob/main/Java/basic/images/08_10.png?raw=true)
 
 **정적 메서드가 인스턴스의 기능을 사용할 수 없는 이유**
 정적 메서드는 클래스의 이름을 통해 바로 호출할 수 있다. 그래서 인스턴스처럼 참조값의 개념이 없다.
