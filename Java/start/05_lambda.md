@@ -6,7 +6,7 @@
 - 람다 표현식은 특정 클래스에 종속되지 않으며 함수라는 이름으로 명명 한다.
 - 람다 표현식은 함수 자체를 전달 인자로 보내거나 변수에 저장하는 것이 가능하다.
 
-``` java
+```java
 import java.util.ArrayList;
 import java.util.List;
 

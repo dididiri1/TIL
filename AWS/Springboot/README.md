@@ -49,7 +49,7 @@ cloud:
 ```
 
 ### AwsS3Config 설정 [1/1]
-``` java
+```java
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;

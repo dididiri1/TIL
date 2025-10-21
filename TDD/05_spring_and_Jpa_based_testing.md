@@ -86,14 +86,14 @@ spring:
 - data.sql 쿼리를 Hibernate가 시작할때 자동으로 생성해줌.
 
 #### data.sql
-``` sql
+```
 insert into product(product_number, type, selling_status, name, price)
 values ('001', 'HANDMADE', 'SELLING', '아메리카노', 4000),
        ('002', 'HANDMADE', 'HOLD', '카페라떼', 4500),
        ('003', 'BAKERY', 'STOP_SELLING', '크루아상', 3500);
 ``` 
 
-``` java
+```java
 package sample.cafekiosk.spring.domain.product;
 
 import org.junit.jupiter.api.DisplayName;
@@ -223,7 +223,7 @@ class ProductRepositoryTest {
 - Service에 전체적으로 @Transactional(readOnly = true) 걸고 CUD 메소드에 따로 설정
 
 
-``` java
+```java
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
@@ -253,7 +253,7 @@ public class ProductService {
 
 ### @WebMvcTest
 - Controller 빈들만 주입 받아서 사용하는 가벼운 테스트
-``` java
+```java
 package sample.cafekiosk.spring.api.controller.product;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -282,7 +282,7 @@ class ProductControllerTest {
 
 ### @MockBean
 - @MockBean 사용하면 service, repository 주입 가능
-``` java
+```java
 package sample.cafekiosk.spring.api.controller.product;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -314,7 +314,7 @@ class ProductControllerTest {
 - 생성일, 수정일 자동 시간을 매핑해서 넣어줌.
 
 - 1. @EntityListeners(AuditingEntityListener.class) 어노테이션 추가
-``` java
+```java
 package sample.cafekiosk.spring.domain;
 
 import lombok.Getter;
@@ -342,7 +342,7 @@ public abstract class BaseEntity {
 ``` 
 
 - 2. @EnableJpaAuditing 어노테이션 추가(자주 까먹을수도 있음)
-``` java
+```java
 package sample.cafekiosk.spring;
 
 import org.springframework.boot.SpringApplication;
@@ -364,7 +364,7 @@ public class CafekioskApplication {
 ### 참고
 > MockMvc 테스트시 @WebMvcTest JPA 빈들을 주입받지 않기 때문에 문제가 발생한다.  
 > 따라서 config로 분리해서 문제를 해결해야된다.
-``` java
+```java
 package sample.cafekiosk.spring.config;
 
 import org.springframework.context.annotation.Configuration;

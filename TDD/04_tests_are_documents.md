@@ -9,7 +9,7 @@
 
 ### DisplayName 설정
 
-``` java
+```java
 class CafeKioskTest {
 
     @DisplayName("음료 1개 추가하면 주문 목록에 담긴다.")

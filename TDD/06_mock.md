@@ -3,7 +3,7 @@
 ![](https://github.com/dididiri1/TIL/blob/main/TDD/images/06_01.png?raw=true)
 
 ### JPQL
-``` java
+```java
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
@@ -16,7 +16,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 ``` 
 
 ### Native Query
-``` java
+```java
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
@@ -79,7 +79,7 @@ Mockito.when(mailSendClient.sendEmail(any(String.class), any(String.class), any(
 | InOrder |       순서 검증       |
 
 ### @Mock
-``` java
+```java
 package sample.cafekiosk.spring.api.service.mail;
 
 import org.junit.jupiter.api.DisplayName;
@@ -128,7 +128,7 @@ class MailServiceTest {
 ``` 
 
 ### @Spy
-``` java
+```java
 package sample.cafekiosk.spring.api.service.mail;
 
 import org.junit.jupiter.api.DisplayName;
@@ -181,7 +181,7 @@ class MailServiceTest {
 
 ### BDDMockito
 - Mockito랑 기능은 같은 하지만 given 있어서 직관적임
-``` java
+```java
 package sample.cafekiosk.spring.api.service.mail;
 
 import org.junit.jupiter.api.DisplayName;

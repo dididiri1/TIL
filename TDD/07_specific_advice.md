@@ -54,7 +54,7 @@
     - 장점1 : 생성자에 넘기는 메게변수 이름만으로는 반환될 객체의 특성을 설명하기 어렵지만, 정적 펙토리 메소드는  
       이름 지을수 있어 객체 특성을 쉽게 표현할 수 있다.
     - 장점2 : 인스턴스를 새로 생성하지 않아도 된다.
-``` java
+```java
 package sample.cafekiosk.spring.domain.stock;
 
 import lombok.AccessLevel;
@@ -105,7 +105,7 @@ public class Stock extends BaseEntity {
 - 테스트간에 순서는 무관해야 됨. A테스트가 수행된 이후 B테스트가 수행되어야 성공을 한다는 개념 자체가 없어야됨.
 - 각각 독립적으로 언제 수행이 되도 항상 같은 결과를 내야됨.
 - 공유 자원을 사용하는 경우에는 테스트 간 순서가 생길 수 있기 때문이다.
-``` java
+```java
 class StockTest {
 
     private static final Stock stock = Stock.create("100", 1);
@@ -139,7 +139,7 @@ class StockTest {
 }
 ``` 
 
-``` java
+```java
 class StockTest {
 
     @DisplayName("재고의 수량이 제공된 수량보다 작은지 확인하다.")
@@ -216,7 +216,7 @@ void tearDown() {
 
 ### @ValueSource 방식
 - 파라미터 하나일 때 간단한 형태
-``` java
+```java
 class ProductTypeTest {
 
     @ParameterizedTest
@@ -231,7 +231,7 @@ class ProductTypeTest {
 
 
 ### @CsvSource 방식
-``` java
+```java
 class ProductTypeTest {
      
     @DisplayName("상품 타입이 재고 관련 타입인지를 체크한다.")
@@ -249,7 +249,7 @@ class ProductTypeTest {
 
 ### @MethodSource 방식
 - 이경우 프로덕션 코드에서는 private method를 보통 아래쪽에 명시하는 편인데. given의 역활이기 떄문에 테스트 바로 위에다가 명시할수도 있다.
-``` java
+```java
 class ProductTypeTest {
      
      private static Stream<Arguments> provideProductTypesForCheckingStockType() {
@@ -282,7 +282,7 @@ class ProductTypeTest {
 - 일련의 시나리오를 테스트 하고 싶을때 단계별로 어떤 행위와 검증을 수행하고 싶을때 사용
 - @TestFactory 사용
 
-``` java
+```java
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -333,7 +333,7 @@ class StockTest {
   받고 우리의 프로덕션 코드를 발전시켜 나갈 수 있는 도구
 - 해서 테스트 자체를 자주 수행하려면 테스트가 수행되는 시간이 다 비용기 떄문에 관리가 필요하다.
 
-``` java
+```java
 package sample.cafekiosk.spring;
 
 import org.springframework.boot.test.context.SpringBootTest;
@@ -350,7 +350,7 @@ public abstract class IntegrationTestSupport {
 }
 ``` 
 
-``` java
+```java
 package sample.cafekiosk.spring;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -388,7 +388,7 @@ public abstract class ControllerTestSupport {
 - 객체가 공개한 API들을 테스트하다 보면 자연스럽게 검증이 되기 떄문이다.  
   만약에 욕망이 강하게 든다 객체 분리의 신호롸 봐야함.
 
-``` java
+```java
 package sample.cafekiosk.spring.api.service.product;
 
 import lombok.RequiredArgsConstructor;
@@ -417,7 +417,7 @@ public class ProductNumberFactory {
 ## Q. 테스트에서만 필요한 메서드가 생겼는데 프로덕션 코드에서는 필요 없다면?
 - Test에서만 사용하는 ① ProductCreateRequest 생성자
 - 있어도 상관없지만 **보수적**으로 접근하기!
-``` java
+```java
 package sample.cafekiosk.spring.api.controller.product.request;
 
 import lombok.Builder;

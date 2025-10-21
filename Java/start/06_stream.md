@@ -6,7 +6,7 @@
 - Stream API의 활용을 통해 수집된 다양한 데이터를 활용하는데 있어서 간결하고 가독성 있는 처리가 가능함.
 - Stream API의 다양한 기능들은 대부분 람다를 필요로 하기 때문에 람다를 이해하고 사용할수 있어야 한다.
 
-``` java
+```java
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -37,7 +37,7 @@ public class Ex01 {
 
 ## 활용법
 
-``` java
+```java
 public class Customer implements Comparable<Customer>{
 
     private String name;
@@ -79,7 +79,7 @@ public class Customer implements Comparable<Customer>{
 ``` 
 
 #### 기존
-``` java
+```java
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -118,7 +118,7 @@ public class Ex02 {
 ``` 
 
 #### Stream 활용
-``` java
+```java
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -178,7 +178,7 @@ public class Ex02 {
 
 
 ### Collection 방식
-``` java
+```java
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -212,7 +212,7 @@ public class Ex03 {
 
 ### Stream.Builder 방식
 - 일반적으로 사용 잘안함..
-``` java
+```java
 import java.util.stream.Stream;
 
 public class Ex04 {
@@ -288,7 +288,7 @@ public class Ex04 {
 - 데이터의 중복을 제거하는 distinct()는 병렬 스트림의 경우 선능에 대한 고려가 필요하며 종복 객체의 비교는 equals()  
   메소드를 이용하기 때문에 이에 대한 고려 또한 필요하다.
 
-``` java
+```java
 import java.util.ArrayList;
 import java.util.List;
 
@@ -331,12 +331,12 @@ Customer{name='Lee', age=67}
 
 ### distinct
 - Customer.java의 equals, hashCode 있어야됨.
-``` java
+```java
 import java.util.Objects;
 
 public class Customer implements Comparable<Customer>{
     
-    ``` 
+    //``` 
     
     @Override
     public boolean equals(Object o) {
@@ -362,10 +362,10 @@ public class Customer implements Comparable<Customer>{
   default, static 메소드를 이용해 정렬을 구현함.
 
 ### Customer.java
-``` java
+```java
 public class Customer implements Comparable<Customer>{
 
-    ``` 
+    //``` 
     
     @Override
     public int compareTo(Customer customer) {
@@ -381,7 +381,7 @@ public class Customer implements Comparable<Customer>{
 
 ``` 
 ### compareTo 이용한 정렬
-``` java
+```java
 import java.util.ArrayList;
 import java.util.List;
 
@@ -411,7 +411,7 @@ Customer{name='Lee', age=67}
 ``` 
 
 ### Comparator.comparing 이용한 정렬
-``` java
+```java
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -451,7 +451,7 @@ Customer{name='Choi', age=19}
 - double, int, long 기본형 데이터 타입의 데이터를 처리하기 위한 메소드들은 매핑된 값의 결과가 기본형  
   데이터 타입일 경우 작용하여 사용한다.
 
-``` java
+```java
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

@@ -46,7 +46,7 @@
 - 인스턴스 변수(Instance variables)
 - 정적 변수(Class variables)
 
-``` java
+```java
 public class VariableTypes {
     
     /** 정적 변수 */
@@ -84,7 +84,7 @@ public class VariableTypes {
 ### 논리 자료형은 **참과 거짓**을 표현하는 자료형이다.
 - true : 참을 표현하는 값
 - false : 거짓을 표현하는 값
-``` java
+```java
 public class BooleanType {
 
     public static void main(String[] args) {
@@ -93,7 +93,6 @@ public class BooleanType {
         System.out.println(isTrue);
         System.out.println(isFalse);
     }
-
 }
 ```
 ``` console
@@ -340,7 +339,7 @@ public class Student {
 - 생성자 오버로딩은 해당 클래스를 구성하는 생성자들의 매개변수 개수와 타입, 순서를 달리하여 정의한다.
 - 객체의 인스턴스화 과정에서 생성자를 호출하여 이때 전달인자를 다르게 하여 필요한 생성자를 호출한다.
 
-``` java
+```java
 class Customer {
 
     private String name;

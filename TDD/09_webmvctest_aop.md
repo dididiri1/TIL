@@ -6,8 +6,7 @@
 > 그래서 이번 글에선 문제 원인과 해결 방법을 정리해보자!
 
 ### Controller 코드
-``` 
-
+```
 @PostMapping("/api/v1/diary")
 public ResponseEntity<?> createDiary(@RequestBody @Valid DiaryCreateRequest request, BindingResult bindingResult) {
     DiaryCreateResponse response = diaryService.createDiary(request);
@@ -16,7 +15,7 @@ public ResponseEntity<?> createDiary(@RequestBody @Valid DiaryCreateRequest requ
 ``` 
 
 ### AOP 로직
-``` 
+```java
 @Slf4j
 @Component
 @Aspect
@@ -25,7 +24,7 @@ public class BindingAspect {
     @Around("execution(* controller..api..*(..))")
     public Object validCheck(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         
-        ``` 
+        //``` 
         
         for (Object arg:args){
             if(arg instanceof BindingResult){
@@ -33,11 +32,12 @@ public class BindingAspect {
                 if(bindingResult.hasErrors()){
                     log.warn("❌ 검증 오류 발생: {}", bindingResult.getFieldErrors());
 
-                    ``` 
+                    //``` 
                 }
             }
         }
-        ``` 
+        
+        //``` 
     }
 }
 ``` 
@@ -64,7 +64,7 @@ void createDiaryWithContent() throws Exception {
 
 ## ✅ 해결 방법
 - AOP까지 정상적으로 적용되게 하려면 아래처럼 테스트를 변경하면 된다.
-``` 
+```java 
 @SpringBootTest
 @AutoConfigureMockMvc
 class DiaryApiControllerTest {

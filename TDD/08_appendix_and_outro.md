@@ -36,7 +36,7 @@
 - Settings -> Plugins -> asciidoc 설치
 
 #### 설정 1
-``` java
+```java
 package sample.cafekiosk.spring.docs;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +65,7 @@ public abstract class RestDocsSupport {
 ``` 
 
 #### 설정 2
-``` java
+```java
 package sample.cafekiosk.spring.docs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

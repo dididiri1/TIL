@@ -318,7 +318,7 @@ public class InheritanceAssist {
 - 자바의 모든 클래스가 상속 받아 갖는 Object 클래스 메소드에 대한 목적과 기능을 이해하는 것이 중요하다.
 - Object 클래스를 통해 상속 받는 메소드의 의미를 이해해야 그 의미에 맞게 재정의 할 수 있다.
 
-``` java
+```java
 public class EmptyClass {
     
 }
@@ -340,7 +340,7 @@ public vlass ObjectExam {
 - 자바의 모든 클래스는 스스로에 대한 정보를 읽기 쉬운 형태로 제공 할 수 있으며 이 기능이 toString() 메소드 이다.
 - 클래스를 정의할 때 그 클래스를 나타내는 주요 정보를 이용해 toString() 메소드를 재정의 한다.
 
-``` java
+```java
 public class Person {
 
     private String name;
@@ -357,7 +357,7 @@ public class Person {
     }
 }
 ```
-``` java
+```java
 public class ObjectExam {
 
     public static void main(String[] args) {
@@ -377,7 +377,7 @@ Name:Kim, Age:25
 - equals() 메소드는 인스턴스 객체와 파라미터로 전달되는 객체를 같은지 비교하여 결과를 반환한다.
 - hashCode() 메소드는 객체를 식별하는 정수값을 의미하며 정수값을 반환하는 메소드이다.
 
-``` java
+```java
 import java.util.Objects;
 
 public class Person {
@@ -447,7 +447,7 @@ public class User implements Cloneable {
 - 추상 메소드는 메소드의 몸체(body)가 없는 메소드이며 자식 클래스에서 재정의 하도록 하기 위한 메소드 이다.
 - 추상 클래스는 new 동적 할당자를 통해 인스턴스 객체를 만들 수 없다.
 
-``` java
+```java
 abstract class Shape {
 
     private String type;
@@ -479,14 +479,14 @@ public class AbstractAssist extends Shape {
 - 상속과 달리 인터페이스는 하나의 클래스가 둘 이상의 인터페이스를 동시에 구현할 수 있다.
 - 인터페이스를 통해 설계와 구현을 완전히 분리할 수 있다.
 
-``` java
+```java
 public interface IBehavior {
     
     // public abstract 생략 가능
     public abstract void play();
 }
 ```
-``` java
+```java
 public class Soccer extends Sport implements IBehavior {
 
     @Override
@@ -502,7 +502,7 @@ public class Soccer extends Sport implements IBehavior {
 - java 8부터 인터페이스에 static 메소드를 추가할 수 있으며 static 메소드의 사용은 일반 클래스와 동일하다.
 - java 8부터 default 메소드가 추가되었으며 이 메소드는 그 자체로 완전한 메소드이며 구현 클래스는 선택적으로 재정의할 수 있다.
 
-``` java
+```java
 public interface MyInterface {
 
     // public static final 생략 가능
@@ -536,7 +536,7 @@ public interface MyInterface {
 
 > final 클래스 상속 금지!
 > final 메소드 재정의 금지!
-> 
+ 
 
 ## 3.11 배열
 
@@ -588,7 +588,7 @@ int[] copyDoubleSize = Arrays.copyOf(a, 2 * a.length);
 ### 배열[3/4]
 #### 배열 정렬(Sorting)
 - Arrays.sort() 메소드는 배열 내부의 요소(element)를 정렬 한다.  
-``` java
+```java
 import java.util.Arrays;
 
 public class ArraySortTest {

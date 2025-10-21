@@ -185,7 +185,7 @@ System.out.println(BigDecimal.valueOf(3.14).add(BigDecimal.valueOf(1))); // 4.14
 - 제네릭을 사용하면 데이터를 저장하는 시점에 어떤 데이터를 저장할 것인지 명시할 수 있다.
 - 이를 통해 사용하고자 하는 데이터의 타입을 명확히 선언할 수 있고, 정확한 데이터의 사용 여부를 컴파일 시점에 확인할 수 있다,
 
-``` java
+```java
 public class Box<T> {
 
     private T item;
@@ -317,7 +317,7 @@ System.out.println(intSet);
 - LinkedHashMap 클래스는 요소를 추가한 순서를 보장한다.
 - TreeMap 클래스는 요소의 키에 대한 정렬된 순서를 보장하며 이를 위해서는 키 객체가 Comparable 인터페이스를 구현하고 있어야 한다.
 
-``` java
+```java
 import java.util.HashMap;
 import java.util.Map;
 
@@ -371,7 +371,7 @@ public class MapTest {
 - Map 구현 클래스의 경우 Map.values() 메소드를 통해 값(요소) 들을 Collection 타입으로 겍체를 반환 받은 이후에  
   다시 iterator 구현 객체를 이용하여 순회할 수 있다.
 
-``` java
+```java
 import java.util.*;
 
 public class IteratorTest {
