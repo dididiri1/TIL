@@ -190,3 +190,80 @@ export default function TodoListPage() {
   );
 }
 ```
+
+## 캐싱 메커니즘 이해하기 1
+- useQuery로 가져온 데이터는 useQuery 내 queryKey를 기준으로 자동으로 캐싱된다.
+- 같은 queryKey를 사용하는 컴포넌트는 네트워크 요청 없이 캐시된 데이터를 즉시 활용한다
+
+![](https://github.com/dididiri1/TIL/blob/main/React/v2/images/04_06.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/React/v2/images/04_07.png?raw=true)
+
+![](https://github.com/dididiri1/TIL/blob/main/React/v2/images/04_09.png?raw=true)
+
+- TanStack Query는 상황에 따라 최신 데이터 유지 전략(Stale-While-Refetch)을 제공한다.
+  - 화면은 캐시 데이터로 빠르게 렌더링
+  - 이후 백그라운드에서 최신 데이터 요청
+  - 완료 후 UI 업데이트
+  
+
+### TanStack Query 캐시의 5가지 상태
+
+![](https://github.com/dididiri1/TIL/blob/main/React/v2/images/04_08.png?raw=true)
+
+| 상태        | 설명                                 |
+|------------|--------------------------------------|
+| fetching   | 서버에서 데이터를 가져오는 중        |
+| fresh      | 최신 상태의 데이터 (캐시 직후 상태) |
+| stale      | 시간이 지나 만료된 데이터           |
+| staleTime  | fresh → stale 로 전환되는 시간       |
+| refetching | stale 상태에서 데이터를 다시 요청 중 |
+
+- 리페칭(데이터 다시 불러옴)
+  - 1. Mount: 캐시 데이터를 사용하는 컴포넌트가 Mount 되었을 때
+  - 2. WindowFocus: 사용자가 해당 탭에 다시 돌아왔을 때
+  - 3. Reconnet: 인터넷 연결이 끊어졌다가 다시 연결되었을 때
+  - 4. Interval: 일정 주기로 자동 요청
+
+### DevTools
+- 캐시의 상태 변화를 시각적으로 확인할 수 있는 도구
+```
+npm i @tanstack/react-query-devtools
+```
+- main.tsx에 ReactQueryDevTools 컴포넌트를 추가하면 실시간 캐시 상태 확인 가능
+
+### Refetch 옵션
+| 옵션                   | 설명                           |
+|------------------------|--------------------------------|
+| refetchOnMount         | 컴포넌트 마운트 시 refetch 여부 |
+| refetchOnWindowFocus   | 브라우저 포커스 복귀 시 refetch |
+| refetchOnReconnect     | 네트워크 재연결 시 refetch      |
+| refetchInterval        | 일정 주기마다 자동 refetch      |
+
+- 기본 staleTime = 0이므로 응답 직후 곧바로 stale 처리됨
+- stale !== 무효, stale 데이터도 렌더링에 즉시 사용 가능
+- stale 데이터 노출 후 백그라운드 refetch → 화면 갱신 방식으로 UX 향상
+
+### 핵심정리
+- TanStack Query의 핵심은 단순 데이터 요청 도구가 아니라, 데이터의 생명주기 관리를 담당한다는 점이다.
+- 캐싱 + stale + refetch 조합으로 API 요청 최소화 & 더 부드러운 UI 경험
+- stale 상태의 데이터도 화면을 즉시 구성하여 UX 최적화 가능
+
+#### use-todo-data-by-id.ts
+```
+import { fetchTodoById } from "@/api/fetch-todo-by-id";
+import { useQuery } from "@tanstack/react-query";
+
+export function useTodoDataById(id: number) {
+  return useQuery({
+    queryFn: () => fetchTodoById(id),
+    queryKey: ["todos", id],
+    // refetchInterval: 1000,  // 10초 간격으로 자동 refetch
+    staleTime: 5000,   // 5초 동안 fresh 상태 유지
+    refetchOnMount: false, 
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: false,
+  });
+}
+```
