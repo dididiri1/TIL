@@ -613,3 +613,130 @@ export function useUpdateTodoMutation() {
   - Ajax 요청 지연/실패가 잦은 환경에서 특히 유용하다.
 - 좋아요/즐겨찾기/북마크 기능
   - 클릭 즉시 반응하는 UI 필요
+
+
+## 캐시 데이터 다루기 4 - 낙관적 업데이트 2
+### 낙관적 업데이트에서 예외 상황 처리 전략
+낙관적 업데이트는 서버 응답을 기다리지 않고 UI를 즉시 변경해 사용자 경험을 개선하는 방식이다.
+하지만 요청 실패, 동시 요청 충돌, 데이터 불일치와 같은 문제가 발생할 수 있기 때문에 반드시 예외 대응 로직을 함께 설계해야 한다.
+
+TanStack Query는 이를 위해 useMutation에서 에러 처리와 롤백을 위한 여러 훅과 매개변수를 제공한다.
+```
+onError(error, variables, context)
+```
+- error
+요청 과정에서 발생한 에러 정보
+- variables
+mutationFn에 전달된 입력값 (요청에 사용된 데이터)
+- context
+onMutate에서 반환한 값
+→ 일반적으로 롤백을 위한 이전 캐시 상태(snapshot) 를 담는다
+
+👉 따라서 롤백을 위해서는 onMutate 단계에서 반드시 기존 캐시를 저장해야 한다.
+
+### onMutate에서 해야 할 핵심 작업
+#### 1️⃣ 기존 refetch 요청 취소
+```
+queryClient.cancelQueries({ queryKey })
+```
+- mutation 실행 시점에 동일한 queryKey의 refetch가 진행 중이라면 즉시 중단
+- 네트워크 지연으로 인한 UI 꼬임 현상 방지
+
+#### 2️⃣ 이전 캐시 데이터 스냅샷 저장
+```
+const prevData = queryClient.getQueryData(queryKey);
+```
+- 실패 시 원래 상태로 되돌리기 위한 백업
+- 이 값은 context로 반환되어 onError에서 사용된다
+
+#### 3️⃣ 낙관적 캐시 업데이트 수행
+```
+queryClient.setQueryData(queryKey, (prev) => {
+  // UI를 먼저 변경
+});
+```
+- 서버 응답을 기다리지 않고 UI 즉시 반영
+- UX 개선의 핵심 포인트
+
+### 전체 흐름 요약
+1. onMutate
+- refetch 취소
+- 이전 캐시 백업
+- 낙관적 UI 업데이트
+
+#### 2. onError
+- 요청 실패 시 이전 상태로 롤백
+#### 3. onSettled
+- invalidateQueries로 서버 데이터와 동기화
+
+```
+import { updateTodo } from "@/api/update-todo";
+import { QUERY_KEYS } from "@/lib/constants";
+import type { Todo } from "@/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+export function useUpdateTodoMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateTodo,
+    onMutate: async (updatedTodo) => {
+      await queryClient.cancelQueries({
+        queryKey: QUERY_KEYS.todo.list,
+      });
+
+      const prevTodos = queryClient.getQueryData<Todo[]>(QUERY_KEYS.todo.list);
+
+      queryClient.setQueryData<Todo[]>(QUERY_KEYS.todo.list, (prevTodos) => {
+        if (!prevTodos) return [];
+        return prevTodos.map((prevTodo) =>
+          prevTodo.id === updatedTodo.id
+            ? { ...prevTodo, ...updatedTodo }
+            : prevTodo,
+        );
+      });
+
+      return {
+        prevTodos,
+      };
+    },
+    onError: (error, variable, context) => {
+      if (context && context.prevTodos) {
+        queryClient.setQueryData<Todo[]>(
+          QUERY_KEYS.todo.list,
+          context.prevTodos,
+        );
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.todo.list,
+      });
+    },
+  });
+}
+```
+
+### 정리
+- 낙관적 업데이트는 UX를 크게 개선하지만, 실패 대응 전략 없이는 위험
+- onMutate는 낙관적 업데이트의 시작점이자 롤백을 준비하는 단계
+- context는 이전 상태를 담는 스냅샷 컨테이너
+- cancelQueries는 refetch와 mutation 충돌을 막는 안전장치
+- onSettled는 최종 데이터 무결성을 보장하는 보정 단계
+
+
+## 투두 삭제 기능 만들기
+
+### 1. 캐시 무효화 -> invalidateQueries
+- 간단하지만 전체를 다시 불러오는 과정이 수반되기 때문에 성능적으로는 단점이 있다.
+- 하나만 딱 삭제하는 이런 상황에서는 어울리는 방식은 아니다.
+
+### 2. 수정 요청의 응답값 활용 -> onSuceess
+- onSuceess 응답값을 활용해서 캐시 데이터를 수정하기만 할 뿐 캐시 데이터를 무효화하지는 않아
+  데이터를 다시 리패칭하는 과정은 필요하지 않는다는 장점이 있다.
+- 단점으로는 요청이 완료되기까지 시간이 좀 걸리게 되면 그만큼 늦게 호출되기 떄문에 빠르게 보여주기 어렵다.
+- 하지만 하나만 삭제하는 상황에서는 그닥 나쁘지는 않다.
+### 3. 낙관적 업데이트 -> onMutate
+```
+
+```
