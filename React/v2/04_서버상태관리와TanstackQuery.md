@@ -731,12 +731,105 @@ export function useUpdateTodoMutation() {
 - 간단하지만 전체를 다시 불러오는 과정이 수반되기 때문에 성능적으로는 단점이 있다.
 - 하나만 딱 삭제하는 이런 상황에서는 어울리는 방식은 아니다.
 
-### 2. 수정 요청의 응답값 활용 -> onSuceess
+### 2. 수정 요청의 응답값 활용 -> onSuceess (추천)
 - onSuceess 응답값을 활용해서 캐시 데이터를 수정하기만 할 뿐 캐시 데이터를 무효화하지는 않아
   데이터를 다시 리패칭하는 과정은 필요하지 않는다는 장점이 있다.
 - 단점으로는 요청이 완료되기까지 시간이 좀 걸리게 되면 그만큼 늦게 호출되기 떄문에 빠르게 보여주기 어렵다.
 - 하지만 하나만 삭제하는 상황에서는 그닥 나쁘지는 않다.
+
 ### 3. 낙관적 업데이트 -> onMutate
+- 요청의 성공을 기다릴 것도 없이 화면이 바로 업데이트 되는 장점은 있다.
+- 하지만 요청이 실패 하게되면 데이터를 다시 원상 복귀 시켜야된다.
+- 사용자에게 혼란을 불러일으킬 수 있는 방식이다.
+
+```
+import { deleteTodo } from "@/api/delete-todo";
+import { QUERY_KEYS } from "@/lib/constants";
+import type { Todo } from "@/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+export function useDeleteTodoMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteTodo,
+
+    onSuccess: (deleteTodo) => {
+      queryClient.setQueryData<Todo[]>(QUERY_KEYS.todo.list, (prevTodos) => {
+        if (!prevTodos) return [];
+        return prevTodos.filter((prevTodo) => prevTodo.id !== deleteTodo.id);
+      });
+    },
+  });
+}
+```
+```
+import { Button } from "../ui/button";
+import { Link } from "react-router";
+import type { Todo } from "@/types";
+import { useUpdateTodoMutation } from "@/hooks/mutations/use-update-todo.mutation";
+import { useDeleteTodoMutation } from "@/hooks/mutations/use-delete-todo-mutaion";
+
+export default function TodoItem({ id, content, isDone }: Todo) {
+  //const deleteTodo = useDeleteTodo();
+  const { mutate: deleteTodo, isPending: isDeleteTodoPending } =
+    useDeleteTodoMutation();
+  const { mutate: updateTodo, isPending } = useUpdateTodoMutation();
+
+  const handleDeleteClick = () => {
+    deleteTodo(id);
+  };
+
+  const handleCheckboxClick = () => {
+    updateTodo({
+      id,
+      isDone: !isDone,
+    });
+  };
+
+  return (
+    <div className="items-conter flex justify-between border p-2">
+      <div className="flex gap-5">
+        <input
+          disabled={isDeleteTodoPending}
+          type={"checkbox"}
+          onChange={handleCheckboxClick}
+          checked={isDone}
+        />
+        <Link to={`/todolist/${id}`}>{content}</Link>
+      </div>
+      <Button
+        disabled={isDeleteTodoPending}
+        onClick={handleDeleteClick}
+        variant={"destructive"}
+      >
+        삭제
+      </Button>
+    </div>
+  );
+}
+```
+
+
+## 캐시 정규화하기 1
+
+### 캐시 정규화(Cache Normalization)
+캐시 정규화란 서버에서 전달받은 데이터를 캐시에 저장할 때,
+중복을 제거하고 효율적으로 관리할 수 있도록 데이터 구조를 정리하는 과정을 의미한다.
+
+같은 데이터가 리스트 조회, 상세 조회 등 여러 Query에 중복 저장되면
+유지보수 비용이 증가하고 데이터 업데이트가 어려워진다.
+
+캐시 정규화를 적용하면 단일한 데이터 원본을 유지할 수 있어
+특정 데이터가 변경되었을 때
+해당 데이터를 사용하는 모든 UI가 자동으로 최신 상태를 반영하게 된다.
+
+### 데이터 중복 저장 시 발생하는 문제
+- 동일한 데이터가 여러 Query Key에 저장되면 일부 캐시만 갱신되는 문제가 생길 수 있다.
+- 중복 저장으로 인해 불필요한 메모리 사용이 발생한다.
+- 캐시를 맞추기 위해 invalidateQueries 호출이 과도하게 사용될 수 있다.
+
+![](https://github.com/dididiri1/TIL/blob/main/React/v2/images/04_14.png?raw=true)
+
 ```
 
 ```
