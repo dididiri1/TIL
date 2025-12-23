@@ -241,3 +241,5 @@ align-items: baseline;
 | items-end | 아래쪽 정렬 | 하단 정렬 |
 | items-stretch | 높이 꽉 채움 (기본값) | 카드 높이 맞출 때 |
 | items-baseline | 텍스트 기준선 정렬 | 서로 다른 폰트 크기 정렬 |
+
+
